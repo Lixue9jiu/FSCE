@@ -28,7 +28,11 @@ public class BlocksData : MonoBehaviour
 		{ typeof(AirBlock), new int[] { 0 } },
 		{ typeof(GrassBlock), new int[] { 8 } },
 		{ typeof(TreeBlock), new int[] { 9, 10, 11 } },
-		{ typeof(TransparentBlock), new int[] { 12, 13, 14 } }
+		{ typeof(TransparentBlock), new int[] { 12, 13, 14 } },
+		{ typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
+		{ typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
+		{ typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } }
+
 	};
 
 	public static Block GetBlock (int content)
@@ -68,7 +72,7 @@ public class BlocksData : MonoBehaviour
 
 	void Awake ()
 	{
-		ParseBlocksData ("Assets/Resources/out.txt");
+		ParseBlocksData ("Assets/Resources/BlocksData.txt");
 	}
 
 	void ParseBlocksData (string path)
@@ -172,32 +176,32 @@ public abstract class Block
 		Vector3 v110 = new Vector3 (x + 1.0f, y + 1.0f, z);
 		Vector3 v111 = new Vector3 (x + 1.0f, y + 1.0f, z + 1.0f);
 
-		if ((neighborData & XminusOne) == XminusOne) {
+		if ((neighborData & XminusOne) != 0) {
 			g.MeshFromRect (v001, v011, v010, v000);
 			g.GenerateBlockUVs (GetTextureSlot (value, BACK));
 			g.GenerateBlockColors (color);
 		}
-		if ((neighborData & YminusOne) == YminusOne) {
+		if ((neighborData & YminusOne) != 0) {
 			g.MeshFromRect (v000, v100, v101, v001);
 			g.GenerateBlockUVs (GetTextureSlot (value, BOTTOM));
 			g.GenerateBlockColors (color);
 		}
-		if ((neighborData & ZminusOne) == ZminusOne) {
+		if ((neighborData & ZminusOne) != 0) {
 			g.MeshFromRect (v000, v010, v110, v100);
 			g.GenerateBlockUVs (GetTextureSlot (value, LEFT));
 			g.GenerateBlockColors (color);
 		}
-		if ((neighborData & XplusOne) == XplusOne) {
+		if ((neighborData & XplusOne) != 0) {
 			g.MeshFromRect (v100, v110, v111, v101);
 			g.GenerateBlockUVs (GetTextureSlot (value, FRONT));
 			g.GenerateBlockColors (color);
 		}
-		if ((neighborData & YplusOne) == YplusOne) {
+		if ((neighborData & YplusOne) != 0) {
 			g.MeshFromRect (v111, v110, v010, v011);
 			g.GenerateBlockUVs (GetTextureSlot (value, TOP));
 			g.GenerateBlockColors (color);
 		}
-		if ((neighborData & ZplusOne) == ZplusOne) {
+		if ((neighborData & ZplusOne) != 0) {
 			g.MeshFromRect (v101, v111, v011, v001);
 			g.GenerateBlockUVs (GetTextureSlot (value, RIGHT));
 			g.GenerateBlockColors (color);
@@ -207,7 +211,7 @@ public abstract class Block
 	protected void DrawMeshBlock (int x, int y, int z, int value, Mesh mesh, Color color, TerrainGenerator g)
 	{
 		g.MeshFromMesh (x, y, z, mesh);
-		g.GenerateTextureForMesh (mesh, TextureSlot, color);
+		g.GenerateTextureForMesh (mesh, GetTextureSlot (value, FRONT), color);
 	}
 
 	public abstract void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g);
@@ -243,6 +247,9 @@ public abstract class PaintableBlock : Block
 			break;
 		case 54:
 			paintTextureSlot = 50;
+			break;
+		case 8:
+			paintTextureSlot = 147;
 			break;
 		}
 	}
@@ -365,9 +372,7 @@ public class PaintableCubeBlock : PaintableBlock
 		neighborData += (BlocksData.IsTransparent (chunk, x, y + 1, z)) ? YplusOne : 0;
 		neighborData += (BlocksData.IsTransparent (chunk, x, y, z + 1)) ? ZplusOne : 0;
 
-		Color color = GetColorC (BlockTerrain.GetData (value));
-
-		DrawCubeBlock (x, y, z, value, neighborData, color, g);
+		DrawCubeBlock (x, y, z, value, neighborData, GetColorC (value), g);
 	}
 }
 
@@ -469,6 +474,8 @@ public class StairBlock : PaintableBlock
 	public override void Initialize (GameObject game)
 	{
 		base.Initialize (game);
+		IsTransparent = true;
+
 		BlockMeshes meshes = game.GetComponent<BlockMeshes> ();
 
 		float y;
@@ -477,8 +484,7 @@ public class StairBlock : PaintableBlock
 		for (int i = 0; i < 24; i++) {
 			y = 0;
 
-			int rotation = FurnitureManager.GetRotation (i);
-			y -= rotation * 90;
+			y -= FurnitureManager.GetRotation (i) * 90;
 
 			m = Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, y, 0), Vector3.one);
 			switch ((i >> 3) & 3) {
@@ -526,9 +532,11 @@ public class SlabBlock : PaintableBlock
 	public override void Initialize (GameObject game)
 	{
 		base.Initialize (game);
+		IsTransparent = true;
+
 		BlockMeshes meshes = game.GetComponent<BlockMeshes> ();
-		slabs [1] = meshes.slab;
-		slabs [0] = BlockMeshes.UpsideDownMesh (meshes.slab);
+		slabs [0] = meshes.slab;
+		slabs [1] = BlockMeshes.UpsideDownMesh (meshes.slab);
 	}
 
 	public override int? GetColor (int data)
