@@ -172,17 +172,4 @@ public class BlockTerrain : MonoBehaviour {
 	{
 		return value ^ ((value ^ data << 14) & -16384);
 	}
-
-	public static int? GetColor (int data)
-	{
-		if ((data & 1) != 0) {
-			return new int? (data >> 1 & 15);
-		}
-		return null;
-	}
-
-	public static bool IsColored (int data)
-	{
-		return (data & 1) != 0;
-	}
 }
