@@ -8,8 +8,8 @@ public class WorldManager : MonoBehaviour
 	public List<string> Worlds = new List<string> ();
 	string WorldsFolder;
 
-	public static ProjectData Project;
-	public static string ChunkDat;
+	public static ProjectData Project = new ProjectData ("/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1");
+	public static string ChunkDat = "/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1/Chunks32.dat";
 
 	void Awake ()
 	{
@@ -36,6 +36,7 @@ public class WorldManager : MonoBehaviour
 	{
 		if (index > -1 && index < Worlds.Count) {
 			LoadWorldDir (Worlds [index]);
+			Debug.Log (string.Format ("switching world to {0}", Worlds [index]));
 			return true;
 		}
 		return false;

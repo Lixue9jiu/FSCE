@@ -16,13 +16,17 @@ public class FPSDisplay : MonoBehaviour
 
 		GUIStyle style = new GUIStyle();
 
-		Rect rect = new Rect(0, 0, w, h * 7 / 100);
+		Rect rect = new Rect(0, 0, w, h * 6 / 100);
 		style.alignment = TextAnchor.UpperLeft;
-		style.fontSize = h * 2 / 100;
-		style.normal.textColor = new Color (0.0f, 0.0f, 0.5f, 1.0f);
+		style.fontSize = h * 3 / 100;
+		style.normal.textColor = new Color (1.0f, 1.0f, 1.0f, 1.0f);
 		float msec = deltaTime * 1000.0f;
 		float fps = 1.0f / deltaTime;
 		string text = string.Format("{0:0.0} ms ({1:0.} fps)", msec, fps);
-		GUI.Label(rect, text, style);
+		TerrainRaycast.RaycastResult? r = GetComponent<TerrainRaycast> ().LookingAt;
+		if (r.HasValue) {
+			text += string.Format ("\nlooking at {0}", BlocksData.GetBlock(BlockTerrain.GetContent(r.Value.BlockValue)).Name);
+		}
+		GUI.Label (rect, text, style);
 	}
 }

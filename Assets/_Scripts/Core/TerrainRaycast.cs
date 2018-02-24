@@ -12,9 +12,8 @@ public class TerrainRaycast : MonoBehaviour {
 
 	void Awake()
 	{
-		GameObject game = GameObject.Find ("MainTerrain");
-		terrain = game.GetComponent<BlockTerrain> ();
-		terrainManager = game.GetComponent<TerrainManager> ();
+		terrain = GetComponent<BlockTerrain> ();
+		terrainManager = GetComponent<TerrainManager> ();
 	}
 
 	void Update()

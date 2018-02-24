@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Xml.Linq;
 using UnityEngine;
 
 public class BlocksData : MonoBehaviour
@@ -21,6 +22,7 @@ public class BlocksData : MonoBehaviour
 		}
 	}
 
+	static NullBlock nullBlock = new NullBlock ();
 	static Block[] blocks;
 	static Dictionary<System.Type, int[]> definedBlocks = new Dictionary<System.Type, int[]> () {
 		{ typeof(XBlock), new int[] { 19, 20, 24, 25, 28, 174, 204 } },
@@ -31,19 +33,21 @@ public class BlocksData : MonoBehaviour
 		{ typeof(TransparentBlock), new int[] { 12, 13, 14 } },
 		{ typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
 		{ typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
-		{ typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } }
-
+		{ typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } },
+		{ typeof(FurnitureBlock), new int[] { 227 } }
 	};
 
 	public static Block GetBlock (int content)
 	{
 		if (content < blocks.Length) {
 			return blocks [content];
+		} else if (content == 1023) {
+			return nullBlock;
 		}
 		return blocks [0];
 	}
 
-	public static readonly Color[] DEFAULT_COLORS = new Color[] {
+	public static Color[] DEFAULT_COLORS = new Color[] {
 		new Color (1, 1, 1),
 		new Color (0.7109375f, 1, 1),
 		new Color (1, 0.7109375f, 1),
@@ -70,8 +74,20 @@ public class BlocksData : MonoBehaviour
 		return Color.white;
 	}
 
+	public static Color ParseColor (string str)
+	{
+		string[] rgb = str.Split (',');
+		return new Color ((float)int.Parse (rgb [0]) / 256f, (float)int.Parse (rgb [1]) / 256f, (float)int.Parse (rgb [2]) / 256f);
+	}
+
 	void Awake ()
 	{
+		string[] strs = WorldManager.Project.GetGameInfo ().Colors;
+		for (int i = 0; i < 16; i++) {
+			if (strs [i] != string.Empty) {
+				DEFAULT_COLORS [i] = ParseColor (strs [i]);
+			}
+		}
 		ParseBlocksData ("Assets/Resources/BlocksData.txt");
 	}
 
@@ -336,7 +352,8 @@ public class TransparentBlock : Block
 		return 0;
 	}
 
-	public bool DrawFace (int i) {
+	public bool DrawFace (int i)
+	{
 		return i != Index && BlocksData.GetBlock (i).IsTransparent;
 	}
 }
@@ -430,7 +447,7 @@ public class FlatBlock : Block
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
 	{
-		int face = FurnitureManager.GetRotation (BlockTerrain.GetData (value));
+		int face = GetRotation (BlockTerrain.GetData (value));
 
 		Vector3 v0;
 		Vector3 v1;
@@ -474,6 +491,11 @@ public class FlatBlock : Block
 		g.GenerateBlockUVs (TextureSlot);
 		g.GenerateBlockColors (color);
 	}
+
+	public static int GetRotation (int data)
+	{
+		return data & 3;
+	}
 }
 
 public class StairBlock : PaintableBlock
@@ -493,7 +515,7 @@ public class StairBlock : PaintableBlock
 		for (int i = 0; i < 24; i++) {
 			y = 0;
 
-			y -= FurnitureManager.GetRotation (i) * 90;
+			y -= GetRotation (i) * 90;
 
 			m = Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, y, 0), Vector3.one);
 			switch ((i >> 3) & 3) {
@@ -512,6 +534,11 @@ public class StairBlock : PaintableBlock
 
 			stairs [i] = BlockMeshes.TranslateMesh (mesh, m, (i & 4) != 0);
 		}
+	}
+
+	public static int GetRotation (int data)
+	{
+		return data & 3;
 	}
 
 	public override int? GetColor (int data)
@@ -568,3 +595,52 @@ public class SlabBlock : PaintableBlock
 		DrawMeshBlock (x, y, z, value, mesh, GetColorC (value), g);
 	}
 }
+
+public class FurnitureBlock : Block
+{
+	FurnitureManager furnitureManager;
+
+	public override void Initialize (GameObject game)
+	{
+		IsTransparent = true;
+		furnitureManager = game.GetComponent<FurnitureManager> ();
+	}
+
+	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+	{
+		int data = BlockTerrain.GetData (value);
+		g.MeshFromMeshRaw (x, y, z, furnitureManager.GetFurniture (GetDesignIndex (data), GetRotation (data)));
+	}
+
+	public static int GetDesignIndex (int data)
+	{
+		return data >> 2 & 1023;
+	}
+
+	public static int GetRotation (int data)
+	{
+		return data & 3;
+	}
+}
+
+public class NullBlock : Block
+{
+	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+	{
+	}
+}
+
+//public abstract class MeshBlock : Block
+//{
+//	Mesh mesh;
+//
+//	public override void Initialize (GameObject game)
+//	{
+//		mesh = GetMesh ();
+//		if (mesh.colors.Length == 0) {
+//
+//		}
+//	}
+//
+//	protected abstract Mesh GetMesh ();
+//}

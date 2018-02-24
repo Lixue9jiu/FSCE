@@ -45,6 +45,9 @@ public class BlockTerrain : MonoBehaviour
 				c.YplusOne.YminusOne = null;
 				c.YplusOne = null;
 			}
+
+			GameObject.Destroy (c.instance);
+			GameObject.Destroy (c.instance2);
 		}
 	}
 
@@ -115,6 +118,7 @@ public class BlockTerrain : MonoBehaviour
 		public int chunky;
 
 		public GameObject instance;
+		public GameObject instance2;
 
 		public Chunk XminusOne;
 		public Chunk YminusOne;
@@ -144,7 +148,7 @@ public class BlockTerrain : MonoBehaviour
 				return YminusOne.GetCellValue (x, y, 15);
 			else if (YplusOne != null && z == 16)
 				return YplusOne.GetCellValue (x, y, 0);
-			return 0;
+			return 1023;
 		}
 
 		public int GetCellValue (int index)

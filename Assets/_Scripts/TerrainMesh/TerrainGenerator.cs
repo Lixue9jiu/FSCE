@@ -12,19 +12,39 @@ public class TerrainGenerator : MonoBehaviour
 
 	public void MeshFromChunk (BlockTerrain.Chunk chunk, Mesh mesh)
 	{
-		mesh.Clear ();
 		for (int x = 0; x < chunk.sizeX; x++) {
 			for (int y = 0; y < chunk.sizeY; y++) {
 				for (int z = 0; z < chunk.sizeZ; z++) {
 					int value = chunk.GetCellValue (x, y, z);
 					int content = BlockTerrain.GetContent (value);
-					if (content != 0) {
-						BlocksData.GetBlock(content).GenerateTerrain (x, y, z, value, chunk, this);
+					Block b = BlocksData.GetBlock (content);
+					if (!b.IsTransparent) {
+						b.GenerateTerrain (x, y, z, value, chunk, this);
 					}
 				}
 			}
 		}
 
+		mesh.Clear ();
+		PushToMesh (mesh);
+	}
+
+	public void MeshFromTransparent (BlockTerrain.Chunk chunk, Mesh mesh)
+	{
+		for (int x = 0; x < chunk.sizeX; x++) {
+			for (int y = 0; y < chunk.sizeY; y++) {
+				for (int z = 0; z < chunk.sizeZ; z++) {
+					int value = chunk.GetCellValue (x, y, z);
+					int content = BlockTerrain.GetContent (value);
+					Block b = BlocksData.GetBlock (content);
+					if (b.IsTransparent) {
+						b.GenerateTerrain (x, y, z, value, chunk, this);
+					}
+				}
+			}
+		}
+
+		mesh.Clear ();
 		PushToMesh (mesh);
 	}
 
@@ -39,12 +59,12 @@ public class TerrainGenerator : MonoBehaviour
 					int content = BlockTerrain.GetContent (value);
 					if (content != 0) {
 						int neighborData = 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x - 1, y, z)).IsTransparent) ? Block.XminusOne : 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x, y - 1, z)).IsTransparent) ? Block.YminusOne : 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x, y, z - 1)).IsTransparent) ? Block.ZminusOne : 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x + 1, y, z)).IsTransparent) ? Block.XplusOne : 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x, y + 1, z)).IsTransparent) ? Block.YplusOne : 0;
-						neighborData += (BlocksData.GetBlock (furniture.GetCellValue (x, y, z + 1)).IsTransparent) ? Block.ZplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x - 1, y, z))).IsTransparent) ? Block.XminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y - 1, z))).IsTransparent) ? Block.YminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y, z - 1))).IsTransparent) ? Block.ZminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x + 1, y, z))).IsTransparent) ? Block.XplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y + 1, z))).IsTransparent) ? Block.YplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y, z + 1))).IsTransparent) ? Block.ZplusOne : 0;
 						GenerateFurnitureBlcok (res, x, y, z, content, value, neighborData);
 					}
 				}
@@ -137,7 +157,7 @@ public class TerrainGenerator : MonoBehaviour
 		uvs.Add (v10);
 	}
 
-	void PushToMesh (Mesh mesh)
+	public void PushToMesh (Mesh mesh)
 	{
 		mesh.vertices = vertices.ToArray ();
 		mesh.triangles = triangles.ToArray ();
@@ -149,6 +169,13 @@ public class TerrainGenerator : MonoBehaviour
 		triangles.Clear ();
 		uvs.Clear ();
 		colors.Clear ();
+	}
+
+	public void MeshFromMeshRaw (int x, int y, int z, Mesh mesh)
+	{
+		MeshFromMesh (x, y, z, mesh);
+		uvs.AddRange (mesh.uv);
+		colors.AddRange (mesh.colors);
 	}
 
 	public void MeshFromMesh (int x, int y, int z, Mesh mesh)
@@ -201,14 +228,6 @@ public class TerrainGenerator : MonoBehaviour
 		colors.Add (color);
 		colors.Add (color);
 		colors.Add (color);
-	}
-
-	public void TextureFromMesh (Mesh mesh, Color color)
-	{
-		uvs.AddRange (mesh.uv);
-		for (int i = 0; i < mesh.uv.Length; i++) {
-			colors.Add (color);
-		}
 	}
 
 	public void GenerateTextureForMesh (Mesh mesh, int textureSlot, Color color)
