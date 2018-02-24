@@ -8,8 +8,14 @@ public class WorldManager : MonoBehaviour
 	public List<string> Worlds = new List<string> ();
 	string WorldsFolder;
 
-	public static ProjectData Project = new ProjectData ("/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1");
-	public static string ChunkDat = "/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1/Chunks32.dat";
+	public static ProjectData Project;
+	public static string ChunkDat;
+
+//	static WorldManager()
+//	{
+//		Project = new ProjectData ("/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1");
+//		ChunkDat = "/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1/Chunks32.dat";
+//	}
 
 	void Awake ()
 	{
