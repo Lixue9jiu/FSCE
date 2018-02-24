@@ -9,54 +9,114 @@ public class WorldManager : MonoBehaviour
 	string WorldsFolder;
 
 	public static ProjectData Project;
+	public static string ChunkDat;
 
-//	void Awake ()
-//	{
-//		WorldsFolder = Path.Combine (Application.persistentDataPath, "Worlds");
-//		if (Directory.Exists (WorldsFolder)) {
-//			Worlds.AddRange (Directory.GetFiles (WorldsFolder));
-//		} else {
-//			Directory.CreateDirectory (WorldsFolder);
-//		}
-//	}
-
-	public void LoadWorld (string path)
+	void Awake ()
 	{
-		string dir = Path.Combine (WorldsFolder, "World" + Worlds.Count);
+		WorldsFolder = Path.Combine (Application.persistentDataPath, "Worlds");
+		if (Directory.Exists (WorldsFolder)) {
+			string[] paths = Directory.GetDirectories (WorldsFolder);
+			for (int i = 0; i < paths.Length; i++) {
+				string p = paths [i];
+				if (Path.GetFileName (p).StartsWith ("World")) {
+					if (IsWorldVaild (p)) {
+						Worlds.Add (p);
+					} else {
+						Directory.Delete (p, true);
+					}
+				}
+			}
+		} else {
+			Directory.CreateDirectory (WorldsFolder);
+		}
+		Debug.Log (string.Format ("{0}, count: {1}", WorldsFolder, Worlds.Count));
+	}
+
+	public bool SetCurrent (int index)
+	{
+		if (index > -1 && index < Worlds.Count) {
+			LoadWorldDir (Worlds [index]);
+			return true;
+		}
+		return false;
+	}
+
+	public List<string> GetWorldNames ()
+	{
+		string[] strs = new string[Worlds.Count];
+		for (int i = 0; i < strs.Length; i++) {
+			strs [i] = ProjectData.GetWorldName (Worlds [i]);
+		}
+		return new List<string> (strs);
+	}
+
+	public void LoadWorld (Stream stream)
+	{
+		string dir = Path.Combine (WorldsFolder, "World");
+		int i = 0;
+		while (Directory.Exists (dir + i)) {
+			i++;
+		}
+		dir += i;
 		Directory.CreateDirectory (dir);
-		ZipUtils.Unzip (path, dir);
+		ZipUtils.Unzip (stream, dir);
+		Worlds.Add (dir);
 
 		LoadWorldDir (dir);
 
-		BroadcastMessage ("OnWorldLoaded");
+		BroadcastMessage ("OnWorldLoaded", SendMessageOptions.DontRequireReceiver);
+	}
+
+	public void RemoveWorld (int index)
+	{
+		if (index > -1 && index < Worlds.Count) {
+			Directory.Delete (Worlds [index], true);
+			Worlds.RemoveAt (index);
+		}
 	}
 
 	void LoadWorldDir (string dir)
 	{
-		Project = new ProjectData (XDocument.Load (Path.Combine (dir, "Project.xml")));
-		Vector3 playerPosition = Project
-			.GetSubsystem ("Players")
-			.GetValues ("Players")
-			.GetValues ("1")
-			.GetValue<Vector3> ("SpawnPosition");
-		
+		Project = new ProjectData (dir);
+		ChunkDat = Path.Combine (dir, "Chunks32.dat");
+	}
+
+	bool IsWorldVaild (string dir)
+	{
+		return File.Exists (Path.Combine (dir, "Project.xml")) && File.Exists (Path.Combine (dir, "Chunks32.dat"));
 	}
 
 }
 
-public class ProjectData {
+public class ProjectData
+{
 	public XElement Root;
 
-	public string WorldName {
+	public static string GetWorldName (string path)
+	{
+		ProjectData p = new ProjectData (path);
+		return p.GetSubsystem ("GameInfo").GetValue<string> ("WorldName");
+	}
+
+	public Vector3 PlayerPosition {
 		get {
-			XElement gameinfo = GetSubsystem("GameInfo");
-			return XMLUtils.FindValueByName (gameinfo, "WorldName");
+			Vector3 v = GetSubsystem ("Players")
+				.GetValues ("Players")
+				.GetValues ("1")
+				.GetValue<Vector3> ("SpawnPosition");
+			v.x = -v.x;
+			return v;
 		}
 	}
 
 	public ProjectData (XDocument doc)
 	{
 		Root = doc.Root;
+	}
+
+	public ProjectData (string worldPath)
+	{
+		Root = XDocument.Load (Path.Combine (worldPath, "Project.xml")).Root;
 	}
 
 	public GameInfo GetGameInfo ()
@@ -84,7 +144,7 @@ public struct GameInfo
 	public string BlockTextureName;
 	public string[] Colors;
 
-	public GameInfo(ProjectData project)
+	public GameInfo (ProjectData project)
 	{
 		XElement e = project.GetSubsystem ("GameInfo");
 		e.GetValue ("WorldName", out WorldName);
@@ -99,7 +159,7 @@ public struct GameInfo
 		e.GetValue ("BlockTextureName", out BlockTextureName);
 
 		string str;
-		XMLUtils.FindValuesByName (e, "Palette").GetValue("Colors", out str);
+		XMLUtils.FindValuesByName (e, "Palette").GetValue ("Colors", out str);
 		Colors = str.Split (';');
 	}
 }

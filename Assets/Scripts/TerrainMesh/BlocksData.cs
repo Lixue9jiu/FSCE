@@ -300,6 +300,11 @@ public class CubeBlock : Block
 
 		DrawCubeBlock (x, y, z, value, neighborData, Color.white, g);
 	}
+
+	static void GetNeighbor (int i)
+	{
+
+	}
 }
 
 public class TransparentBlock : Block
@@ -329,6 +334,10 @@ public class TransparentBlock : Block
 			return mask;
 		}
 		return 0;
+	}
+
+	public bool DrawFace (int i) {
+		return i != Index && BlocksData.GetBlock (i).IsTransparent;
 	}
 }
 

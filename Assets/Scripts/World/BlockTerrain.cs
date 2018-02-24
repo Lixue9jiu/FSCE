@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockTerrain : MonoBehaviour {
+public class BlockTerrain : MonoBehaviour
+{
 
 	public const int chunkSizeX = 16;
 	public const int chunkSizeY = 256;
@@ -11,7 +12,7 @@ public class BlockTerrain : MonoBehaviour {
 	Dictionary<Point2, Chunk> chunks = new Dictionary<Point2, Chunk> ();
 	LinkedList<Chunk> freeChunks = new LinkedList<Chunk> ();
 
-	public Chunk GetChunk(int x, int y)
+	public Chunk GetChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
 		if (chunks.ContainsKey (p)) {
@@ -20,7 +21,7 @@ public class BlockTerrain : MonoBehaviour {
 		return null;
 	}
 
-	public void DiscardChunk(int x, int y)
+	public void DiscardChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
 		if (chunks.ContainsKey (p)) {
@@ -47,7 +48,7 @@ public class BlockTerrain : MonoBehaviour {
 		}
 	}
 
-	public Chunk CreateChunk(int x, int y)
+	public Chunk CreateChunk (int x, int y)
 	{
 		Chunk c;
 		if (freeChunks.Count != 0) {
@@ -62,26 +63,26 @@ public class BlockTerrain : MonoBehaviour {
 		chunks [new Point2 (x, y)] = c;
 
 		Chunk neighbor;
-		if (chunks.TryGetValue (new Point2(x - 1, y), out neighbor)) {
+		if (chunks.TryGetValue (new Point2 (x - 1, y), out neighbor)) {
 			c.XminusOne = neighbor;
 			neighbor.XplusOne = c;
 		}
-		if (chunks.TryGetValue (new Point2(x + 1, y), out neighbor)) {
+		if (chunks.TryGetValue (new Point2 (x + 1, y), out neighbor)) {
 			c.XplusOne = neighbor;
 			neighbor.XminusOne = c;
 		}
-		if (chunks.TryGetValue (new Point2(x, y - 1), out neighbor)) {
+		if (chunks.TryGetValue (new Point2 (x, y - 1), out neighbor)) {
 			c.YminusOne = neighbor;
 			neighbor.YplusOne = c;
 		}
-		if (chunks.TryGetValue (new Point2(x, y + 1), out neighbor)) {
+		if (chunks.TryGetValue (new Point2 (x, y + 1), out neighbor)) {
 			c.YplusOne = neighbor;
 			neighbor.YminusOne = c;
 		}
 		return c;
 	}
 
-	public int GetCellValue(int x, int y, int z)
+	public int GetCellValue (int x, int y, int z)
 	{
 		int chunkx = x >> 4;
 		int chunky = z >> 4;
@@ -90,6 +91,18 @@ public class BlockTerrain : MonoBehaviour {
 			return chunk.GetCellValue (x - (chunkx << 4), y, z - (chunky << 4));
 		}
 		return 0;
+	}
+
+	public bool SetCellValue (int x, int y, int z, int value)
+	{
+		int chunkx = x >> 4;
+		int chunky = z >> 4;
+		BlockTerrain.Chunk chunk = GetChunk (chunkx, chunky);
+		if (chunk != null) {
+			chunk.SetCellValue (x - (chunkx << 4), y, z - (chunky << 4), value);
+			return true;
+		}
+		return false;
 	}
 
 	public class Chunk
@@ -101,6 +114,8 @@ public class BlockTerrain : MonoBehaviour {
 		public int chunkx;
 		public int chunky;
 
+		public GameObject instance;
+
 		public Chunk XminusOne;
 		public Chunk YminusOne;
 		public Chunk XplusOne;
@@ -108,7 +123,7 @@ public class BlockTerrain : MonoBehaviour {
 
 		int[] data;
 
-		public Chunk(int sizex, int sizey, int sizez)
+		public Chunk (int sizex, int sizey, int sizez)
 		{
 			sizeX = sizex;
 			sizeY = sizey;
@@ -116,10 +131,10 @@ public class BlockTerrain : MonoBehaviour {
 			data = new int[sizeX * sizeY * sizeZ];
 		}
 
-		public int GetCellValue(int x, int y, int z)
+		public int GetCellValue (int x, int y, int z)
 		{
 			if (x >= 0 && x < chunkSizeX && y >= 0 && y < chunkSizeY && z >= 0 && z < chunkSizeZ) {
-				return data [GetCellIndex (x, y, z)];
+				return GetCellValue (GetCellIndex (x, y, z));
 			}
 			if (XminusOne != null && x == -1)
 				return XminusOne.GetCellValue (15, y, z);
@@ -132,28 +147,33 @@ public class BlockTerrain : MonoBehaviour {
 			return 0;
 		}
 
-		public int GetCellContent(int x, int y, int z)
+		public int GetCellValue (int index)
+		{
+			return data [index];
+		}
+
+		public int GetCellContent (int x, int y, int z)
 		{
 			return GetContent (GetCellValue (x, y, z));
 		}
 
-		public void SetCellValue(int x, int y, int z, int value)
+		public void SetCellValue (int x, int y, int z, int value)
 		{
-			SetCellValue(GetCellIndex(x, y, z), value);
+			SetCellValue (GetCellIndex (x, y, z), value);
 		}
 
-		public void SetCellValue(int index, int value)
+		public void SetCellValue (int index, int value)
 		{
 			data [index] = value;
 		}
 	}
 
-	public static int GetCellIndex(int x, int y, int z)
+	public static int GetCellIndex (int x, int y, int z)
 	{
 		return y + chunkSizeY * x + chunkSizeX * chunkSizeY * z;
 	}
 
-	public static int GetContent(int value)
+	public static int GetContent (int value)
 	{
 		return value & 1023;
 	}

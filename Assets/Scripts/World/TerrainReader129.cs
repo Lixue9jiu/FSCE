@@ -27,8 +27,7 @@ public class TerrainReader129
 
 		while (enu.MoveNext ()) {
 			Point2 p = enu.Current.Key;
-			ReadChunk (p.X, p.Y, terrain);
-			chunk = terrain.GetChunk (p.X, p.Y);
+			chunk = ReadChunk (p.X, p.Y, terrain);
 			c.Add (chunk);
 		}
 		return c.ToArray ();
@@ -48,12 +47,12 @@ public class TerrainReader129
 		}
 	}
 
-	public void ReadChunk (int chunkx, int chunky, BlockTerrain terrain)
+	public BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain terrain)
 	{
-		ReadChunk (chunkx, chunky, terrain.CreateChunk (chunkx, chunky));
+		return ReadChunk (chunkx, chunky, terrain.CreateChunk (chunkx, chunky));
 	}
 
-	private void ReadChunk (int chunkx, int chunky, BlockTerrain.Chunk chunk)
+	private BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain.Chunk chunk)
 	{
 		Point2 p = new Point2 (chunkx, chunky);
 		long value;
@@ -75,6 +74,31 @@ public class TerrainReader129
 					}
 				}
 			}
+		}
+		return chunk;
+	}
+
+	public void SaveChunk (BlockTerrain.Chunk chunk)
+	{
+		Point2 p = new Point2 (chunk.chunkx, chunk.chunky);
+		long value;
+		if (chunkOffsets.TryGetValue (p, out value)) {
+			stream.Seek (value, SeekOrigin.Begin);
+			WriteChunkHeader (stream, chunk.chunkx, chunk.chunky);
+
+			memStr.Seek (0, SeekOrigin.Begin);
+			for (int x = 0; x < 16; x++) {
+				for (int y = 0; y < 16; y++) {
+					int index = BlockTerrain.GetCellIndex (15 - x, 0, y);
+					int h = 0;
+					while (h < 128) {
+						WriteInt (memStr, chunk.GetCellValue (index));
+						h++;
+						index++;
+					}
+				}
+			}
+			stream.Write (buffer, 0, 131072);
 		}
 	}
 

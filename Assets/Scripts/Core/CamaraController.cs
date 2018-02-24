@@ -38,8 +38,6 @@ public class CamaraController : MonoBehaviour
 
 		if (Input.GetKeyUp (KeyCode.Escape)) {
 			SetCursorLocked (!isCursorLocked);
-		} else if (Input.GetKeyUp (KeyCode.R)) {
-
 		}
 	}
 

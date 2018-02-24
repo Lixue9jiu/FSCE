@@ -10,7 +10,7 @@ public class TerrainGenerator : MonoBehaviour
 	List<Vector2> uvs = new List<Vector2> ();
 	List<Color> colors = new List<Color> ();
 
-	public void MeshFromChunk (BlockTerrain.Chunk chunk, ref Mesh mesh)
+	public void MeshFromChunk (BlockTerrain.Chunk chunk, Mesh mesh)
 	{
 		mesh.Clear ();
 		for (int x = 0; x < chunk.sizeX; x++) {

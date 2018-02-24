@@ -5,14 +5,16 @@ using UnityEngine;
 public class TerrainRaycast : MonoBehaviour {
 
 	public GameObject cube;
-	public UnityEngine.UI.Text text;
 	BlockTerrain terrain;
+	TerrainManager terrainManager;
 
 	public RaycastResult? LookingAt;
 
-	void Start()
+	void Awake()
 	{
-		terrain = GameObject.Find ("MainTerrain").GetComponent<BlockTerrain> ();
+		GameObject game = GameObject.Find ("MainTerrain");
+		terrain = game.GetComponent<BlockTerrain> ();
+		terrainManager = game.GetComponent<TerrainManager> ();
 	}
 
 	void Update()
@@ -25,11 +27,31 @@ public class TerrainRaycast : MonoBehaviour {
 		if (LookingAt.HasValue) {
 			cube.SetActive (true);
 			cube.transform.position = LookingAt.Value.Position.ToVec3 ();
-			int value = LookingAt.Value.BlockValue;
-			text.text = string.Format ("looking at: {0}; {1}", BlockTerrain.GetContent (value), BlockTerrain.GetData (value));
 		} else {
 			cube.SetActive (false);
 		}
+
+		if (!isBreaking && LookingAt.HasValue)
+		{
+			if (Input.GetKey (KeyCode.Mouse0)) {
+				Point3 p = LookingAt.Value.Position;
+				terrainManager.ChangeCell (p.X, p.Y, p.Z, 0);
+				StartCoroutine (Delay (0.1f));
+			} else if (Input.GetKey (KeyCode.Mouse1)) {
+				Point3 p = LookingAt.Value.LastPosition;
+				terrainManager.ChangeCell (p.X, p.Y, p.Z, 2);
+				StartCoroutine (Delay (0.1f));
+			}
+		}
+	}
+
+	bool isBreaking;
+
+	IEnumerator Delay(float seconds)
+	{
+		isBreaking = true;
+		yield return new WaitForSecondsRealtime (seconds);
+		isBreaking = false;
 	}
 
 	public RaycastResult? AlaphaRaycast(Vector3 position, Vector3 direction, float distance = 20)
@@ -43,14 +65,15 @@ public class TerrainRaycast : MonoBehaviour {
 		for (int i = 0; i < count; i++) {
 			result = new Point3(ToCell(position.x), ToCell(position.y), ToCell(position.z));
 			if (!result.Equals (last)) {
-				last = result;
 				int value = terrain.GetCellValue (result.X, result.Y, result.Z);
 				if (BlockTerrain.GetContent(value) != 0) {
 					return new RaycastResult {
 						Position = result,
+						LastPosition = last,
 						BlockValue = value
 					};
 				}
+				last = result;
 			}
 			position += increase;
 		}
@@ -128,5 +151,7 @@ public class TerrainRaycast : MonoBehaviour {
 	{
 		public Point3 Position;
 		public int BlockValue;
+
+		public Point3 LastPosition;
 	}
 }

@@ -6,35 +6,40 @@ using UnityEngine;
 public class ZipUtils
 {
 
+	public static void Unzip (Stream stream, string outFolder)
+	{
+		ZipFile file = null;
+		try {
+			file = new ZipFile (stream);
+			foreach (ZipEntry zipEntry in file) {
+				if (!zipEntry.IsFile) {
+					continue;
+				}
+				string entryFileName = zipEntry.Name;
+
+				byte[] buffer = new byte[4096];
+				Stream zipStream = file.GetInputStream (zipEntry);
+
+				string fullZipToPath = Path.Combine (outFolder, entryFileName);
+				string directoryName = Path.GetDirectoryName (fullZipToPath);
+				if (directoryName.Length > 0)
+					Directory.CreateDirectory (directoryName);
+
+				using (FileStream streamWriter = File.Create (fullZipToPath)) {
+					StreamUtils.Copy (zipStream, streamWriter, buffer);
+				}
+			}
+		} catch {
+			if (file != null) {
+				file.Close ();
+			}
+		}
+	}
+
 	public static void Unzip (string path, string outFolder)
 	{
 		using (Stream s = File.OpenRead (path)) {
-			ZipFile file = null;
-			try {
-				file = new ZipFile (s);
-				foreach (ZipEntry zipEntry in file) {
-					if (!zipEntry.IsFile) {
-						continue;
-					}
-					string entryFileName = zipEntry.Name;
-
-					byte[] buffer = new byte[4096];
-					Stream zipStream = file.GetInputStream (zipEntry);
-
-					string fullZipToPath = Path.Combine (outFolder, entryFileName);
-					string directoryName = Path.GetDirectoryName (fullZipToPath);
-					if (directoryName.Length > 0)
-						Directory.CreateDirectory (directoryName);
-					
-					using (FileStream streamWriter = File.Create (fullZipToPath)) {
-						StreamUtils.Copy (zipStream, streamWriter, buffer);
-					}
-				}
-			} catch {
-				if (file != null) {
-					file.Close ();
-				}
-			}
+			Unzip (s, outFolder);
 		}
 	}
 
