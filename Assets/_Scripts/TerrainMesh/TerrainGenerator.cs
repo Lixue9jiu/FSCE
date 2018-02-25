@@ -59,12 +59,12 @@ public class TerrainGenerator : MonoBehaviour
 					int content = BlockTerrain.GetContent (value);
 					if (content != 0) {
 						int neighborData = 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x - 1, y, z))).IsTransparent) ? Block.XminusOne : 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y - 1, z))).IsTransparent) ? Block.YminusOne : 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y, z - 1))).IsTransparent) ? Block.ZminusOne : 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x + 1, y, z))).IsTransparent) ? Block.XplusOne : 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y + 1, z))).IsTransparent) ? Block.YplusOne : 0;
-						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent(furniture.GetCellValue (x, y, z + 1))).IsTransparent) ? Block.ZplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x - 1, y, z))).IsTransparent) ? Block.XminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x, y - 1, z))).IsTransparent) ? Block.YminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x, y, z - 1))).IsTransparent) ? Block.ZminusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x + 1, y, z))).IsTransparent) ? Block.XplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x, y + 1, z))).IsTransparent) ? Block.YplusOne : 0;
+						neighborData += (BlocksData.GetBlock (BlockTerrain.GetContent (furniture.GetCellValue (x, y, z + 1))).IsTransparent) ? Block.ZplusOne : 0;
 						GenerateFurnitureBlcok (res, x, y, z, content, value, neighborData);
 					}
 				}

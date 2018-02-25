@@ -13,8 +13,8 @@ public class WorldManager : MonoBehaviour
 
 //	static WorldManager()
 //	{
-//		Project = new ProjectData ("/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1");
-//		ChunkDat = "/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1/Chunks32.dat";
+//		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
+//		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
 //	}
 
 	void Awake ()

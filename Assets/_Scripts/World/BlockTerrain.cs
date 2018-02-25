@@ -120,6 +120,8 @@ public class BlockTerrain : MonoBehaviour
 		public GameObject instance;
 		public GameObject instance2;
 
+		public int state;
+
 		public Chunk XminusOne;
 		public Chunk YminusOne;
 		public Chunk XplusOne;

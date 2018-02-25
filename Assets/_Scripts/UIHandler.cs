@@ -36,7 +36,11 @@ public class UIHandler : MonoBehaviour
 	{
 		downloadWorld.enabled = false;
 		input.enabled = false;
-		StartCoroutine (GetFromURL (new WWW (input.text)));
+		string url = input.text;
+		if (!url.StartsWith ("http://")) {
+			url = "file://" + url.Replace ('\\', '/');
+		}
+		StartCoroutine (GetFromURL (new WWW (url)));
 
 //		string path = UnityEditor.EditorUtility.OpenFilePanel ("choose a world file", "", "scworld");
 //		if (path != string.Empty) {

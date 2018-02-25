@@ -78,21 +78,46 @@ public class TerrainManager : MonoBehaviour
 
 	public void ChangeCell (int x, int y, int z, int newValue)
 	{
-//		BlockTerrain.Chunk c = Terrain.GetChunk (x >> 4, z >> 4);
-//		if (c != null) {
-//			int cx = x & 15;
-//			int cz = z & 15;
-//			c.SetCellValue (cx, y, cz, newValue);
-//			if (c.XminusOne != null && cx == 0)
-//				dirty.AddFirst (c.XminusOne);
-//			else if (c.XplusOne != null && cx == 15)
-//				dirty.AddFirst (c.XplusOne);
-//			if (c.YminusOne != null && cz == 0)
-//				dirty.AddFirst (c.YminusOne);
-//			else if (c.YplusOne != null && cz == 15)
-//				dirty.AddFirst (c.YplusOne);
-//			dirty.AddFirst (c);
-//		}
+		BlockTerrain.Chunk c = Terrain.GetChunk (x >> 4, z >> 4);
+		if (c != null) {
+			int cx = x & 15;
+			int cz = z & 15;
+
+			int content = c.GetCellContent (cx, y, cz);
+			if (content != 0) {
+				Block b = BlocksData.GetBlock (content);
+				if (b.IsTransparent) {
+					c.state += 2;
+				} else {
+					c.state += 1;
+				}
+			}
+			content = newValue;
+			if (content != 0) {
+				Block b = BlocksData.GetBlock (content);
+				if (b.IsTransparent) {
+					c.state += 2;
+				} else {
+					c.state += 1;
+				}
+			}
+			c.SetCellValue (cx, y, cz, newValue);
+			if (cx == 0 && c.XminusOne != null) {
+				c.XminusOne.state = 1;
+				dirty.AddFirst (c.XminusOne);
+			} else if (cx == 15 && c.XplusOne != null) {
+				c.XplusOne.state = 1;
+				dirty.AddFirst (c.XplusOne);
+			}
+			if (cz == 0 && c.YminusOne != null) {
+				c.YminusOne.state = 1;
+				dirty.AddFirst (c.YminusOne);
+			} else if (cz == 15 && c.YplusOne != null) {
+				c.YplusOne.state = 1;
+				dirty.AddFirst (c.YplusOne);
+			}
+			dirty.AddFirst (c);
+		}
 	}
 
 	void FixedUpdate ()
@@ -101,6 +126,11 @@ public class TerrainManager : MonoBehaviour
 			UpdateChunk (c);
 		}
 		dirty.Clear ();
+	}
+
+	void LoadChunk (int x, int y)
+	{
+
 	}
 
 	public void InstantiateChunk (BlockTerrain.Chunk chunk)
@@ -125,8 +155,19 @@ public class TerrainManager : MonoBehaviour
 	public void UpdateChunk (BlockTerrain.Chunk chunk)
 	{
 		if (chunk.instance != null) {
-			terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
-			terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
+			switch (chunk.state) {
+			case 3:
+				terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
+				terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
+				break;
+			case 1:
+				terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
+				break;
+			case 2:
+				terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
+				break;
+			}
+			chunk.state = 0;
 		}
 	}
 
