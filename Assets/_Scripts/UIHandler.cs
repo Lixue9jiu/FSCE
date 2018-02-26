@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 
 public class UIHandler : MonoBehaviour
 {
@@ -37,10 +38,10 @@ public class UIHandler : MonoBehaviour
 		downloadWorld.enabled = false;
 		input.enabled = false;
 		string url = input.text;
-		if (!url.StartsWith ("http://")) {
+		if (!url.Contains ("://")) {
 			url = "file://" + url.Replace ('\\', '/');
 		}
-		StartCoroutine (GetFromURL (new WWW (url)));
+		StartCoroutine (GetFromURL (url));
 
 //		string path = UnityEditor.EditorUtility.OpenFilePanel ("choose a world file", "", "scworld");
 //		if (path != string.Empty) {
@@ -70,9 +71,6 @@ public class UIHandler : MonoBehaviour
 			worldManager.LoadWorld (s);
 		}
 		RefreshDropdown ();
-		downloadWorld.enabled = true;
-		input.enabled = true;
-		input.text = string.Empty;
 	}
 
 	void RefreshDropdown ()
@@ -83,16 +81,18 @@ public class UIHandler : MonoBehaviour
 		deleteWorld.enabled = enterWorld.enabled;
 	}
 
-	IEnumerator GetFromURL (WWW www)
+	IEnumerator GetFromURL (string url)
 	{
-		yield return www;
-		if (!string.IsNullOrEmpty (www.error)) {
-			Debug.Log (www.error);
-			downloadWorld.enabled = true;
-			input.enabled = true;
-			input.text = string.Empty;
+		UnityWebRequest web = UnityWebRequest.Get (url);
+		yield return web.SendWebRequest();
+		if (!(web.isHttpError || web.isNetworkError)) {
+			Debug.Log (web.error);
 		} else {
-			OnURLLoaded (www.bytes);
+			OnURLLoaded (web.downloadHandler.data);
 		}
+
+		downloadWorld.enabled = true;
+		input.enabled = true;
+		input.text = string.Empty;
 	}
 }
