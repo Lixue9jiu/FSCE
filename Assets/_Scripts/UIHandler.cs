@@ -85,7 +85,7 @@ public class UIHandler : MonoBehaviour
 	{
 		UnityWebRequest web = UnityWebRequest.Get (url);
 		yield return web.SendWebRequest();
-		if (!(web.isHttpError || web.isNetworkError)) {
+		if (web.isHttpError || web.isNetworkError) {
 			Debug.Log (web.error);
 		} else {
 			OnURLLoaded (web.downloadHandler.data);
