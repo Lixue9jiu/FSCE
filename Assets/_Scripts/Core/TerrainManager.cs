@@ -133,6 +133,14 @@ public class TerrainManager : MonoBehaviour
 
 	}
 
+	public void SaveAllChunks ()
+	{
+		terrainReader.SaveChunkEntries ();
+		foreach (BlockTerrain.Chunk c in Terrain.Chunks) {
+			terrainReader.SaveChunk (c);
+		}
+	}
+
 	public void InstantiateChunk (BlockTerrain.Chunk chunk)
 	{
 		GameObject obj;
@@ -140,16 +148,25 @@ public class TerrainManager : MonoBehaviour
 		if (chunk.instance == null) {
 			obj = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity) as GameObject;
 			chunk.instance = obj;
-			obj2 = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity);
-			obj2.transform.parent = obj.transform;
-			chunk.instance2 = obj2;
+			Mesh m = new Mesh ();
+			terrainGenerator.MeshFromTransparent (chunk, m);
+			if (m.vertexCount != 0) {
+				obj2 = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity);
+				obj2.transform.parent = obj.transform;
+				chunk.instance2 = obj2;
+
+				obj2.GetComponent<MeshFilter> ().mesh = m;
+			}
 		} else {
 			obj = chunk.instance;
 			obj.transform.position = new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4);
 			obj2 = chunk.instance2;
+			if (obj2 != null) {
+				terrainGenerator.MeshFromTransparent (chunk, obj2.GetComponent<MeshFilter> ().mesh);
+			}
 		}
 		terrainGenerator.MeshFromChunk (chunk, obj.GetComponent<MeshFilter> ().mesh);
-		terrainGenerator.MeshFromTransparent (chunk, obj2.GetComponent<MeshFilter> ().mesh);
+
 	}
 
 	public void UpdateChunk (BlockTerrain.Chunk chunk)
@@ -178,11 +195,11 @@ public class TerrainManager : MonoBehaviour
 
 	void LoadTerrain (string path)
 	{
-		Stream stream = File.OpenRead (path);
+		Stream stream = File.Open (path, FileMode.Open, FileAccess.ReadWrite);
 		terrainReader.Load (stream);
 	}
 
-	void UpdateTerrain ()
+	void UpdateTerrain (int centerChunkX, int centerChunkY)
 	{
 
 	}

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 
-public class UIHandler : MonoBehaviour
+public class MainMenu : MonoBehaviour
 {
 	WorldManager worldManager;
 
@@ -56,7 +56,7 @@ public class UIHandler : MonoBehaviour
 
 	public void OnEnterWorldClicked ()
 	{
-		SceneManager.LoadScene ("MainScene");
+		SceneManager.LoadScene (1);
 	}
 
 	public void OnDeleteWorldClicked ()
@@ -83,16 +83,20 @@ public class UIHandler : MonoBehaviour
 
 	IEnumerator GetFromURL (string url)
 	{
-		UnityWebRequest web = UnityWebRequest.Get (url);
-		yield return web.SendWebRequest();
-		if (web.isHttpError || web.isNetworkError) {
-			Debug.Log (web.error);
-		} else {
-			OnURLLoaded (web.downloadHandler.data);
+		Debug.Log (string.Format ("loading from url : {0}", url));
+		try {
+			UnityWebRequest web = UnityWebRequest.Get (url);
+			yield return web.SendWebRequest ();
+			if (web.isHttpError || web.isNetworkError) {
+				Debug.Log (web.error);
+			} else {
+				Debug.Log (string.Format("file loaded, size: {0}, isDone: {1}", web.downloadHandler.data.Length, web.downloadHandler.isDone));
+				OnURLLoaded (web.downloadHandler.data);
+			}
+		} finally {
+			downloadWorld.enabled = true;
+			input.enabled = true;
+			input.text = string.Empty;
 		}
-
-		downloadWorld.enabled = true;
-		input.enabled = true;
-		input.text = string.Empty;
 	}
 }

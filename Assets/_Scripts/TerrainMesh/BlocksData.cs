@@ -25,12 +25,14 @@ public class BlocksData : MonoBehaviour
 	static NullBlock nullBlock = new NullBlock ();
 	static Block[] blocks;
 	static Dictionary<System.Type, int[]> definedBlocks = new Dictionary<System.Type, int[]> () {
-		{ typeof(XBlock), new int[] { 19, 20, 24, 25, 28, 174, 204 } },
-		{ typeof(FlatBlock), new int[] { 197 } },
+		{ typeof(XBlock), new int[] { 20, 24, 25, 28, 174, 204 } },
+		{ typeof(IvyBlock), new int[] { 197 } },
 		{ typeof(AirBlock), new int[] { 0 } },
 		{ typeof(GrassBlock), new int[] { 8 } },
+		{ typeof(WaterBlock), new int[] { 18 } },
+		{ typeof(XGrassBlock), new int[] { 19 } },
 		{ typeof(TreeBlock), new int[] { 9, 10, 11 } },
-		{ typeof(TransparentBlock), new int[] { 12, 13, 14 } },
+		{ typeof(TreeLeaveBlock), new int[] { 12, 13, 14, 225 } },
 		{ typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
 		{ typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
 		{ typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } },
@@ -88,7 +90,7 @@ public class BlocksData : MonoBehaviour
 				DEFAULT_COLORS [i] = ParseColor (strs [i]);
 			}
 		}
-		ParseBlocksData ("Assets/Resources/BlocksData.txt");
+		ParseBlocksData (Application.streamingAssetsPath + Path.DirectorySeparatorChar + "BlocksData.txt");
 	}
 
 	void ParseBlocksData (string path)
@@ -166,6 +168,16 @@ public abstract class Block
 	public const int BACK = 4;
 	public const int LEFT = 5;
 
+	public static Vector3[] offsets = new Vector3[] {
+		new Vector3 (0.0f, 0.0f, 1.0f),
+		new Vector3 (0.0f, 1.0f, 0.0f),
+		new Vector3 (0.0f, 1.0f, 1.0f),
+		new Vector3 (1.0f, 0.0f, 0.0f),
+		new Vector3 (1.0f, 0.0f, 1.0f),
+		new Vector3 (1.0f, 1.0f, 0.0f),
+		new Vector3 (1.0f, 1.0f, 1.0f)
+	};
+
 	public int Index;
 	public bool IsTransparent;
 	public int TextureSlot;
@@ -184,13 +196,13 @@ public abstract class Block
 	protected void DrawCubeBlock (int x, int y, int z, int value, int neighborData, Color color, TerrainGenerator g)
 	{
 		Vector3 v000 = new Vector3 (x, y, z);
-		Vector3 v001 = new Vector3 (x, y, z + 1.0f);
-		Vector3 v010 = new Vector3 (x, y + 1.0f, z);
-		Vector3 v011 = new Vector3 (x, y + 1.0f, z + 1.0f);
-		Vector3 v100 = new Vector3 (x + 1.0f, y, z);
-		Vector3 v101 = new Vector3 (x + 1.0f, y, z + 1.0f);
-		Vector3 v110 = new Vector3 (x + 1.0f, y + 1.0f, z);
-		Vector3 v111 = new Vector3 (x + 1.0f, y + 1.0f, z + 1.0f);
+		Vector3 v001 = v000 + offsets [0];
+		Vector3 v010 = v000 + offsets [1];
+		Vector3 v011 = v000 + offsets [2];
+		Vector3 v100 = v000 + offsets [3];
+		Vector3 v101 = v000 + offsets [4];
+		Vector3 v110 = v000 + offsets [5];
+		Vector3 v111 = v000 + offsets [6];
 
 		if ((neighborData & XminusOne) != 0) {
 			g.MeshFromRect (v001, v011, v010, v000);
@@ -316,18 +328,47 @@ public class CubeBlock : Block
 
 		DrawCubeBlock (x, y, z, value, neighborData, Color.white, g);
 	}
+}
 
-	static void GetNeighbor (int i)
+public class WaterBlock : Block
+{
+	private static ColorMap map = new ColorMap (new Color32 (0, 0, 128, 255), new Color32 (0, 80, 100, 255), new Color32 (0, 45, 85, 255), new Color32 (0, 113, 97, 255));
+
+	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
 	{
+		int neighborData = 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x - 1, y, z)) ? XminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y - 1, z)) ? YminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y, z - 1)) ? ZminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x + 1, y, z)) ? XplusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y + 1, z)) ? YplusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y, z + 1)) ? ZplusOne : 0;
 
+		DrawCubeBlock (x, y, z, value, neighborData, map.Lookup (chunk.GetShiftValue (x, z)), g);
 	}
 }
 
-public class TransparentBlock : Block
+public class TreeLeaveBlock : Block
 {
+	private ColorMap map;
+
 	public override void Initialize (GameObject game)
 	{
 		IsTransparent = true;
+		switch (Index) {
+		case 12:
+			map = new ColorMap (new Color32 (96, 161, 123, 255), new Color32 (174, 164, 42, 255), new Color32 (96, 161, 123, 255), new Color32 (30, 191, 1, 255));
+			break;
+		case 13:
+			map = new ColorMap (new Color32 (96, 161, 96, 255), new Color32 (174, 109, 42, 255), new Color32 (96, 161, 96, 255), new Color32 (107, 191, 1, 255));
+			break;
+		case 14:
+			map = new ColorMap (new Color32 (96, 161, 150, 255), new Color32 (129, 174, 42, 255), new Color32 (96, 161, 150, 255), new Color32 (1, 191, 53, 255));
+			break;
+		case 225:
+			map = new ColorMap (new Color32 (90, 141, 160, 255), new Color32 (119, 152, 51, 255), new Color32 (86, 141, 162, 255), new Color32 (1, 158, 65, 255));
+			break;
+		}
 	}
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
@@ -340,7 +381,7 @@ public class TransparentBlock : Block
 		neighborData += GetNeightbor (chunk, x, y + 1, z, YplusOne);
 		neighborData += GetNeightbor (chunk, x, y, z + 1, ZplusOne);
 
-		DrawCubeBlock (x, y, z, value, neighborData, Color.white, g);
+		DrawCubeBlock (x, y, z, value, neighborData, map.Lookup(chunk.GetShiftValue(x, z)), g);
 	}
 
 	int GetNeightbor (BlockTerrain.Chunk chunk, int x, int y, int z, int mask)
@@ -358,13 +399,68 @@ public class TransparentBlock : Block
 	}
 }
 
-public class GrassBlock : CubeBlock
+public class GrassBlock : Block
 {
+	public static ColorMap map = new ColorMap (new Color32 (141, 198, 166, 255), new Color32 (210, 201, 93, 255), new Color32 (141, 198, 166, 255), new Color32 (79, 225, 56, 255));
+
 	public override int GetTextureSlot (int value, int face)
 	{
 		if (face == TOP)
 			return 0;
 		return 3;
+	}
+
+	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+	{
+		int neighborData = 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x - 1, y, z)) ? XminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y - 1, z)) ? YminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y, z - 1)) ? ZminusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x + 1, y, z)) ? XplusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y + 1, z)) ? YplusOne : 0;
+		neighborData += (BlocksData.IsTransparent (chunk, x, y, z + 1)) ? ZplusOne : 0;
+
+		Vector3 v000 = new Vector3 (x, y, z);
+		Vector3 v001 = v000 + offsets [0];
+		Vector3 v010 = v000 + offsets [1];
+		Vector3 v011 = v000 + offsets [2];
+		Vector3 v100 = v000 + offsets [3];
+		Vector3 v101 = v000 + offsets [4];
+		Vector3 v110 = v000 + offsets [5];
+		Vector3 v111 = v000 + offsets [6];
+
+		Color white = Color.white;
+
+		if ((neighborData & XminusOne) != 0) {
+			g.MeshFromRect (v001, v011, v010, v000);
+			g.GenerateBlockUVs (GetTextureSlot (value, BACK));
+			g.GenerateBlockColors (white);
+		}
+		if ((neighborData & YminusOne) != 0) {
+			g.MeshFromRect (v000, v100, v101, v001);
+			g.GenerateBlockUVs (GetTextureSlot (value, BOTTOM));
+			g.GenerateBlockColors (white);
+		}
+		if ((neighborData & ZminusOne) != 0) {
+			g.MeshFromRect (v000, v010, v110, v100);
+			g.GenerateBlockUVs (GetTextureSlot (value, LEFT));
+			g.GenerateBlockColors (white);
+		}
+		if ((neighborData & XplusOne) != 0) {
+			g.MeshFromRect (v100, v110, v111, v101);
+			g.GenerateBlockUVs (GetTextureSlot (value, FRONT));
+			g.GenerateBlockColors (white);
+		}
+		if ((neighborData & YplusOne) != 0) {
+			g.MeshFromRect (v111, v110, v010, v011);
+			g.GenerateBlockUVs (GetTextureSlot (value, TOP));
+			g.GenerateBlockColors (map.Lookup (chunk.GetShiftValue (x, z)));
+		}
+		if ((neighborData & ZplusOne) != 0) {
+			g.MeshFromRect (v101, v111, v011, v001);
+			g.GenerateBlockUVs (GetTextureSlot (value, RIGHT));
+			g.GenerateBlockColors (white);
+		}
 	}
 }
 
@@ -438,8 +534,51 @@ public class XBlock : Block
 	}
 }
 
-public class FlatBlock : Block
+public class XGrassBlock : Block
 {
+	public static bool GetIsSmall (int data)
+	{
+		return (data & 8) != 0;
+	}
+
+	public override void Initialize (GameObject game)
+	{
+		IsTransparent = true;
+	}
+
+	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+	{
+		Vector3 v000 = new Vector3 (x, y, z);
+		Vector3 v001 = new Vector3 (x, y, z + 1.0f);
+		Vector3 v010 = new Vector3 (x, y + 1.0f, z);
+		Vector3 v011 = new Vector3 (x, y + 1.0f, z + 1.0f);
+		Vector3 v100 = new Vector3 (x + 1.0f, y, z);
+		Vector3 v101 = new Vector3 (x + 1.0f, y, z + 1.0f);
+		Vector3 v110 = new Vector3 (x + 1.0f, y + 1.0f, z);
+		Vector3 v111 = new Vector3 (x + 1.0f, y + 1.0f, z + 1.0f);
+
+		int textureSlot = GetIsSmall (BlockTerrain.GetData (value)) ? 84 : 85;
+		Color color = GrassBlock.map.Lookup (chunk.GetShiftValue (x, z));
+
+		g.MeshFromRect (v101, v111, v010, v000);
+		g.GenerateBlockUVs (textureSlot);
+		g.GenerateBlockColors (color);
+		g.MeshFromRect (v000, v010, v111, v101);
+		g.GenerateBlockUVs (textureSlot);
+		g.GenerateBlockColors (color);
+		g.MeshFromRect (v100, v110, v011, v001);
+		g.GenerateBlockUVs (textureSlot);
+		g.GenerateBlockColors (color);
+		g.MeshFromRect (v001, v011, v110, v100);
+		g.GenerateBlockUVs (textureSlot);
+		g.GenerateBlockColors (color);
+	}
+}
+
+public class IvyBlock : Block
+{
+	private static ColorMap map = new ColorMap (new Color32 (96, 161, 123, 255), new Color32 (174, 164, 42, 255), new Color32 (96, 161, 123, 255), new Color32 (30, 191, 1, 255));
+
 	public override void Initialize (GameObject game)
 	{
 		IsTransparent = true;
@@ -482,7 +621,7 @@ public class FlatBlock : Block
 			throw new UnityException ("undefined face: " + face);
 		}
 
-		Color color = Color.white;
+		Color color = map.Lookup(chunk.GetShiftValue(x, z));
 
 		g.MeshFromRect (v0, v1, v2, v3);
 		g.GenerateBlockUVs (TextureSlot);
@@ -507,7 +646,7 @@ public class StairBlock : PaintableBlock
 		base.Initialize (game);
 		IsTransparent = true;
 
-		BlockMeshes meshes = game.GetComponent<BlockMeshes> ();
+		BlockMeshes bm = game.GetComponent<BlockMeshes> ();
 
 		float y;
 		Matrix4x4 m;
@@ -520,13 +659,13 @@ public class StairBlock : PaintableBlock
 			m = Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, y, 0), Vector3.one);
 			switch ((i >> 3) & 3) {
 			case 1:
-				mesh = meshes.stair0;
+				mesh = bm.stair0;
 				break;
 			case 0:
-				mesh = meshes.stair1;
+				mesh = bm.stair1;
 				break;
 			case 2:
-				mesh = meshes.stair2;
+				mesh = bm.stair2;
 				break;
 			default:
 				throw new UnityException ("unknown stair module: " + ((i >> 3) & 3));
@@ -570,9 +709,10 @@ public class SlabBlock : PaintableBlock
 		base.Initialize (game);
 		IsTransparent = true;
 
-		BlockMeshes meshes = game.GetComponent<BlockMeshes> ();
-		slabs [0] = meshes.slab;
-		slabs [1] = BlockMeshes.UpsideDownMesh (meshes.slab);
+		BlockMeshes bm = game.GetComponent<BlockMeshes> ();
+
+		slabs [0] = bm.slab;
+		slabs [1] = BlockMeshes.UpsideDownMesh (bm.slab);
 	}
 
 	public override int? GetColor (int data)
@@ -593,33 +733,6 @@ public class SlabBlock : PaintableBlock
 		int i = SlabBlock.GetIsTop (BlockTerrain.GetData (value)) ? 1 : 0;
 		Mesh mesh = slabs [i];
 		DrawMeshBlock (x, y, z, value, mesh, GetColorC (value), g);
-	}
-}
-
-public class FurnitureBlock : Block
-{
-	FurnitureManager furnitureManager;
-
-	public override void Initialize (GameObject game)
-	{
-		IsTransparent = true;
-		furnitureManager = game.GetComponent<FurnitureManager> ();
-	}
-
-	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
-	{
-		int data = BlockTerrain.GetData (value);
-		g.MeshFromMeshRaw (x, y, z, furnitureManager.GetFurniture (GetDesignIndex (data), GetRotation (data)));
-	}
-
-	public static int GetDesignIndex (int data)
-	{
-		return data >> 2 & 1023;
-	}
-
-	public static int GetRotation (int data)
-	{
-		return data & 3;
 	}
 }
 

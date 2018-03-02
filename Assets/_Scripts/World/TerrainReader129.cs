@@ -47,6 +47,17 @@ public class TerrainReader129
 		}
 	}
 
+	public void SaveChunkEntries ()
+	{
+		Point2[] entries = new Point2[chunkOffsets.Count];
+		foreach (KeyValuePair<Point2, long> p in chunkOffsets) {
+			entries [(int)((p.Value - 786444L) / 132112L)] = p.Key;
+		}
+		for (int i = 0; i < entries.Length; i++) {
+			WriteChunkEntry (stream, -entries [i].X, entries [i].Y, i);
+		}
+	}
+
 	public BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain terrain)
 	{
 		return ReadChunk (chunkx, chunky, terrain.CreateChunk (chunkx, chunky));
@@ -59,8 +70,8 @@ public class TerrainReader129
 		if (chunkOffsets.TryGetValue (p, out value)) {
 			stream.Seek (value, SeekOrigin.Begin);
 			ReadChunkHeader (stream);
-			stream.Read (buffer, 0, 131072);
 
+			stream.Read (buffer, 0, 131072);
 			memStr.Seek (0, SeekOrigin.Begin);
 
 			for (int x = 0; x < 16; x++) {
@@ -72,6 +83,19 @@ public class TerrainReader129
 						h++;
 						index++;
 					}
+				}
+			}
+
+			stream.Read (buffer, 0, 1024);
+			memStr.Seek (0, SeekOrigin.Begin);
+
+			for (int x = 0; x < 16; x++) {
+				int index = BlockTerrain.GetShiftIndex (15 - x, 0);
+				int h = 0;
+				while (h < 16) {
+					chunk.SetShiftValue (index, ReadInt (memStr));
+					h++;
+					index++;
 				}
 			}
 		}
@@ -99,6 +123,18 @@ public class TerrainReader129
 				}
 			}
 			stream.Write (buffer, 0, 131072);
+
+			memStr.Seek (0, SeekOrigin.Begin);
+			for (int x = 0; x < 16; x++) {
+				int index = BlockTerrain.GetShiftIndex (15 - x, 0);
+				int h = 0;
+				while (h < 16) {
+					WriteInt (memStr, chunk.GetShiftValue (index));
+					h++;
+					index++;
+				}
+			}
+			stream.Write (buffer, 0, 1024);
 		}
 	}
 

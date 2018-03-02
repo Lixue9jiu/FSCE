@@ -6,6 +6,11 @@ using UnityEngine;
 public class ZipUtils
 {
 
+	static ZipUtils()
+	{
+		ZipConstants.DefaultCodePage = 0;
+	}
+
 	public static void Unzip (Stream stream, string outFolder)
 	{
 		ZipFile file = null;
@@ -29,7 +34,8 @@ public class ZipUtils
 					StreamUtils.Copy (zipStream, streamWriter, buffer);
 				}
 			}
-		} catch {
+		} catch (System.Exception e) {
+			Debug.Log ("error while unzipping: " + e.Message);
 			if (file != null) {
 				file.Close ();
 			}

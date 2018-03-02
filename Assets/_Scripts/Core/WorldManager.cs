@@ -11,11 +11,11 @@ public class WorldManager : MonoBehaviour
 	public static ProjectData Project;
 	public static string ChunkDat;
 
-//	static WorldManager()
-//	{
-//		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
-//		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
-//	}
+	static WorldManager()
+	{
+		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
+		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
+	}
 
 	void Awake ()
 	{
@@ -141,6 +141,7 @@ public struct GameInfo
 {
 	public string WorldName;
 	public string WorldSeed;
+	public string TerrainGenerationMode;
 	public int TerrainLevel;
 	public int TerrainBlockIndex;
 	public int TerrainOceanBlockIndex;
@@ -156,6 +157,7 @@ public struct GameInfo
 		XElement e = project.GetSubsystem ("GameInfo");
 		e.GetValue ("WorldName", out WorldName);
 		e.GetValue ("WorldSeedString", out WorldSeed);
+		e.GetValue ("TerrainGenerationMode", out TerrainGenerationMode);
 		e.GetValue ("TerrainLevel", out TerrainLevel);
 		e.GetValue ("TerrainBlockIndex", out TerrainBlockIndex);
 		e.GetValue ("TerrainOceanBlockIndex", out TerrainOceanBlockIndex);

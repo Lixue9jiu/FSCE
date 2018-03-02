@@ -9,6 +9,12 @@ public class BlockTerrain : MonoBehaviour
 	public const int chunkSizeY = 256;
 	public const int chunkSizeZ = 16;
 
+	public Dictionary<Point2, Chunk>.ValueCollection Chunks {
+		get {
+			return chunks.Values;
+		}
+	}
+
 	Dictionary<Point2, Chunk> chunks = new Dictionary<Point2, Chunk> ();
 	LinkedList<Chunk> freeChunks = new LinkedList<Chunk> ();
 
@@ -127,14 +133,16 @@ public class BlockTerrain : MonoBehaviour
 		public Chunk XplusOne;
 		public Chunk YplusOne;
 
-		int[] data;
+		int[] cells;
+		int[] shifts;
 
 		public Chunk (int sizex, int sizey, int sizez)
 		{
 			sizeX = sizex;
 			sizeY = sizey;
 			sizeZ = sizez;
-			data = new int[sizeX * sizeY * sizeZ];
+			cells = new int[sizeX * sizeY * sizeZ];
+			shifts = new int[sizeX * sizeZ];
 		}
 
 		public int GetCellValue (int x, int y, int z)
@@ -155,7 +163,7 @@ public class BlockTerrain : MonoBehaviour
 
 		public int GetCellValue (int index)
 		{
-			return data [index];
+			return cells [index];
 		}
 
 		public int GetCellContent (int x, int y, int z)
@@ -170,8 +178,28 @@ public class BlockTerrain : MonoBehaviour
 
 		public void SetCellValue (int index, int value)
 		{
-			data [index] = value;
+			cells [index] = value;
 		}
+
+		public int GetShiftValue (int index)
+		{
+			return shifts [index];
+		}
+
+		public int GetShiftValue (int x, int y)
+		{
+			return GetShiftValue (GetShiftIndex (x, y));
+		}
+
+		public void SetShiftValue (int index, int value)
+		{
+			shifts [index] = value;
+		}
+	}
+
+	public static int GetShiftIndex (int x, int y)
+	{
+		return y + chunkSizeZ * x;
 	}
 
 	public static int GetCellIndex (int x, int y, int z)
@@ -197,5 +225,15 @@ public class BlockTerrain : MonoBehaviour
 	public static int ReplaceData (int value, int data)
 	{
 		return value ^ ((value ^ data << 14) & -16384);
+	}
+
+	public static int GetTemperature (int value)
+	{
+		return (value & 3840) >> 8;
+	}
+
+	public static int GetHumidity (int value)
+	{
+		return (value & 61440) >> 12;
 	}
 }

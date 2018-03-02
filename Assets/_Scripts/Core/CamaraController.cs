@@ -5,14 +5,16 @@ using UnityEngine;
 public class CamaraController : MonoBehaviour
 {
 
+	public PauseMenu pauseMenu;
+
 	public float WalkSpeed = 1;
 	public float RotationSensitivity = 2;
 
-	bool isCursorLocked;
+	public static bool isCursorLocked;
 
 	void Start ()
 	{
-		SetCursorLocked (true);
+//		SetCursorLocked (true);
 	}
 
 	void Update ()
@@ -37,11 +39,12 @@ public class CamaraController : MonoBehaviour
 		}
 
 		if (Input.GetKeyUp (KeyCode.Escape)) {
-			SetCursorLocked (!isCursorLocked);
+			SetCursorLocked (false);
+			pauseMenu.Pause ();
 		}
 	}
 
-	public void SetCursorLocked(bool isLocked)
+	public static void SetCursorLocked (bool isLocked)
 	{
 		isCursorLocked = isLocked;
 		if (isLocked) {
