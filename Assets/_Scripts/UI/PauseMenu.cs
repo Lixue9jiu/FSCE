@@ -4,9 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class PauseMenu : MonoBehaviour {
+public class PauseMenu : MonoBehaviour
+{
 
 	public GameObject menu;
+	public PopupWindow window;
 
 	public void Pause ()
 	{
@@ -21,8 +23,14 @@ public class PauseMenu : MonoBehaviour {
 
 	public void OnMainMenuClicked ()
 	{
-		GetComponent<TerrainManager> ().SaveAllChunks ();
-		SceneManager.LoadScene (0);
+		window.ShowThreeChoices ("要保存世界吗？", delegate {
+			GetComponent<TerrainManager> ().SaveAllChunks ();
+			SceneManager.LoadScene (0);
+		}, delegate {
+			SceneManager.LoadScene (0);
+		}, delegate {
+		}
+		);
 	}
 
 	public void OnSaveWorldClicked ()
