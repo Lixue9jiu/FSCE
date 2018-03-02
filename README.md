@@ -1,12 +1,15 @@
 # FSCE
 Fancy SurvivalCraft Editor, inspired by [SCFE-Unity](https://github.com/khohryakov/SCFE-Unity) by khohryakov
-### 现在的目标
-* ~主界面，从硬盘上加载存档~
-* ~暂停界面~
-* 英文版
-* ~加载Project.xml~
-* 创建选区
-* 填充选区
-* 保存，导入选区
-* 地形生成？
-* 支持~Windows~，Android和IOS
+
+*Read this in other languages: [English](README.md), [简体中文](README.zh-cn.md)*
+
+### Current Goals
+* ~Main Menu，Load world file from disk~
+* ~Pause Menu~
+* English support
+* ~Load Project.xml~
+* Create a selection of blocks
+* Fill a selection with certain block
+* Save and Load selections
+* Terrain generation？
+* Support ~Windows~, Android, and IOS
