@@ -86,7 +86,7 @@ public class BlocksData : MonoBehaviour
 	{
 		string[] strs = WorldManager.Project.GetGameInfo ().Colors;
 		for (int i = 0; i < 16; i++) {
-			if (strs [i] != string.Empty) {
+			if (!string.IsNullOrEmpty(strs [i])) {
 				DEFAULT_COLORS [i] = ParseColor (strs [i]);
 			}
 		}
@@ -236,7 +236,7 @@ public abstract class Block
 		}
 	}
 
-	protected void DrawMeshBlock (int x, int y, int z, int value, Mesh mesh, Color color, TerrainGenerator g)
+	protected void DrawMeshBlock (int x, int y, int z, int value, MeshData mesh, Color color, TerrainGenerator g)
 	{
 		g.MeshFromMesh (x, y, z, mesh);
 		g.GenerateTextureForMesh (mesh, GetTextureSlot (value, FRONT), color);
@@ -639,7 +639,7 @@ public class IvyBlock : Block
 
 public class StairBlock : PaintableBlock
 {
-	Mesh[] stairs = new Mesh[24];
+	MeshData[] stairs = new MeshData[24];
 
 	public override void Initialize (GameObject game)
 	{
@@ -671,7 +671,7 @@ public class StairBlock : PaintableBlock
 				throw new UnityException ("unknown stair module: " + ((i >> 3) & 3));
 			}
 
-			stairs [i] = BlockMeshes.TranslateMesh (mesh, m, (i & 4) != 0);
+			stairs [i] = new MeshData(BlockMeshes.TranslateMesh (mesh, m, (i & 4) != 0));
 		}
 	}
 
@@ -695,14 +695,13 @@ public class StairBlock : PaintableBlock
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
 	{
-		Mesh mesh = stairs [GetVariant (BlockTerrain.GetData (value))];
-		DrawMeshBlock (x, y, z, value, mesh, GetColorC (value), g);
+		DrawMeshBlock (x, y, z, value, stairs [GetVariant (BlockTerrain.GetData (value))], GetColorC (value), g);
 	}
 }
 
 public class SlabBlock : PaintableBlock
 {
-	Mesh[] slabs = new Mesh[2];
+	MeshData[] slabs = new MeshData[2];
 
 	public override void Initialize (GameObject game)
 	{
@@ -711,8 +710,8 @@ public class SlabBlock : PaintableBlock
 
 		BlockMeshes bm = game.GetComponent<BlockMeshes> ();
 
-		slabs [0] = bm.slab;
-		slabs [1] = BlockMeshes.UpsideDownMesh (bm.slab);
+		slabs [0] = new MeshData (bm.slab);
+		slabs [1] = new MeshData (BlockMeshes.UpsideDownMesh (bm.slab));
 	}
 
 	public override int? GetColor (int data)
@@ -731,8 +730,7 @@ public class SlabBlock : PaintableBlock
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
 	{
 		int i = SlabBlock.GetIsTop (BlockTerrain.GetData (value)) ? 1 : 0;
-		Mesh mesh = slabs [i];
-		DrawMeshBlock (x, y, z, value, mesh, GetColorC (value), g);
+		DrawMeshBlock (x, y, z, value, slabs [i], GetColorC (value), g);
 	}
 }
 

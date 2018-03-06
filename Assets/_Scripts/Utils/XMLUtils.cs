@@ -9,12 +9,29 @@ public static class XMLUtils
 
 	public static XElement FindValuesByName (XElement elem, string name)
 	{
-		return elem.Elements ("Values").Single (e => e.Attribute ("Name").Value == name);
+		try {
+			return elem.Elements ("Values").FirstOrDefault (e => e.Attribute ("Name").Value == name);
+		} catch {
+			throw new System.Exception (string.Format ("xml error when finding {0} in {1}", name, elem.Name));
+		}
 	}
 
 	public static string FindValueByName (XElement elem, string name)
 	{
-		return elem.Elements ("Value").Single (e => e.Attribute ("Name").Value == name).Attribute ("Value").Value;
+		try {
+			return elem.Elements ("Value").First (e => e.Attribute ("Name").Value == name).Attribute ("Value").Value;
+		} catch {
+			throw new System.Exception (string.Format ("xml error when finding {0} in {1}", name, elem.Name));
+		}
+	}
+
+	public static void GetValueOrDefault<T> (this XElement elem, string name, out T value, T def)
+	{
+		try {
+			value = GetValue<T> (elem, name);
+		} catch {
+			value = def;
+		}
 	}
 
 	public static void GetValue<T> (this XElement elem, string name, out T value)

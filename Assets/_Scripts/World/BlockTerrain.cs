@@ -18,6 +18,8 @@ public class BlockTerrain : MonoBehaviour
 	Dictionary<Point2, Chunk> chunks = new Dictionary<Point2, Chunk> ();
 	LinkedList<Chunk> freeChunks = new LinkedList<Chunk> ();
 
+	public ChunkStats chunkStats = new ChunkStats ();
+
 	public Chunk GetChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
@@ -27,9 +29,10 @@ public class BlockTerrain : MonoBehaviour
 		return null;
 	}
 
-	public void DiscardChunk (int x, int y)
+	public Chunk DiscardChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
+//		Debug.Log (string.Format ("contains chunk {0}, {1}: {2}", x, y, chunks.ContainsKey (p)));
 		if (chunks.ContainsKey (p)) {
 			BlockTerrain.Chunk c = chunks [p];
 			freeChunks.AddLast (c);
@@ -52,9 +55,13 @@ public class BlockTerrain : MonoBehaviour
 				c.YplusOne = null;
 			}
 
-			GameObject.Destroy (c.instance);
-			GameObject.Destroy (c.instance2);
+//			c.instance.SetActive (false);
+
+			chunkStats.Get (x, y).Loaded = false;
+
+			return c;
 		}
+		return null;
 	}
 
 	public Chunk CreateChunk (int x, int y)
@@ -114,6 +121,66 @@ public class BlockTerrain : MonoBehaviour
 		return false;
 	}
 
+	public class ChunkStats
+	{
+		public const int size = 8;
+		const int mask = 7;
+		const int shift = 3;
+
+		public int offsetX;
+		public int offsetY;
+
+		ChunkState[] data = new ChunkState[size * size];
+
+		public ChunkStats ()
+		{
+			for (int i = 0; i < data.Length; i++) {
+				data [i] = new ChunkState ();
+			}
+		}
+
+		public void SetOffset (int x, int y)
+		{
+//			Debug.Log (string.Format ("set offset to: {0}, {1}", x, y));
+			offsetX = x;
+			offsetY = y;
+		}
+
+		public void Offset (int x, int y)
+		{
+			offsetX += x;
+			offsetY += y;
+		}
+
+		public ChunkState Get (int x, int y)
+		{
+			return data [GetChunkIndex (x, y)];
+		}
+
+		public int GetChunkIndex (int x, int y)
+		{
+			return (x & mask) + ((y & mask) << shift);
+		}
+
+		public bool IsValid (int x, int y)
+		{
+			x -= offsetX;
+			y -= offsetY;
+			return x > -1 && x < size && y > -1 && y < size;
+		}
+
+		public void GetOriginal (ref int x, ref int y)
+		{
+			x = ((x - offsetX) & mask) + offsetX;
+			y = ((y - offsetY) & mask) + offsetY;
+		}
+	}
+
+	public class ChunkState
+	{
+		public bool Loaded;
+	}
+
 	public class Chunk
 	{
 		public readonly int sizeX;
@@ -125,6 +192,9 @@ public class BlockTerrain : MonoBehaviour
 
 		public GameObject instance;
 		public GameObject instance2;
+
+		public MeshData mesh;
+		public MeshData mesh2;
 
 		public int state;
 

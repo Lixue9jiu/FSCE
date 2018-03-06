@@ -23,14 +23,8 @@ public class PauseMenu : MonoBehaviour
 
 	public void OnMainMenuClicked ()
 	{
-		window.ShowThreeChoices ("要保存世界吗？", delegate {
-			GetComponent<TerrainManager> ().SaveAllChunks ();
-			SceneManager.LoadScene (0);
-		}, delegate {
-			SceneManager.LoadScene (0);
-		}, delegate {
-		}
-		);
+		GetComponent<TerrainManager> ().SaveAllChunks ();
+		SceneManager.LoadScene (0);
 	}
 
 	public void OnSaveWorldClicked ()

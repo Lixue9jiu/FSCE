@@ -27,4 +27,9 @@ public struct Point2
 	{
 		return obj is Point2 && Equals((Point2)obj);
 	}
+
+	public override string ToString ()
+	{
+		return string.Format ("{0}, {1}", X, Y);
+	}
 }

@@ -6,14 +6,14 @@ using UnityEngine;
 public class FurnitureManager : MonoBehaviour
 {
 
-	Dictionary<int, Mesh> furnitures = new Dictionary<int, Mesh> ();
+	Dictionary<int, MeshData[]> furnitures = new Dictionary<int, MeshData[]> ();
 	TerrainGenerator terrainGenerator;
 
 	public GameObject furniturePrefab;
 
 	void Start ()
 	{
-		AlaphaTest4 ();
+//		AlaphaTest4 ();
 	}
 
 	//	void AlaphaTest ()
@@ -44,7 +44,7 @@ public class FurnitureManager : MonoBehaviour
 	//		GetComponent<TerrainManager> ().InstantiateChunk (chunk);
 	//	}
 
-	void AlaphaTest4 ()
+	public void AlaphaTest4 ()
 	{
 //		WorldManager.ChunkDat = "/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1/Chunks32.dat";
 //		WorldManager.Project = new ProjectData ("/Users/user/Library/Application Support/DefaultCompany/FSCE/Worlds/World1");
@@ -52,7 +52,8 @@ public class FurnitureManager : MonoBehaviour
 		Debug.Log ("loading furnitures");
 		Load (WorldManager.Project);
 
-		GetComponent<TerrainManager> ().AlaphaTest6 ();
+//		GetComponent<TerrainManager> ().AlaphaTest6 ();
+		GetComponent<TerrainManager> ().Load ();
 	}
 
 	public void InstantiateFurniture (int index, Vector3 position, int rotation)
@@ -60,12 +61,12 @@ public class FurnitureManager : MonoBehaviour
 		GameObject obj = Instantiate (furniturePrefab, position, Quaternion.AngleAxis (rotation * -90, Vector3.up));
 		MeshFilter filter = obj.GetComponent<MeshFilter> ();
 	
-		filter.mesh = furnitures [index];
+		furnitures [index][0].ToMesh (filter.mesh);
 	}
 
-	public Mesh GetFurniture (int index, int rotation)
+	public MeshData GetFurniture (int index, int rotation)
 	{
-		return BlockMeshes.TranslateMeshRaw (furnitures [index], Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, -90 * rotation, 0), Vector3.one));
+		return furnitures [index] [rotation];
 	}
 
 	public void Load (ProjectData project)
@@ -96,7 +97,12 @@ public class FurnitureManager : MonoBehaviour
 	{
 		Mesh mesh;
 		terrainGenerator.MeshFromFurniture (furniture, out mesh);
-		furnitures[furniture.index] = mesh;
+		MeshData[] all = new MeshData[4];
+		all [0] = new MeshData(mesh);
+		for (int i = 1; i < 4; i++) {
+			all[i] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, -90 * i, 0), Vector3.one)));
+		}
+		furnitures [furniture.index] = all;
 	}
 
 	int[] ParseData (string str, int resolution)

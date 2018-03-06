@@ -10,7 +10,7 @@ public class TerrainGenerator : MonoBehaviour
 	List<Vector2> uvs = new List<Vector2> ();
 	List<Color> colors = new List<Color> ();
 
-	public void MeshFromChunk (BlockTerrain.Chunk chunk, Mesh mesh)
+	public void MeshFromChunk (BlockTerrain.Chunk chunk, out MeshData mesh)
 	{
 		for (int x = 0; x < chunk.sizeX; x++) {
 			for (int y = 0; y < chunk.sizeY; y++) {
@@ -25,11 +25,17 @@ public class TerrainGenerator : MonoBehaviour
 			}
 		}
 
-		mesh.Clear ();
-		PushToMesh (mesh);
+		PushToMesh (out mesh);
 	}
 
-	public void MeshFromTransparent (BlockTerrain.Chunk chunk, Mesh mesh)
+	public void MeshFromChunk (BlockTerrain.Chunk chunk, Mesh mesh)
+	{
+		MeshData data;
+		MeshFromChunk (chunk, out data);
+		data.ToMesh (mesh);
+	}
+
+	public void MeshFromTransparent (BlockTerrain.Chunk chunk, out MeshData mesh)
 	{
 		for (int x = 0; x < chunk.sizeX; x++) {
 			for (int y = 0; y < chunk.sizeY; y++) {
@@ -44,8 +50,14 @@ public class TerrainGenerator : MonoBehaviour
 			}
 		}
 
-		mesh.Clear ();
-		PushToMesh (mesh);
+		PushToMesh (out mesh);
+	}
+
+	public void MeshFromTransparent (BlockTerrain.Chunk chunk, Mesh mesh)
+	{
+		MeshData data;
+		MeshFromTransparent (chunk, out data);
+		data.ToMesh (mesh);
 	}
 
 	public void MeshFromFurniture (FurnitureManager.Furniture furniture, out Mesh mesh)
@@ -171,18 +183,31 @@ public class TerrainGenerator : MonoBehaviour
 		colors.Clear ();
 	}
 
-	public void MeshFromMeshRaw (int x, int y, int z, Mesh mesh)
+	public void PushToMesh (out MeshData mesh)
+	{
+		mesh.vertices = vertices.ToArray ();
+		mesh.triangles = triangles.ToArray ();
+		mesh.uv = uvs.ToArray ();
+		mesh.colors = colors.ToArray ();
+
+		vertices.Clear ();
+		triangles.Clear ();
+		uvs.Clear ();
+		colors.Clear ();
+	}
+
+	public void MeshFromMeshRaw (int x, int y, int z, MeshData mesh)
 	{
 		MeshFromMesh (x, y, z, mesh);
 		uvs.AddRange (mesh.uv);
 		colors.AddRange (mesh.colors);
 	}
 
-	public void MeshFromMesh (int x, int y, int z, Mesh mesh)
+	public void MeshFromMesh (int x, int y, int z, MeshData mesh)
 	{
 		Vector3 tran = new Vector3 (x, y, z);
 		int count = vertices.Count;
-		for (int i = 0; i < mesh.vertexCount; i++) {
+		for (int i = 0; i < mesh.vertices.Length; i++) {
 			vertices.Add (mesh.vertices [i] + tran);
 		}
 		for (int i = 0; i < mesh.triangles.Length; i++) {
@@ -230,7 +255,7 @@ public class TerrainGenerator : MonoBehaviour
 		colors.Add (color);
 	}
 
-	public void GenerateTextureForMesh (Mesh mesh, int textureSlot, Color color)
+	public void GenerateTextureForMesh (MeshData mesh, int textureSlot, Color color)
 	{
 		float v = (float)(textureSlot % 16) / 16;
 		float u = (float)(15 - (textureSlot / 16)) / 16;

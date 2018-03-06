@@ -13,6 +13,8 @@ public class TerrainReader129
 	byte[] buffer = new byte[131072];
 	MemoryStream memStr;
 
+	object locker = new object();
+
 	public TerrainReader129 ()
 	{
 		memStr = new MemoryStream (buffer);
@@ -47,6 +49,11 @@ public class TerrainReader129
 		}
 	}
 
+	public bool ChunkExist (int chunkx, int chunky)
+	{
+		return chunkOffsets.ContainsKey (new Point2 (chunkx, chunky));
+	}
+
 	public void SaveChunkEntries ()
 	{
 		Point2[] entries = new Point2[chunkOffsets.Count];
@@ -60,46 +67,49 @@ public class TerrainReader129
 
 	public BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain terrain)
 	{
+		terrain.chunkStats.Get (chunkx, chunky).Loaded = true;
 		return ReadChunk (chunkx, chunky, terrain.CreateChunk (chunkx, chunky));
 	}
 
 	private BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain.Chunk chunk)
 	{
-		Point2 p = new Point2 (chunkx, chunky);
-		long value;
-		if (chunkOffsets.TryGetValue (p, out value)) {
-			stream.Seek (value, SeekOrigin.Begin);
-			ReadChunkHeader (stream);
+		lock (locker) {
+			Point2 p = new Point2 (chunkx, chunky);
+			long value;
+			if (chunkOffsets.TryGetValue (p, out value)) {
+				stream.Seek (value, SeekOrigin.Begin);
+				ReadChunkHeader (stream);
 
-			stream.Read (buffer, 0, 131072);
-			memStr.Seek (0, SeekOrigin.Begin);
+				stream.Read (buffer, 0, 131072);
+				memStr.Seek (0, SeekOrigin.Begin);
 
-			for (int x = 0; x < 16; x++) {
-				for (int y = 0; y < 16; y++) {
-					int index = BlockTerrain.GetCellIndex (15 - x, 0, y);
+				for (int x = 0; x < 16; x++) {
+					for (int y = 0; y < 16; y++) {
+						int index = BlockTerrain.GetCellIndex (15 - x, 0, y);
+						int h = 0;
+						while (h < 128) {
+							chunk.SetCellValue (index, ReadInt (memStr));
+							h++;
+							index++;
+						}
+					}
+				}
+
+				stream.Read (buffer, 0, 1024);
+				memStr.Seek (0, SeekOrigin.Begin);
+
+				for (int x = 0; x < 16; x++) {
+					int index = BlockTerrain.GetShiftIndex (15 - x, 0);
 					int h = 0;
-					while (h < 128) {
-						chunk.SetCellValue (index, ReadInt (memStr));
+					while (h < 16) {
+						chunk.SetShiftValue (index, ReadInt (memStr));
 						h++;
 						index++;
 					}
 				}
 			}
-
-			stream.Read (buffer, 0, 1024);
-			memStr.Seek (0, SeekOrigin.Begin);
-
-			for (int x = 0; x < 16; x++) {
-				int index = BlockTerrain.GetShiftIndex (15 - x, 0);
-				int h = 0;
-				while (h < 16) {
-					chunk.SetShiftValue (index, ReadInt (memStr));
-					h++;
-					index++;
-				}
-			}
+			return chunk;
 		}
-		return chunk;
 	}
 
 	public void SaveChunk (BlockTerrain.Chunk chunk)

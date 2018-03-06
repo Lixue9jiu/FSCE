@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Xml.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -93,82 +92,4 @@ public class WorldManager : MonoBehaviour
 		return File.Exists (Path.Combine (dir, "Project.xml")) && File.Exists (Path.Combine (dir, "Chunks32.dat"));
 	}
 
-}
-
-public class ProjectData
-{
-	public XElement Root;
-
-	public static string GetWorldName (string path)
-	{
-		ProjectData p = new ProjectData (path);
-		return p.GetSubsystem ("GameInfo").GetValue<string> ("WorldName");
-	}
-
-	public Vector3 PlayerPosition {
-		get {
-			Vector3 v = GetSubsystem ("Players")
-				.GetValues ("Players")
-				.GetValues ("1")
-				.GetValue<Vector3> ("SpawnPosition");
-			v.x = -v.x;
-			return v;
-		}
-	}
-
-	public ProjectData (XDocument doc)
-	{
-		Root = doc.Root;
-	}
-
-	public ProjectData (string worldPath)
-	{
-		Root = XDocument.Load (Path.Combine (worldPath, "Project.xml")).Root;
-	}
-
-	public GameInfo GetGameInfo ()
-	{
-		return new GameInfo (this);
-	}
-
-	public XElement GetSubsystem (string name)
-	{
-		return XMLUtils.FindValuesByName (Root.Element ("Subsystems"), name);
-	}
-}
-
-public struct GameInfo
-{
-	public string WorldName;
-	public string WorldSeed;
-	public string TerrainGenerationMode;
-	public int TerrainLevel;
-	public int TerrainBlockIndex;
-	public int TerrainOceanBlockIndex;
-	public int TemperatureOffset;
-	public int HumidityOffset;
-	public int SeaLevelOffset;
-	public int BiomeSize;
-	public string BlockTextureName;
-	public string[] Colors;
-
-	public GameInfo (ProjectData project)
-	{
-		XElement e = project.GetSubsystem ("GameInfo");
-		e.GetValue ("WorldName", out WorldName);
-		e.GetValue ("WorldSeedString", out WorldSeed);
-		e.GetValue ("TerrainGenerationMode", out TerrainGenerationMode);
-		e.GetValue ("TerrainLevel", out TerrainLevel);
-		e.GetValue ("TerrainBlockIndex", out TerrainBlockIndex);
-		e.GetValue ("TerrainOceanBlockIndex", out TerrainOceanBlockIndex);
-		e.GetValue ("TemperatureOffset", out TemperatureOffset);
-		e.GetValue ("HumidityOffset", out HumidityOffset);
-		e.GetValue ("SeaLevelOffset", out SeaLevelOffset);
-		e.GetValue ("BiomeSize", out BiomeSize);
-		e.GetValue ("BlockTextureName", out BlockTextureName);
-
-		string str;
-		XMLUtils.FindValuesByName (e, "Palette").GetValue ("Colors", out str);
-		Colors = str.Split (';');
-	}
 }

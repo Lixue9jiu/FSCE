@@ -35,10 +35,10 @@ public class ZipUtils
 				}
 			}
 		} catch (System.Exception e) {
-			Debug.Log ("error while unzipping: " + e.Message);
 			if (file != null) {
 				file.Close ();
 			}
+			throw new System.Exception ("error while unzipping: " + e.Message);
 		}
 	}
 

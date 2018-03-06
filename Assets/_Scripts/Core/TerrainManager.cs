@@ -1,10 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using UnityEngine;
 
 public class TerrainManager : MonoBehaviour
 {
+
+	public int chunkLoadDistance = 8;
+	public int chunkDiscardDistance = 9;
 
 	TerrainReader129 terrainReader = new TerrainReader129 ();
 
@@ -15,6 +19,9 @@ public class TerrainManager : MonoBehaviour
 
 	TerrainGenerator terrainGenerator;
 
+	Thread thread;
+	bool threadRunning = true;
+
 	void Awake ()
 	{
 		terrainGenerator = GetComponent<TerrainGenerator> ();
@@ -24,6 +31,32 @@ public class TerrainManager : MonoBehaviour
 	{
 //		AlaphaTest4 ();
 //		AlaphaTest6 ();
+		GetComponent <FurnitureManager> ().AlaphaTest4 ();
+//		AlaphaTest9 ();
+
+		thread = new Thread (new ThreadStart (delegate {
+			while (threadRunning) {
+				if (needTerrainUpdate) {
+					Debug.Log (string.Format ("start: {0}", centerChunk));
+					try {
+						UpdateTerrain (centerChunk.X, centerChunk.Y);
+					} catch (System.Exception e) {
+						Debug.Log ("error updating terrain " + e.Message);
+					}
+					Debug.Log ("done");
+
+					needTerrainUpdate = false;
+				}
+			}
+			Debug.Log ("chunk loading thread closed");
+		}));
+		thread.Start ();
+	}
+
+	void OnDisable ()
+	{
+		threadRunning = false;
+		thread.Join ();
 	}
 
 	public void AlaphaTest4 ()
@@ -76,6 +109,47 @@ public class TerrainManager : MonoBehaviour
 		Camera.main.transform.position = WorldManager.Project.PlayerPosition;
 	}
 
+	public void AlaphaTest7 ()
+	{
+		Point3 p = TerrainRaycast.ToCell (Camera.main.transform.position);
+		UpdateTerrain (p.X >> 4, p.Z >> 4);
+	}
+
+	public void AlaphaTest8 ()
+	{
+		Point2 p = CurrentChunk ();
+//		Terrain.chunkStats.Get (p.X, p.Y).Loaded = true;
+		DiscardChunk (p.X, p.Y);
+	}
+
+	public void AlaphaTest9 ()
+	{
+		int x = 9;
+		int y = 10;
+		Terrain.chunkStats.Get (x, y).Loaded = true;
+		Terrain.chunkStats.GetOriginal (ref x, ref y);
+		Debug.Log (Terrain.chunkStats.Get (x, y).Loaded);
+	}
+
+	public void Load ()
+	{
+		LoadTerrain (WorldManager.ChunkDat);
+		Camera.main.transform.position = WorldManager.Project.PlayerPosition;
+
+		Point3 p = TerrainRaycast.ToCell (WorldManager.Project.PlayerPosition);
+		int startx = (p.X >> 4) - 4;
+		int starty = (p.Z >> 4) - 4;
+		Terrain.chunkStats.SetOffset (startx, starty);
+
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				LoadChunk (startx + x, starty + y);
+			}
+		}
+
+		centerChunk = CurrentChunk ();
+	}
+
 	public void ChangeCell (int x, int y, int z, int newValue)
 	{
 		BlockTerrain.Chunk c = Terrain.GetChunk (x >> 4, z >> 4);
@@ -120,17 +194,57 @@ public class TerrainManager : MonoBehaviour
 		}
 	}
 
+	Point2 centerChunk;
+	bool needTerrainUpdate;
+
 	void FixedUpdate ()
 	{
-		foreach (BlockTerrain.Chunk c in dirty) {
+		LinkedList<BlockTerrain.Chunk> copy;
+		lock (dirty) {
+			copy = new LinkedList<BlockTerrain.Chunk> (dirty);
+		}
+		foreach (BlockTerrain.Chunk c in copy) {
 			UpdateChunk (c);
 		}
-		dirty.Clear ();
+		lock (dirty) {
+			for (int i = 0; i < copy.Count; i++) {
+				dirty.RemoveLast ();
+			}
+		}
+
+		Point2 p = CurrentChunk ();
+		if (!p.Equals (centerChunk)) {
+			Debug.Log ("need terrain update: " + needTerrainUpdate);
+			centerChunk = p;
+			needTerrainUpdate = true;
+		}
 	}
 
 	void LoadChunk (int x, int y)
 	{
+		if (terrainReader.ChunkExist (x, y)) {
+			Debug.Log (string.Format ("loading chunk at {0}, {1}", x, y));
+			BlockTerrain.Chunk c = terrainReader.ReadChunk (x, y, Terrain);
+			terrainGenerator.MeshFromChunk (c, out c.mesh);
+			terrainGenerator.MeshFromTransparent (c, out c.mesh2);
+			c.state = 4;
+			lock (dirty) {
+				dirty.AddFirst (c);
+			}
+		}
+	}
 
+	void DiscardChunk (int x, int y)
+	{
+		Debug.Log (string.Format ("discarding chunk at {0}, {1}", x, y));
+		BlockTerrain.Chunk c = Terrain.DiscardChunk (x, y);
+		if (c != null) {
+			terrainReader.SaveChunk (c);
+			c.state = 5;
+			lock (dirty) {
+				dirty.AddFirst (c);
+			}
+		}
 	}
 
 	public void SaveAllChunks ()
@@ -148,44 +262,49 @@ public class TerrainManager : MonoBehaviour
 		if (chunk.instance == null) {
 			obj = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity) as GameObject;
 			chunk.instance = obj;
-			Mesh m = new Mesh ();
-			terrainGenerator.MeshFromTransparent (chunk, m);
-			if (m.vertexCount != 0) {
-				obj2 = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity);
-				obj2.transform.parent = obj.transform;
-				chunk.instance2 = obj2;
+//			Mesh m = new Mesh ();
+//			terrainGenerator.MeshFromTransparent (chunk, m);
+			obj2 = Instantiate (TerrainChunk, new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4), Quaternion.identity);
+			obj2.transform.parent = obj.transform;
+			chunk.instance2 = obj2;
 
-				obj2.GetComponent<MeshFilter> ().mesh = m;
-			}
+			chunk.mesh2.ToMesh (obj2.GetComponent<MeshFilter> ().mesh);
 		} else {
 			obj = chunk.instance;
 			obj.transform.position = new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4);
-			obj2 = chunk.instance2;
-			if (obj2 != null) {
-				terrainGenerator.MeshFromTransparent (chunk, obj2.GetComponent<MeshFilter> ().mesh);
-			}
+			chunk.mesh2.ToMesh (chunk.instance2.GetComponent <MeshFilter> ().mesh);
+//			terrainGenerator.MeshFromTransparent (chunk, obj2.GetComponent<MeshFilter> ().mesh);
 		}
-		terrainGenerator.MeshFromChunk (chunk, obj.GetComponent<MeshFilter> ().mesh);
+//		terrainGenerator.MeshFromChunk (chunk, obj.GetComponent<MeshFilter> ().mesh);
+		chunk.mesh.ToMesh (obj.GetComponent<MeshFilter> ().mesh);
 
 	}
 
 	public void UpdateChunk (BlockTerrain.Chunk chunk)
 	{
-		if (chunk.instance != null) {
-			switch (chunk.state) {
-			case 3:
-				terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
-				terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
-				break;
-			case 1:
-				terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
-				break;
-			case 2:
-				terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
-				break;
-			}
-			chunk.state = 0;
+		switch (chunk.state) {
+		case 3:
+			terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
+			terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
+			break;
+		case 1:
+			terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
+			break;
+		case 2:
+			terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
+			break;
+		case 4:
+			InstantiateChunk (chunk);
+			break;
+		case 5:
+//			GameObject.Destroy (chunk.instance);
+//			GameObject.Destroy (chunk.instance2);
+//
+//			chunk.instance = null;
+//			chunk.instance2 = null;
+			break;
 		}
+		chunk.state = 0;
 	}
 
 	void OnDestory ()
@@ -201,7 +320,42 @@ public class TerrainManager : MonoBehaviour
 
 	void UpdateTerrain (int centerChunkX, int centerChunkY)
 	{
+		centerChunkX -= 4;
+		centerChunkY -= 4;
 
+		BlockTerrain.ChunkStats chunkStats = Terrain.chunkStats;
+
+		int startx;
+		int starty;
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+				startx = centerChunkX + x;
+				starty = centerChunkY + y;
+
+				if (!chunkStats.IsValid (startx, starty)) {
+					if (chunkStats.Get (startx, starty).Loaded) {
+						chunkStats.GetOriginal (ref startx, ref starty);
+						DiscardChunk (startx, starty);
+//						Debug.Log ("is loaded " + Terrain.chunkStats.Get (startx, starty).Loaded);
+					}
+//					Debug.Log ("is loaded " + Terrain.chunkStats.Get (centerChunkX + x, centerChunkY + y).Loaded);
+					LoadChunk (centerChunkX + x, centerChunkY + y);
+				}
+			}
+		}
+
+		chunkStats.SetOffset (centerChunkX, centerChunkY);
+	}
+
+	public static Point2 CurrentChunk ()
+	{
+		Point3 p = TerrainRaycast.ToCell (Camera.main.transform.position);
+		return ToChunk (p.X, p.Z);
+	}
+
+	public static Point2 ToChunk (int x, int z)
+	{
+		return new Point2 (x >> 4, z >> 4);
 	}
 
 	//	class Chunk
@@ -215,5 +369,33 @@ public class TerrainManager : MonoBehaviour
 	//		Undefined,
 	//		Dirty,
 	//		Good
+	//	}
+
+	//	void OnDrawGizmos ()
+	//	{
+	//		Gizmos.color = Color.black;
+	////		Point3 p = TerrainRaycast.ToCell (Camera.main.transform.position);
+	//		BlockTerrain.ChunkStats stats = Terrain.chunkStats;
+	//		int startx = stats.offsetX;
+	//		int starty = stats.offsetY;
+	////		Terrain.chunkStats.SetOffset (startx, starty);
+	//
+	//		int cx;
+	//		int cy;
+	//		for (int x = 0; x < 8; x++) {
+	//			for (int y = 0; y < 8; y++) {
+	//				cx = startx + x;
+	//				cy = starty + y;
+	//
+	//				if (stats.Get (cx, cy).Loaded) {
+	//					DrawChunk (cx, cy);
+	//				}
+	//			}
+	//		}
+	//	}
+	//
+	//	void DrawChunk (int x, int y)
+	//	{
+	//		Gizmos.DrawCube (new Vector3 ((x << 4) + 8, 0, (y << 4) + 8), Vector3.one * 16f);
 	//	}
 }
