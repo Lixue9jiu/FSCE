@@ -114,37 +114,39 @@ public class TerrainReader129
 
 	public void SaveChunk (BlockTerrain.Chunk chunk)
 	{
-		Point2 p = new Point2 (chunk.chunkx, chunk.chunky);
-		long value;
-		if (chunkOffsets.TryGetValue (p, out value)) {
-			stream.Seek (value, SeekOrigin.Begin);
-			WriteChunkHeader (stream, chunk.chunkx, chunk.chunky);
+		lock (locker) {
+			Point2 p = new Point2 (chunk.chunkx, chunk.chunky);
+			long value;
+			if (chunkOffsets.TryGetValue (p, out value)) {
+				stream.Seek (value, SeekOrigin.Begin);
+				WriteChunkHeader (stream, chunk.chunkx, chunk.chunky);
 
-			memStr.Seek (0, SeekOrigin.Begin);
-			for (int x = 0; x < 16; x++) {
-				for (int y = 0; y < 16; y++) {
-					int index = BlockTerrain.GetCellIndex (15 - x, 0, y);
+				memStr.Seek (0, SeekOrigin.Begin);
+				for (int x = 0; x < 16; x++) {
+					for (int y = 0; y < 16; y++) {
+						int index = BlockTerrain.GetCellIndex (15 - x, 0, y);
+						int h = 0;
+						while (h < 128) {
+							WriteInt (memStr, chunk.GetCellValue (index));
+							h++;
+							index++;
+						}
+					}
+				}
+				stream.Write (buffer, 0, 131072);
+
+				memStr.Seek (0, SeekOrigin.Begin);
+				for (int x = 0; x < 16; x++) {
+					int index = BlockTerrain.GetShiftIndex (15 - x, 0);
 					int h = 0;
-					while (h < 128) {
-						WriteInt (memStr, chunk.GetCellValue (index));
+					while (h < 16) {
+						WriteInt (memStr, chunk.GetShiftValue (index));
 						h++;
 						index++;
 					}
 				}
+				stream.Write (buffer, 0, 1024);
 			}
-			stream.Write (buffer, 0, 131072);
-
-			memStr.Seek (0, SeekOrigin.Begin);
-			for (int x = 0; x < 16; x++) {
-				int index = BlockTerrain.GetShiftIndex (15 - x, 0);
-				int h = 0;
-				while (h < 16) {
-					WriteInt (memStr, chunk.GetShiftValue (index));
-					h++;
-					index++;
-				}
-			}
-			stream.Write (buffer, 0, 1024);
 		}
 	}
 
@@ -187,7 +189,7 @@ public class TerrainReader129
 		int chunkx = ReadInt (stream);
 		int chunky = ReadInt (stream);
 		if (v1 != -559038737 || v2 != -2) {
-			throw new UnityException (string.Format ("invalid chunk header at: {0}, {1}", chunkx, chunky));
+			throw new System.Exception (string.Format ("invalid chunk header at: {0}, {1}", chunkx, chunky));
 		}
 	}
 

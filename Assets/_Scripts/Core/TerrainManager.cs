@@ -12,7 +12,7 @@ public class TerrainManager : MonoBehaviour
 
 	TerrainReader129 terrainReader = new TerrainReader129 ();
 
-	LinkedList<BlockTerrain.Chunk> dirty = new LinkedList<BlockTerrain.Chunk> ();
+	ChunkQueue chunkQueue = new ChunkQueue ();
 
 	public GameObject TerrainChunk;
 	public BlockTerrain Terrain;
@@ -36,14 +36,29 @@ public class TerrainManager : MonoBehaviour
 
 		thread = new Thread (new ThreadStart (delegate {
 			while (threadRunning) {
-				if (needTerrainUpdate) {
-					Debug.Log (string.Format ("start: {0}", centerChunk));
-					try {
-						UpdateTerrain (centerChunk.X, centerChunk.Y);
-					} catch (System.Exception e) {
-						Debug.Log ("error updating terrain " + e.Message);
+				if (chunkQueue.TerrainCount != 0) {
+					LinkedList<BlockTerrain.Chunk> copy = chunkQueue.Terrain;
+					foreach (BlockTerrain.Chunk chunk in copy) {
+						lock (chunk) {
+							switch (chunk.state) {
+							case 3:
+								terrainGenerator.MeshFromChunk (chunk, out chunk.mesh);
+								terrainGenerator.MeshFromTransparent (chunk, out chunk.mesh2);
+								break;
+							case 1:
+								terrainGenerator.MeshFromChunk (chunk, out chunk.mesh);
+								break;
+							case 2:
+								terrainGenerator.MeshFromTransparent (chunk, out chunk.mesh2);
+								break;
+							}
+						}
 					}
-					Debug.Log ("done");
+					chunkQueue.RemoveTerrain (copy.Count);
+					chunkQueue.AddMain (copy);
+				}
+				if (needTerrainUpdate) {
+					UpdateTerrain (centerChunk.X, centerChunk.Y);
 
 					needTerrainUpdate = false;
 				}
@@ -57,6 +72,8 @@ public class TerrainManager : MonoBehaviour
 	{
 		threadRunning = false;
 		thread.Join ();
+
+		SaveAllChunks ();
 	}
 
 	public void AlaphaTest4 ()
@@ -177,20 +194,16 @@ public class TerrainManager : MonoBehaviour
 			}
 			c.SetCellValue (cx, y, cz, newValue);
 			if (cx == 0 && c.XminusOne != null) {
-				c.XminusOne.state = 1;
-				dirty.AddFirst (c.XminusOne);
+				QuqueChunkUpdate (c.XminusOne, 1);
 			} else if (cx == 15 && c.XplusOne != null) {
-				c.XplusOne.state = 1;
-				dirty.AddFirst (c.XplusOne);
+				QuqueChunkUpdate (c.XplusOne, 1);
 			}
 			if (cz == 0 && c.YminusOne != null) {
-				c.YminusOne.state = 1;
-				dirty.AddFirst (c.YminusOne);
+				QuqueChunkUpdate (c.YminusOne, 1);
 			} else if (cz == 15 && c.YplusOne != null) {
-				c.YplusOne.state = 1;
-				dirty.AddFirst (c.YplusOne);
+				QuqueChunkUpdate (c.YplusOne, 1);
 			}
-			dirty.AddFirst (c);
+			QuqueChunkUpdate (c);
 		}
 	}
 
@@ -199,22 +212,14 @@ public class TerrainManager : MonoBehaviour
 
 	void FixedUpdate ()
 	{
-		LinkedList<BlockTerrain.Chunk> copy;
-		lock (dirty) {
-			copy = new LinkedList<BlockTerrain.Chunk> (dirty);
-		}
+		LinkedList<BlockTerrain.Chunk> copy = chunkQueue.Main;
 		foreach (BlockTerrain.Chunk c in copy) {
 			UpdateChunk (c);
 		}
-		lock (dirty) {
-			for (int i = 0; i < copy.Count; i++) {
-				dirty.RemoveLast ();
-			}
-		}
+		chunkQueue.RemoveMain (copy.Count);
 
 		Point2 p = CurrentChunk ();
 		if (!p.Equals (centerChunk)) {
-			Debug.Log ("need terrain update: " + needTerrainUpdate);
 			centerChunk = p;
 			needTerrainUpdate = true;
 		}
@@ -222,28 +227,31 @@ public class TerrainManager : MonoBehaviour
 
 	void LoadChunk (int x, int y)
 	{
-		if (terrainReader.ChunkExist (x, y)) {
-			Debug.Log (string.Format ("loading chunk at {0}, {1}", x, y));
-			BlockTerrain.Chunk c = terrainReader.ReadChunk (x, y, Terrain);
-			terrainGenerator.MeshFromChunk (c, out c.mesh);
-			terrainGenerator.MeshFromTransparent (c, out c.mesh2);
-			c.state = 4;
-			lock (dirty) {
-				dirty.AddFirst (c);
+		BlockTerrain.Chunk c;
+		try {
+			if (terrainReader.ChunkExist (x, y)) {
+//			Debug.Log (string.Format ("loading chunk at {0}, {1}", x, y));
+				c = terrainReader.ReadChunk (x, y, Terrain);
+				terrainGenerator.MeshFromChunk (c, out c.mesh);
+				terrainGenerator.MeshFromTransparent (c, out c.mesh2);
+				c.state = 4;
+				chunkQueue.AddMain (c);
 			}
+		} catch (System.Exception e) {
+			Debug.LogError ("error loading chunk: " + e.Message);
+//			chunkQueue.Clean ();
 		}
 	}
 
 	void DiscardChunk (int x, int y)
 	{
-		Debug.Log (string.Format ("discarding chunk at {0}, {1}", x, y));
-		BlockTerrain.Chunk c = Terrain.DiscardChunk (x, y);
+//		Debug.Log (string.Format ("discarding chunk at {0}, {1}", x, y));
+		BlockTerrain.Chunk c;
+		c = Terrain.DiscardChunk (x, y);
 		if (c != null) {
 			terrainReader.SaveChunk (c);
 			c.state = 5;
-			lock (dirty) {
-				dirty.AddFirst (c);
-			}
+			chunkQueue.AddMain (c);
 		}
 	}
 
@@ -273,6 +281,8 @@ public class TerrainManager : MonoBehaviour
 			obj = chunk.instance;
 			obj.transform.position = new Vector3 (chunk.chunkx << 4, 0, chunk.chunky << 4);
 			chunk.mesh2.ToMesh (chunk.instance2.GetComponent <MeshFilter> ().mesh);
+			chunk.instance.SetActive (true);
+			chunk.instance2.SetActive (true);
 //			terrainGenerator.MeshFromTransparent (chunk, obj2.GetComponent<MeshFilter> ().mesh);
 		}
 //		terrainGenerator.MeshFromChunk (chunk, obj.GetComponent<MeshFilter> ().mesh);
@@ -282,29 +292,45 @@ public class TerrainManager : MonoBehaviour
 
 	public void UpdateChunk (BlockTerrain.Chunk chunk)
 	{
-		switch (chunk.state) {
-		case 3:
-			terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
-			terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
-			break;
-		case 1:
-			terrainGenerator.MeshFromChunk (chunk, chunk.instance.GetComponent<MeshFilter> ().mesh);
-			break;
-		case 2:
-			terrainGenerator.MeshFromTransparent (chunk, chunk.instance2.GetComponent<MeshFilter> ().mesh);
-			break;
-		case 4:
-			InstantiateChunk (chunk);
-			break;
-		case 5:
+		lock (chunk) {
+			switch (chunk.state) {
+			case 3:
+				chunk.mesh.ToMesh (chunk.instance.GetComponent<MeshFilter> ().mesh);
+				chunk.mesh2.ToMesh (chunk.instance2.GetComponent<MeshFilter> ().mesh);
+				break;
+			case 1:
+				chunk.mesh.ToMesh (chunk.instance.GetComponent<MeshFilter> ().mesh);
+				break;
+			case 2:
+				chunk.mesh2.ToMesh (chunk.instance2.GetComponent<MeshFilter> ().mesh);
+				break;
+			case 4:
+				InstantiateChunk (chunk);
+				if (chunk.XminusOne != null && chunk.XminusOne.state == 0) {
+					QuqueChunkUpdate (chunk.XminusOne, 1);
+				}
+				if (chunk.XplusOne != null && chunk.XplusOne.state == 0) {
+					QuqueChunkUpdate (chunk.XplusOne, 1);
+				}
+				if (chunk.YminusOne != null && chunk.YminusOne.state == 0) {
+					QuqueChunkUpdate (chunk.YminusOne, 1);
+				}
+				if (chunk.YplusOne != null && chunk.YplusOne.state == 0) {
+					QuqueChunkUpdate (chunk.YplusOne, 1);
+				}
+				break;
+			case 5:
+				chunk.instance.SetActive (false);
+				chunk.instance.SetActive (false);
 //			GameObject.Destroy (chunk.instance);
 //			GameObject.Destroy (chunk.instance2);
 //
 //			chunk.instance = null;
 //			chunk.instance2 = null;
-			break;
+				break;
+			}
+			chunk.state = 0;
 		}
-		chunk.state = 0;
 	}
 
 	void OnDestory ()
@@ -316,6 +342,17 @@ public class TerrainManager : MonoBehaviour
 	{
 		Stream stream = File.Open (path, FileMode.Open, FileAccess.ReadWrite);
 		terrainReader.Load (stream);
+	}
+
+	void QuqueChunkUpdate (BlockTerrain.Chunk chunk)
+	{
+		chunkQueue.AddTerrain (chunk);
+	}
+
+	void QuqueChunkUpdate (BlockTerrain.Chunk chunk, int state)
+	{
+		chunk.state = state;
+		QuqueChunkUpdate (chunk);
 	}
 
 	void UpdateTerrain (int centerChunkX, int centerChunkY)
@@ -340,6 +377,7 @@ public class TerrainManager : MonoBehaviour
 					}
 //					Debug.Log ("is loaded " + Terrain.chunkStats.Get (centerChunkX + x, centerChunkY + y).Loaded);
 					LoadChunk (centerChunkX + x, centerChunkY + y);
+
 				}
 			}
 		}
@@ -398,4 +436,93 @@ public class TerrainManager : MonoBehaviour
 	//	{
 	//		Gizmos.DrawCube (new Vector3 ((x << 4) + 8, 0, (y << 4) + 8), Vector3.one * 16f);
 	//	}
+
+	class ChunkQueue
+	{
+		object locker = new object ();
+		LinkedList<BlockTerrain.Chunk> main = new LinkedList<BlockTerrain.Chunk> ();
+		LinkedList<BlockTerrain.Chunk> terrain = new LinkedList<BlockTerrain.Chunk> ();
+
+		public int MainCount {
+			get {
+				return main.Count;
+			}
+		}
+
+		public int TerrainCount {
+			get {
+				return terrain.Count;
+			}
+		}
+
+		public LinkedList<BlockTerrain.Chunk> Main {
+			get {
+				lock (locker) {
+					return new LinkedList<BlockTerrain.Chunk> (main);
+				}
+			}
+		}
+
+		public LinkedList<BlockTerrain.Chunk> Terrain {
+			get {
+				lock (locker) {
+					return new LinkedList<BlockTerrain.Chunk> (terrain);
+				}
+			}
+		}
+
+		public void AddMain (BlockTerrain.Chunk c)
+		{
+			lock (locker) {
+				main.AddLast (c);
+			}
+		}
+
+		public void AddMain (IEnumerable<BlockTerrain.Chunk> e)
+		{
+			lock (locker) {
+				foreach (BlockTerrain.Chunk c in e) {
+					main.AddLast (c);
+				}
+			}
+		}
+
+		public void AddTerrain (BlockTerrain.Chunk c)
+		{
+			lock (locker) {
+				if (c != null)
+					terrain.AddLast (c);
+			}
+		}
+
+		public void RemoveMain (int count)
+		{
+			lock (locker) {
+				for (int i = 0; i < count; i++) {
+					main.RemoveFirst ();
+				}
+			}
+		}
+
+		public void RemoveTerrain (int count)
+		{
+			lock (locker) {
+				for (int i = 0; i < count; i++) {
+					terrain.RemoveFirst ();
+				}
+			}
+		}
+
+		//		public void Clean ()
+		//		{
+		//			lock (locker) {
+		//				if (main.Last == null) {
+		//					main.RemoveLast ();
+		//				}
+		//				if (terrain.Last == null) {
+		//					terrain.RemoveLast ();
+		//				}
+		//			}
+		//		}
+	}
 }

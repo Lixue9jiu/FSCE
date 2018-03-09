@@ -10,11 +10,11 @@ public class WorldManager : MonoBehaviour
 	public static ProjectData Project;
 	public static string ChunkDat;
 
-	static WorldManager()
-	{
-		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
-		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
-	}
+//	static WorldManager()
+//	{
+//		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
+//		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
+//	}
 
 	void Awake ()
 	{
@@ -66,11 +66,12 @@ public class WorldManager : MonoBehaviour
 		dir += i;
 		Directory.CreateDirectory (dir);
 		ZipUtils.Unzip (stream, dir);
-		Worlds.Add (dir);
-
-		LoadWorldDir (dir);
-
-		BroadcastMessage ("OnWorldLoaded", SendMessageOptions.DontRequireReceiver);
+		if (IsWorldVaild (dir)) {
+			Worlds.Add (dir);
+//			BroadcastMessage ("OnWorldLoaded", SendMessageOptions.DontRequireReceiver);
+		} else {
+			Directory.Delete (dir, true);
+		}
 	}
 
 	public void RemoveWorld (int index)

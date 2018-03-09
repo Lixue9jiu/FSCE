@@ -23,7 +23,7 @@ public class PauseMenu : MonoBehaviour
 
 	public void OnMainMenuClicked ()
 	{
-		GetComponent<TerrainManager> ().SaveAllChunks ();
+//		GetComponent<TerrainManager> ().SaveAllChunks ();
 		SceneManager.LoadScene (0);
 	}
 
