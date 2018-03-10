@@ -9,12 +9,11 @@ public class MLineRenderer : MonoBehaviour
 	Vector3 start;
 	Vector3 end;
 
-	Vector3[] linePoints = new Vector3[24];
+	Vector3[] verts;
+	List<Vector3> vertices = new List<Vector3> ();
 
 	public float lineWidth = 5;
 	public Color lineColor = Color.black;
-
-	Camera cam;
 
 	public bool activated;
 
@@ -40,7 +39,6 @@ public class MLineRenderer : MonoBehaviour
 
 	void Awake ()
 	{
-		cam = GetComponent<Camera> ();
 		CreateLineMaterial ();
 	}
 
@@ -50,32 +48,8 @@ public class MLineRenderer : MonoBehaviour
 //		end = start + Vector3.one;
 		Vector3 start = p.ToVec3 ();
 		Vector3 end = start + Vector3.one;
-		linePoints [0] = start;
-		linePoints [1] = new Vector3 (start.x, start.y, end.z);
-		linePoints [2] = new Vector3 (end.x, start.y, start.z);
-		linePoints [3] = new Vector3 (end.x, start.y, end.z);
-		linePoints [4] = new Vector3 (start.x, end.y, start.z);
-		linePoints [5] = new Vector3 (start.x, end.y, end.z);
-		linePoints [6] = new Vector3 (end.x, end.y, start.z);
-		linePoints [7] = new Vector3 (end.x, end.y, end.z);
 
-		linePoints [8] = start;
-		linePoints [9] = new Vector3 (start.x, end.y, start.z);
-		linePoints [10] = new Vector3 (start.x, end.y, end.z);
-		linePoints [11] = new Vector3 (start.x, start.y, end.z);
-		linePoints [12] = new Vector3 (end.x, end.y, start.z);
-		linePoints [13] = new Vector3 (end.x, start.y, start.z);
-		linePoints [14] = new Vector3 (end.x, end.y, end.z);
-		linePoints [15] = new Vector3 (end.x, start.y, end.z);
-
-		linePoints [16] = start;
-		linePoints [17] = new Vector3 (end.x, start.y, start.z);
-		linePoints [18] = new Vector3 (start.x, start.y, end.z);
-		linePoints [19] = new Vector3 (end.x, start.y, end.z);
-		linePoints [20] = new Vector3 (start.x, end.y, start.z);
-		linePoints [21] = new Vector3 (end.x, end.y, start.z);
-		linePoints [22] = new Vector3 (start.x, end.y, end.z);
-		linePoints [23] = new Vector3 (end.x, end.y, end.z);
+		GenerateCuboid (start, end);
 	}
 
 	// Will be called after all regular rendering is done
@@ -123,37 +97,67 @@ public class MLineRenderer : MonoBehaviour
 	//		}
 	//	}
 
+	void GenerateCuboid (Vector3 start, Vector3 end)
+	{
+		Vector3 v000 = start;
+		Vector3 v001 = new Vector3 (start.x, start.y, end.z);
+		Vector3 v010 = new Vector3 (start.x, end.y, start.z);
+		Vector3 v011 = new Vector3 (start.x, end.y, end.z);
+		Vector3 v100 = new Vector3 (end.x, start.y, start.z);
+		Vector3 v101 = new Vector3 (end.x, start.y, end.z);
+		Vector3 v110 = new Vector3 (end.x, end.y, start.z);
+		Vector3 v111 = end;
+
+		GenerateFace (v001, v011, v010, v000);
+		GenerateFace (v000, v100, v101, v001);
+		GenerateFace (v000, v010, v110, v100);
+		GenerateFace (v100, v110, v111, v101);
+		GenerateFace (v111, v110, v010, v011);
+		GenerateFace (v101, v111, v011, v001);
+	}
+
+	void GenerateFace (Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+	{
+		Vector3 center = (v0 + v2) / 2;
+		float scale = Vector3.Distance (v0, v1);
+		scale = (scale - lineWidth) / scale;
+		Vector3 sv0 = (v0 - center) * scale + center;
+		Vector3 sv1 = (v1 - center) * scale + center;
+		Vector3 sv2 = (v2 - center) * scale + center;
+		Vector3 sv3 = (v3 - center) * scale + center;
+
+		GenerateQuard (v0, v1, sv1, sv0);
+		GenerateQuard (v0, sv0, sv3, v3);
+		GenerateQuard (v3, sv3, sv2, v2);
+		GenerateQuard (v2, sv2, sv1, v1);
+	}
+
+	void GenerateQuard(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+	{
+		vertices.Add (a);
+		vertices.Add (b);
+		vertices.Add (c);
+		vertices.Add (d);
+	}
+
+	void PushToArray()
+	{
+		verts = vertices.ToArray ();
+	}
+
 	void OnPostRender ()
 	{
-		if (!activated)
+		if (!activated || verts == null)
 			return;
-
-		float nearClip = cam.nearClipPlane + 0.00001f;
-		int end = linePoints.Length - 1;
-		float thisWidth = 1f / Screen.width * lineWidth * 0.5f;
 
 		lineMaterial.SetPass (0);
 		GL.Color (lineColor);
 
-		if (lineWidth == 1) {
-			GL.Begin (GL.LINES);
-			for (int i = 0; i < end; ++i) {
-				GL.Vertex (cam.ViewportToWorldPoint (new Vector3 (linePoints [i].x, linePoints [i].y, nearClip)));
-				GL.Vertex (cam.ViewportToWorldPoint (new Vector3 (linePoints [i + 1].x, linePoints [i + 1].y, nearClip)));
-			}
-		} else {
-			GL.Begin (GL.QUADS);
-			for (int i = 0; i < end; ++i) {
-				Vector3 perpendicular = (new Vector3 (linePoints [i + 1].y, linePoints [i].x, nearClip) -
-				                        new Vector3 (linePoints [i].y, linePoints [i + 1].x, nearClip)).normalized * thisWidth;
-				Vector3 v1 = new Vector3 (linePoints [i].x, linePoints [i].y, nearClip);
-				Vector3 v2 = new Vector3 (linePoints [i + 1].x, linePoints [i + 1].y, nearClip);
-				GL.Vertex (cam.ViewportToWorldPoint (v1 - perpendicular));
-				GL.Vertex (cam.ViewportToWorldPoint (v1 + perpendicular));
-				GL.Vertex (cam.ViewportToWorldPoint (v2 + perpendicular));
-				GL.Vertex (cam.ViewportToWorldPoint (v2 - perpendicular));
-			}
+		GL.Begin (GL.QUADS);
+		for (int i = 0; i < verts.Length; i++) {
+			GL.Vertex (verts [i]);
 		}
+
 		GL.End ();
 	}
 }

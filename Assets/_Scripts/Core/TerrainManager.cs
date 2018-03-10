@@ -178,19 +178,19 @@ public class TerrainManager : MonoBehaviour
 			int content = c.GetCellContent (cx, y, cz);
 			if (content != 0) {
 				Block b = BlocksData.GetBlock (content);
-				if (b.IsTransparent) {
-					c.state += 2;
+				if (b.IsCubic) {
+					c.state |= 1;
 				} else {
-					c.state += 1;
+					c.state |= 2;
 				}
 			}
 			content = newValue;
 			if (content != 0) {
 				Block b = BlocksData.GetBlock (content);
-				if (b.IsTransparent) {
-					c.state += 2;
+				if (b.IsCubic) {
+					c.state |= 1;
 				} else {
-					c.state += 1;
+					c.state |= 2;
 				}
 			}
 			c.SetCellValue (cx, y, cz, newValue);
