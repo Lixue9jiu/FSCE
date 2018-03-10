@@ -154,12 +154,13 @@ public class TerrainManager : MonoBehaviour
 		Camera.main.transform.position = WorldManager.Project.PlayerPosition;
 
 		Point3 p = TerrainRaycast.ToCell (WorldManager.Project.PlayerPosition);
-		int startx = (p.X >> 4) - 4;
-		int starty = (p.Z >> 4) - 4;
+		int startx = (p.X >> 4) - Terrain.chunkStats.halfSize;
+		int starty = (p.Z >> 4) - Terrain.chunkStats.halfSize;
 		Terrain.chunkStats.SetOffset (startx, starty);
 
-		for (int x = 0; x < 8; x++) {
-			for (int y = 0; y < 8; y++) {
+		int size = Terrain.chunkStats.size;
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
 				LoadChunk (startx + x, starty + y);
 			}
 		}
@@ -239,6 +240,8 @@ public class TerrainManager : MonoBehaviour
 			}
 		} catch (System.Exception e) {
 			Debug.LogError ("error loading chunk: " + e.Message);
+			chunkQueue.RemoveMain (1);
+			Terrain.DiscardChunk (x, y);
 //			chunkQueue.Clean ();
 		}
 	}
@@ -357,15 +360,16 @@ public class TerrainManager : MonoBehaviour
 
 	void UpdateTerrain (int centerChunkX, int centerChunkY)
 	{
-		centerChunkX -= 4;
-		centerChunkY -= 4;
-
 		BlockTerrain.ChunkStats chunkStats = Terrain.chunkStats;
 
+		centerChunkX -= chunkStats.halfSize;
+		centerChunkY -= chunkStats.halfSize;
+
+		int size = chunkStats.size;
 		int startx;
 		int starty;
-		for (int x = 0; x < 8; x++) {
-			for (int y = 0; y < 8; y++) {
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
 				startx = centerChunkX + x;
 				starty = centerChunkY + y;
 
@@ -490,8 +494,7 @@ public class TerrainManager : MonoBehaviour
 		public void AddTerrain (BlockTerrain.Chunk c)
 		{
 			lock (locker) {
-				if (c != null)
-					terrain.AddLast (c);
+				terrain.AddLast (c);
 			}
 		}
 

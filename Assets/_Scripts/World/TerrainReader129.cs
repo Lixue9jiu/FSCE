@@ -60,6 +60,8 @@ public class TerrainReader129
 		foreach (KeyValuePair<Point2, long> p in chunkOffsets) {
 			entries [(int)((p.Value - 786444L) / 132112L)] = p.Key;
 		}
+
+		stream.Seek (0, SeekOrigin.Begin);
 		for (int i = 0; i < entries.Length; i++) {
 			WriteChunkEntry (stream, -entries [i].X, entries [i].Y, i);
 		}

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class BlockTerrain : MonoBehaviour
 {
-
 	public const int chunkSizeX = 16;
 	public const int chunkSizeY = 256;
 	public const int chunkSizeZ = 16;
@@ -18,23 +17,22 @@ public class BlockTerrain : MonoBehaviour
 	Dictionary<Point2, Chunk> chunks = new Dictionary<Point2, Chunk> ();
 	LinkedList<Chunk> freeChunks = new LinkedList<Chunk> ();
 
-	public ChunkStats chunkStats = new ChunkStats ();
+	public ChunkStats chunkStats = new ChunkStats (16);
 
 	public Chunk GetChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
-		if (chunks.ContainsKey (p)) {
-			return chunks [p];
-		}
-		return null;
+		Chunk chunk;
+		chunks.TryGetValue (p, out chunk);
+		return chunk;
 	}
 
 	public Chunk DiscardChunk (int x, int y)
 	{
 		Point2 p = new Point2 (x, y);
 //		Debug.Log (string.Format ("contains chunk {0}, {1}: {2}", x, y, chunks.ContainsKey (p)));
-		if (chunks.ContainsKey (p)) {
-			BlockTerrain.Chunk c = chunks [p];
+		Chunk c;
+		if (chunks.TryGetValue (p, out c)) {
 			freeChunks.AddLast (c);
 			chunks.Remove (p);
 
@@ -123,20 +121,36 @@ public class BlockTerrain : MonoBehaviour
 
 	public class ChunkStats
 	{
-		public const int size = 8;
-		const int mask = 7;
-		const int shift = 3;
+		public readonly int size;
+		public readonly int halfSize;
+		int mask;
+		int shift;
 
 		public int offsetX;
 		public int offsetY;
 
-		ChunkState[] data = new ChunkState[size * size];
+		ChunkState[] data;
 
-		public ChunkStats ()
+		public ChunkStats (int size)
 		{
+			this.size = size;
+			halfSize = size / 2;
+			mask = size - 1;
+			shift = Log2 (size);
+			data = new ChunkState[size * size];
 			for (int i = 0; i < data.Length; i++) {
 				data [i] = new ChunkState ();
 			}
+		}
+
+		int Log2 (int x)
+		{
+			int i = -1;
+			while (x != 0) {
+				i++;
+				x = x >> 1;
+			}
+			return i;
 		}
 
 		public void SetOffset (int x, int y)

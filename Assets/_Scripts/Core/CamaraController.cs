@@ -41,6 +41,8 @@ public class CamaraController : MonoBehaviour
 		if (Input.GetKeyUp (KeyCode.Escape)) {
 			SetCursorLocked (false);
 			pauseMenu.Pause ();
+		} else if (Input.GetKeyUp (KeyCode.P)) {
+			ScreenshotManager.Screenshot ();
 		}
 	}
 

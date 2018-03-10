@@ -5,7 +5,7 @@ using UnityEngine;
 public class TerrainRaycast : MonoBehaviour
 {
 
-	public GameObject cube;
+	public MLineRenderer line;
 	BlockTerrain terrain;
 	TerrainManager terrainManager;
 
@@ -17,18 +17,16 @@ public class TerrainRaycast : MonoBehaviour
 		terrainManager = GetComponent<TerrainManager> ();
 	}
 
-	void Update ()
-	{
-	}
+//	void Update ()
+//	{
+//	}
 
 	void FixedUpdate ()
 	{
 		LookingAt = AlaphaRaycast (Camera.main.transform.position, Camera.main.transform.forward);
+		line.activated = LookingAt.HasValue;
 		if (LookingAt.HasValue) {
-			cube.SetActive (true);
-			cube.transform.position = LookingAt.Value.Position.ToVec3 ();
-		} else {
-			cube.SetActive (false);
+			line.SetLocation (LookingAt.Value.Position);
 		}
 
 		if (!isBreaking && LookingAt.HasValue) {
