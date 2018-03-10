@@ -18,7 +18,7 @@ public class TerrainGenerator : MonoBehaviour
 					int value = chunk.GetCellValue (x, y, z);
 					int content = BlockTerrain.GetContent (value);
 					Block b = BlocksData.GetBlock (content);
-					if (!b.IsTransparent) {
+					if (b.IsCubic) {
 						b.GenerateTerrain (x, y, z, value, chunk, this);
 					}
 				}
@@ -43,7 +43,7 @@ public class TerrainGenerator : MonoBehaviour
 					int value = chunk.GetCellValue (x, y, z);
 					int content = BlockTerrain.GetContent (value);
 					Block b = BlocksData.GetBlock (content);
-					if (b.IsTransparent) {
+					if (!b.IsCubic) {
 						b.GenerateTerrain (x, y, z, value, chunk, this);
 					}
 				}

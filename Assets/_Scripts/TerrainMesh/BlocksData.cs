@@ -180,6 +180,7 @@ public abstract class Block
 
 	public int Index;
 	public bool IsTransparent;
+	public bool IsCubic = true;
 	public int TextureSlot;
 
 	public string Name;
@@ -503,6 +504,7 @@ public class XBlock : Block
 	public override void Initialize (GameObject game)
 	{
 		IsTransparent = true;
+		IsCubic = false;
 	}
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
@@ -544,6 +546,7 @@ public class XGrassBlock : Block
 	public override void Initialize (GameObject game)
 	{
 		IsTransparent = true;
+		IsCubic = false;
 	}
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
@@ -582,6 +585,7 @@ public class IvyBlock : Block
 	public override void Initialize (GameObject game)
 	{
 		IsTransparent = true;
+		IsCubic = false;
 	}
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
@@ -645,6 +649,7 @@ public class StairBlock : PaintableBlock
 	{
 		base.Initialize (game);
 		IsTransparent = true;
+		IsCubic = false;
 
 		BlockMeshes bm = game.GetComponent<BlockMeshes> ();
 
@@ -707,6 +712,7 @@ public class SlabBlock : PaintableBlock
 	{
 		base.Initialize (game);
 		IsTransparent = true;
+		IsCubic = false;
 
 		BlockMeshes bm = game.GetComponent<BlockMeshes> ();
 
