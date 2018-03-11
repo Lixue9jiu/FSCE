@@ -6,7 +6,7 @@ Fancy SurvivalCraft Editor, inspired by [SCFE-Unity](https://github.com/khohryak
 ### Current Goals
 * ~Main Menu, Load world file from disk~
 * ~Pause Menu~
-* English support
+* ~English support~
 * ~Multi-thread chunk loading~
 * ~Load Project.xml~
 * Create a selection of blocks

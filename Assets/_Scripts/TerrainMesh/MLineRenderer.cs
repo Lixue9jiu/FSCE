@@ -9,7 +9,7 @@ public class MLineRenderer : MonoBehaviour
 	Vector3 start;
 	Vector3 end;
 
-	Vector3[] verts;
+//	Vector3[] verts;
 	List<Vector3> vertices = new List<Vector3> ();
 
 	public float lineWidth = 5;
@@ -17,9 +17,9 @@ public class MLineRenderer : MonoBehaviour
 
 	public bool activated;
 
-	static Material lineMaterial;
+	public Material lineMaterial;
 
-	static void CreateLineMaterial ()
+	void CreateLineMaterial ()
 	{
 		if (!lineMaterial) {
 			// Unity has a built-in shader that is useful for drawing
@@ -44,10 +44,8 @@ public class MLineRenderer : MonoBehaviour
 
 	public void SetLocation (Point3 p)
 	{
-//		start = p.ToVec3 ();
-//		end = start + Vector3.one;
-		Vector3 start = p.ToVec3 ();
-		Vector3 end = start + Vector3.one;
+		start = p.ToVec3 ();
+		end = start + Vector3.one;
 
 		GenerateCuboid (start, end);
 	}
@@ -118,21 +116,23 @@ public class MLineRenderer : MonoBehaviour
 
 	void GenerateFace (Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
 	{
-		Vector3 center = (v0 + v2) / 2;
-		float scale = Vector3.Distance (v0, v1);
-		scale = (scale - lineWidth) / scale;
-		Vector3 sv0 = (v0 - center) * scale + center;
-		Vector3 sv1 = (v1 - center) * scale + center;
-		Vector3 sv2 = (v2 - center) * scale + center;
-		Vector3 sv3 = (v3 - center) * scale + center;
+//		Vector3 center = (v0 + v2) / 2;
+//		float scale = Vector3.Distance (v0, v1);
+//		scale = (scale - lineWidth) / scale;
+//		Vector3 sv0 = (v0 - center) * scale + center;
+//		Vector3 sv1 = (v1 - center) * scale + center;
+//		Vector3 sv2 = (v2 - center) * scale + center;
+//		Vector3 sv3 = (v3 - center) * scale + center;
+//
+//		GenerateQuard (v0, v1, sv1, sv0);
+//		GenerateQuard (v0, sv0, sv3, v3);
+//		GenerateQuard (v3, sv3, sv2, v2);
+//		GenerateQuard (v2, sv2, sv1, v1);
 
-		GenerateQuard (v0, v1, sv1, sv0);
-		GenerateQuard (v0, sv0, sv3, v3);
-		GenerateQuard (v3, sv3, sv2, v2);
-		GenerateQuard (v2, sv2, sv1, v1);
+		GenerateQuard (v0, v1, v2, v3);
 	}
 
-	void GenerateQuard(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+	void GenerateQuard (Vector3 a, Vector3 b, Vector3 c, Vector3 d)
 	{
 		vertices.Add (a);
 		vertices.Add (b);
@@ -140,24 +140,72 @@ public class MLineRenderer : MonoBehaviour
 		vertices.Add (d);
 	}
 
-	void PushToArray()
+	void PushToArray ()
 	{
-		verts = vertices.ToArray ();
+//		verts = vertices.ToArray ();
 	}
 
 	void OnPostRender ()
 	{
-		if (!activated || verts == null)
-			return;
+//		if (!activated || verts == null)
+//			return;
+//
+//		lineMaterial.SetPass (0);
+//		GL.PushMatrix ();
+//
+//		GL.Color (lineColor);
+//
+//		GL.Begin (GL.TRIANGLES);
+////		for (int i = 0; i < verts.Length; i++) {
+////			GL.Vertex (verts [i]);
+////		}
+//		GL.Vertex (start);
+//		GL.Vertex3 (start.x, start.y, end.z);
+//		GL.Vertex (end);
+////		GL.Vertex3 (end.x, end.y, start.z);
+//
+//		GL.End ();
+//		GL.PopMatrix ();
 
-		lineMaterial.SetPass (0);
-		GL.Color (lineColor);
-
-		GL.Begin (GL.QUADS);
-		for (int i = 0; i < verts.Length; i++) {
-			GL.Vertex (verts [i]);
+		if (activated) {
+//			CreateLineMaterial ();
+			// Apply the line material
+			lineMaterial.SetPass (0);
+		
+			GL.PushMatrix ();
+		
+			// Draw lines
+			GL.Begin (GL.LINES);
+			GL.Color (Color.black);
+			GL.Vertex (start);
+			GL.Vertex3 (start.x, start.y, end.z);
+			GL.Vertex3 (end.x, start.y, start.z);
+			GL.Vertex3 (end.x, start.y, end.z);
+			GL.Vertex3 (start.x, end.y, start.z);
+			GL.Vertex3 (start.x, end.y, end.z);
+			GL.Vertex3 (end.x, end.y, start.z);
+			GL.Vertex3 (end.x, end.y, end.z);
+		
+			GL.Vertex (start);
+			GL.Vertex3 (start.x, end.y, start.z);
+			GL.Vertex3 (start.x, end.y, end.z);
+			GL.Vertex3 (start.x, start.y, end.z);
+			GL.Vertex3 (end.x, end.y, start.z);
+			GL.Vertex3 (end.x, start.y, start.z);
+			GL.Vertex3 (end.x, end.y, end.z);
+			GL.Vertex3 (end.x, start.y, end.z);
+		
+			GL.Vertex (start);
+			GL.Vertex3 (end.x, start.y, start.z);
+			GL.Vertex3 (start.x, start.y, end.z);
+			GL.Vertex3 (end.x, start.y, end.z);
+			GL.Vertex3 (start.x, end.y, start.z);
+			GL.Vertex3 (end.x, end.y, start.z);
+			GL.Vertex3 (start.x, end.y, end.z);
+			GL.Vertex3 (end.x, end.y, end.z);
+		
+			GL.End ();
+			GL.PopMatrix ();
 		}
-
-		GL.End ();
 	}
 }

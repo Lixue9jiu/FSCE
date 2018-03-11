@@ -10,11 +10,11 @@ public class WorldManager : MonoBehaviour
 	public static ProjectData Project;
 	public static string ChunkDat;
 
-	static WorldManager()
-	{
-		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
-		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
-	}
+//	static WorldManager()
+//	{
+//		Project = new ProjectData ("/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0");
+//		ChunkDat = "/Users/user/Library/Application Support/LixueJiu/FSCE/Worlds/World0/Chunks32.dat";
+//	}
 
 	void Awake ()
 	{

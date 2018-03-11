@@ -33,11 +33,11 @@ public class TerrainRaycast : MonoBehaviour
 			if (Input.GetKey (KeyCode.Mouse0)) {
 				Point3 p = LookingAt.Value.Position;
 				terrainManager.ChangeCell (p.X, p.Y, p.Z, 0);
-				StartCoroutine (Delay (0.1f));
+				StartCoroutine (Delay (0.5f));
 			} else if (Input.GetKey (KeyCode.Mouse1)) {
 				Point3 p = LookingAt.Value.LastPosition;
 				terrainManager.ChangeCell (p.X, p.Y, p.Z, 2);
-				StartCoroutine (Delay (0.1f));
+				StartCoroutine (Delay (0.5f));
 			}
 		}
 	}
@@ -47,7 +47,7 @@ public class TerrainRaycast : MonoBehaviour
 	IEnumerator Delay (float seconds)
 	{
 		isBreaking = true;
-		yield return new WaitForSecondsRealtime (seconds);
+		yield return new WaitForSeconds (seconds);
 		isBreaking = false;
 	}
 
