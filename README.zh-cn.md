@@ -6,6 +6,7 @@ Fancy SurvivalCraft Editor，可以翻译成“很棒的生存战争存档编辑
 * ~英文版~
 * ~多线程区块加载~
 * ~加载Project.xml~
+* 设置界面
 * 创建选区
 * 填充选区
 * 保存，导入选区
