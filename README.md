@@ -9,6 +9,7 @@ Fancy SurvivalCraft Editor, inspired by [SCFE-Unity](https://github.com/khohryak
 * ~English support~
 * ~Multi-thread chunk loading~
 * ~Load Project.xml~
+* Setting panel
 * Create a selection of blocks
 * Fill a selection with certain block
 * Save and Load selections
