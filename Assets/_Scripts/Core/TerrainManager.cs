@@ -39,52 +39,57 @@ public class TerrainManager : MonoBehaviour
 
     void StartChunkUpdateThread()
     {
-        thread = new Thread(new ThreadStart(delegate
-        {
-            while (threadRunning)
-            {
-                Stopwatch.Reset();
-                Stopwatch.Start();
-                if (chunkQueue.TerrainCount != 0)
-                {
-                    int count = chunkQueue.TerrainCount;
-                    for (int i = 0; i < count; i++)
-                    {
-                        int index = chunkQueue.PopTerrain();
-                        BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
-                        lock (chunk)
-                        {
-                            switch (Terrain.chunkStats.Get(index).state)
-                            {
-                                case 3:
-                                    terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
-                                    terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
-                                    break;
-                                case 1:
-                                    terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
-                                    break;
-                                case 2:
-                                    terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
-                                    break;
-                            }
-                        }
-                        chunkQueue.AddMain(index);
-                    }
-                }
-                if (needTerrainUpdate)
-                {
-                    UpdateTerrain(centerChunk.X, centerChunk.Y);
+        thread = new Thread(new ThreadStart(ChunkUpdateWork));
+        thread.Priority = System.Threading.ThreadPriority.Lowest;
+        thread.Start();
+    }
 
-                    needTerrainUpdate = false;
-                }
-                if (Stopwatch.ElapsedMilliseconds < updateMili)
+    void ChunkUpdateWork()
+    {
+        while (threadRunning)
+        {
+            Stopwatch.Reset();
+            Stopwatch.Start();
+            if (chunkQueue.TerrainCount != 0)
+            {
+                int count = chunkQueue.TerrainCount;
+                for (int i = 0; i < count; i++)
                 {
-                    Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
+                    int index = chunkQueue.PopTerrain();
+                    BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
+                    if (chunk == null)
+                        continue;
+                    lock (chunk)
+                    {
+                        switch (Terrain.chunkStats.Get(index).state)
+                        {
+                            case 3:
+                                terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
+                                terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
+                                break;
+                            case 1:
+                                terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
+                                break;
+                            case 2:
+                                terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
+                                break;
+                        }
+                    }
+                    chunkQueue.AddMain(index);
                 }
             }
-            Debug.Log("chunk loading thread closed");
-        }));
-        thread.Start();
+            if (needTerrainUpdate)
+            {
+                UpdateTerrain(centerChunk.X, centerChunk.Y);
+
+                needTerrainUpdate = false;
+            }
+            if (Stopwatch.ElapsedMilliseconds < updateMili)
+            {
+                Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
+            }
+        }
+        Debug.Log("chunk loading thread closed");
     }
 
     void OnDisable()

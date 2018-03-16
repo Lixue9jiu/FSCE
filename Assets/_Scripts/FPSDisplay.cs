@@ -9,7 +9,6 @@ public class FPSDisplay : MonoBehaviour
 	void Update()
 	{
 		deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
-
 	}
 
 	void OnGUI()
@@ -24,7 +23,7 @@ public class FPSDisplay : MonoBehaviour
 		style.normal.textColor = new Color (1.0f, 1.0f, 1.0f, 1.0f);
 		float msec = deltaTime * 1000.0f;
 		float fps = 1.0f / deltaTime;
-		string text = string.Format("{0:0.0} ms ({1:0.} fps)\ncurrent chunk: {2}\n按ESC键暂停", msec, fps, TerrainManager.CurrentChunk ());
+		string text = string.Format("{0:0.0} ms ({1:0.} fps)\ncurrent chunk: {2}\n按ESC键暂停\n按P键截图", msec, fps, TerrainManager.CurrentChunk ());
 		TerrainRaycast.RaycastResult? r = GetComponent<TerrainRaycast> ().LookingAt;
 		if (r.HasValue) {
             //text += string.Format ("\nlooking at {0}", BlocksData.GetBlock(BlockTerrain.GetContent(r.Value.BlockValue)).Name);
