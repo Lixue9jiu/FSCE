@@ -19,6 +19,9 @@ public struct MeshData {
 
 	public void ToMesh (Mesh mesh)
 	{
+        if (vertices.Length > 65534)
+            Debug.LogError("vertices excessed 65534 limit");
+
 		mesh.Clear ();
 		mesh.vertices = vertices;
 		mesh.triangles = triangles;

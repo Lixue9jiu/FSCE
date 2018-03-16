@@ -6,6 +6,17 @@
     <Value id="enter_world_link">输入存档链接</Value>
     <Value id="continue">继续</Value>
     <Value id="main_menu">主菜单</Value>
+    <Value id="view_distance">视距</Value>
+    <Value id="image_quality">视频质量</Value>
+    <Value id="screenshot_folder">截图文件夹</Value>
+    <Value id="open">打开</Value>
+    <Value id="default">恢复到默认</Value>
+    <Value id="ok">确定</Value>
+    <Value id="open">打开</Value>
+    <Value id="chunks">区块</Value>
+    <Value id="settings">设置</Value>
+    <Value id="Simple">简单</Value>
+    <Value id="Fantastic">最高</Value>
   </Chinese>
 
   <English>

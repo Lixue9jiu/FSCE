@@ -11,7 +11,7 @@ public class TerrainReader129
 	Dictionary<Point2, long> chunkOffsets = new Dictionary<Point2, long> ();
 
 	byte[] buffer = new byte[131072];
-	MemoryStream memStr;
+    MemoryStream memStr;
 
 	object locker = new object();
 
@@ -69,7 +69,6 @@ public class TerrainReader129
 
 	public BlockTerrain.Chunk ReadChunk (int chunkx, int chunky, BlockTerrain terrain)
 	{
-		terrain.chunkStats.Get (chunkx, chunky).Loaded = true;
 		return ReadChunk (chunkx, chunky, terrain.CreateChunk (chunkx, chunky));
 	}
 

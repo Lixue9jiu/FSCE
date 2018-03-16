@@ -1,16 +1,16 @@
-// Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
-
-Shader "Custom/VertexColor" {
+﻿Shader "Custom/VCAlaphaTest" {
 Properties {
     _Color ("Main Color", Color) = (1,1,1,1)
-    _MainTex ("Base (RGB)", 2D) = "white" {}
+    _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
+    _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
 }
+
 SubShader {
-    Tags { "RenderType"="Opaque" }
+    Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="TransparentCutout"}
     LOD 200
 
 CGPROGRAM
-#pragma surface surf Lambert
+#pragma surface surf Lambert alphatest:_Cutoff
 
 sampler2D _MainTex;
 fixed4 _Color;
@@ -28,5 +28,5 @@ void surf (Input IN, inout SurfaceOutput o) {
 ENDCG
 }
 
-Fallback "Legacy Shaders/VertexLit"
+Fallback "Legacy Shaders/Transparent/Cutout/VertexLit"
 }

@@ -7,50 +7,49 @@ using UnityEngine.Events;
 public class PopupWindow : MonoBehaviour
 {
 
-	public Text text;
-	public Button yesButton;
-	public Button noButton;
-	public Button cancelButton;
-	public GameObject panel;
+    public Text text;
+    public Button yesButton;
+    public Button noButton;
+    public Button cancelButton;
+    public GameObject panel;
 
-	static PopupWindow main;
+    static PopupWindow main;
 
-	public static PopupWindow Window {
-		get {
-			if (main == null)
-				Debug.LogError ("no popup window found");
+    public static PopupWindow Main
+    {
+        get
+        {
+            if (main == null)
+            {
+                main = FindObjectOfType<PopupWindow>();
+                if (main == null)
+                    Debug.LogError("no popup window found");
+            }
+            return main;
+        }
+    }
 
-			return main;
-		}
-	}
+    public void ShowThreeChoices(string question, UnityAction yes, UnityAction no, UnityAction cancel)
+    {
+        panel.SetActive(true);
 
-	void Awake ()
-	{
-		Debug.Log ("popup window is awaken");
-		main = this;
-	}
+        text.text = question;
 
-	public void ShowThreeChoices (string question, UnityAction yes, UnityAction no, UnityAction cancel)
-	{
-		panel.SetActive (true);
+        yesButton.onClick.RemoveAllListeners();
+        yesButton.onClick.AddListener(yes);
+        yesButton.onClick.AddListener(HidePanel);
 
-		text.text = question;
+        noButton.onClick.RemoveAllListeners();
+        noButton.onClick.AddListener(no);
+        noButton.onClick.AddListener(HidePanel);
 
-		yesButton.onClick.RemoveAllListeners ();
-		yesButton.onClick.AddListener (yes);
-		yesButton.onClick.AddListener (HidePanel);
+        cancelButton.onClick.RemoveAllListeners();
+        cancelButton.onClick.AddListener(cancel);
+        cancelButton.onClick.AddListener(HidePanel);
+    }
 
-		noButton.onClick.RemoveAllListeners ();
-		noButton.onClick.AddListener (no);
-		noButton.onClick.AddListener (HidePanel);
-
-		cancelButton.onClick.RemoveAllListeners ();
-		cancelButton.onClick.AddListener (cancel);
-		cancelButton.onClick.AddListener (HidePanel);
-	}
-
-	public void HidePanel ()
-	{
-		panel.SetActive (false);
-	}
+    public void HidePanel()
+    {
+        panel.SetActive(false);
+    }
 }

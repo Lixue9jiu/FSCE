@@ -16,14 +16,10 @@ public class LanguageManager : MonoBehaviour
 			SwitchLanguage (Application.systemLanguage.ToString ());
 		}
 
-		Text[] all = GetComponentsInChildren<Text> ();
+        Text[] all = GetComponentsInChildren<Text> (true);
 		for (int i = 0; i < all.Length; i++) {
 			Text t = all [i];
-			string id = t.text;
-			string str;
-			if (currentMap.TryGetValue (id, out str)) {
-				t.text = str;
-			}
+            t.text = GetString(t.text);
 		}
 
 		Debug.Log ("running in: " + Application.systemLanguage);
@@ -31,7 +27,12 @@ public class LanguageManager : MonoBehaviour
 
 	public static string GetString (string id)
 	{
-		return currentMap [id];
+        string value;
+        if (currentMap.TryGetValue(id, out value))
+        {
+            return value;
+        }
+        return id;
 	}
 
 	public static void SwitchLanguage (string language)
