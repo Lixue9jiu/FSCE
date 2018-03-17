@@ -81,6 +81,16 @@ public class BlocksData : MonoBehaviour
         return Color.white;
     }
 
+    public static int GetBlockColorInt(Block b, int value)
+    {
+        if (b is PaintableBlock)
+        {
+            int? i = ((PaintableBlock)b).GetColor(BlockTerrain.GetData(value));
+            return i.HasValue ? i.Value : 0;
+        }
+        return 0;
+    }
+
     public static Color ParseColor(string str)
     {
         string[] rgb = str.Split(',');
@@ -654,7 +664,7 @@ public class IvyBlock : Block
 
     public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
     {
-        int face = GetRotation(BlockTerrain.GetData(value));
+        int face = GetFace(BlockTerrain.GetData(value));
 
         Vector3 v0;
         Vector3 v1;
@@ -662,7 +672,7 @@ public class IvyBlock : Block
         Vector3 v3;
         switch (face)
         {
-            case 3:
+            case 1:
                 v0 = new Vector3(x, y, z);
                 v1 = new Vector3(x, y + 1.0f, z);
                 v2 = new Vector3(x, y + 1.0f, z + 1.0f);
@@ -674,7 +684,7 @@ public class IvyBlock : Block
                 v2 = new Vector3(x + 1.0f, y + 1.0f, z + 1.0f);
                 v3 = new Vector3(x + 1.0f, y, z + 1.0f);
                 break;
-            case 1:
+            case 3:
                 v0 = new Vector3(x + 1.0f, y, z + 1.0f);
                 v1 = new Vector3(x + 1.0f, y + 1.0f, z + 1.0f);
                 v2 = new Vector3(x + 1.0f, y + 1.0f, z);
@@ -692,15 +702,29 @@ public class IvyBlock : Block
 
         Color color = map.Lookup(chunk.GetShiftValue(x, z));
 
-        g.MeshFromRect(v0, v1, v2, v3);
-        g.GenerateBlockUVs(TextureSlot);
-        g.GenerateBlockColors(color);
-        g.MeshFromRect(v3, v2, v1, v0);
+		int count = g.vertices.Count;
+		g.vertices.Add (v0);
+		g.vertices.Add (v1);
+		g.vertices.Add (v2);
+		g.vertices.Add (v3);
+		g.triangles.Add (count);
+		g.triangles.Add (count + 1);
+		g.triangles.Add (count + 2);
+		g.triangles.Add (count + 2);
+		g.triangles.Add (count + 3);
+		g.triangles.Add (count);
+		g.triangles.Add (count + 1);
+		g.triangles.Add (count);
+		g.triangles.Add (count + 2);
+		g.triangles.Add (count + 3);
+		g.triangles.Add (count + 2);
+		g.triangles.Add (count);
+
         g.GenerateBlockUVs(TextureSlot);
         g.GenerateBlockColors(color);
     }
 
-    public static int GetRotation(int data)
+    public static int GetFace(int data)
     {
         return data & 3;
     }

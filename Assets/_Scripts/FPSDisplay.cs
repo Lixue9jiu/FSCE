@@ -14,7 +14,7 @@ public class FPSDisplay : MonoBehaviour
 	void OnGUI()
 	{
 		int w = Screen.width, h = Screen.height;
-
+		
 		GUIStyle style = new GUIStyle();
 
 		Rect rect = new Rect(0, 0, w, h * 9 / 100);
@@ -27,7 +27,7 @@ public class FPSDisplay : MonoBehaviour
 		TerrainRaycast.RaycastResult? r = GetComponent<TerrainRaycast> ().LookingAt;
 		if (r.HasValue) {
             //text += string.Format ("\nlooking at {0}", BlocksData.GetBlock(BlockTerrain.GetContent(r.Value.BlockValue)).Name);
-            text += string.Format("\nlooking at {0}", BlockTerrain.GetContent(r.Value.BlockValue));
+            text += string.Format("\nlooking at {0}:{1}", BlockTerrain.GetContent(r.Value.BlockValue), BlockTerrain.GetData(r.Value.BlockValue));
 		}
 		GUI.Label (rect, text, style);
 	}

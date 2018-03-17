@@ -24,6 +24,7 @@ public class SettingWindow : MonoBehaviour
         {
             LoadSettings();
             SaveSettings();
+            hasApplied = true;
         }
 	}
 

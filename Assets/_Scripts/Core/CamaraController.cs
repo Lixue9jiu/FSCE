@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class CamaraController : MonoBehaviour
 {
@@ -20,20 +21,20 @@ public class CamaraController : MonoBehaviour
 	void Update ()
 	{
 		if (isCursorLocked) {
-			float rotationH = Input.GetAxis ("Mouse X");
-			float rotationV = Input.GetAxis ("Mouse Y");
+			float rotationH = CrossPlatformInputManager.GetAxis ("Mouse X");
+			float rotationV = CrossPlatformInputManager.GetAxis ("Mouse Y");
 
 			transform.Rotate (new Vector3 (0, rotationH, 0) * RotationSensitivity, Space.World);
 			transform.Rotate (new Vector3 (-rotationV, 0, 0) * RotationSensitivity);
 
-			float forwardSpeed = Input.GetAxis ("Vertical");
-			float sideWaySpeed = Input.GetAxis ("Horizontal");
+			float forwardSpeed = CrossPlatformInputManager.GetAxis ("Vertical");
+			float sideWaySpeed = CrossPlatformInputManager.GetAxis ("Horizontal");
 
 			Vector3 speed = new Vector3 (sideWaySpeed, 0, forwardSpeed) * WalkSpeed;
 
 			transform.Translate (speed);
 
-			float elevation = Input.GetAxis ("Elevation");
+			float elevation = CrossPlatformInputManager.GetAxis ("Elevation");
 
 			transform.Translate (new Vector3 (0, elevation, 0) * WalkSpeed, Space.World);
 		}
@@ -49,11 +50,14 @@ public class CamaraController : MonoBehaviour
 	public static void SetCursorLocked (bool isLocked)
 	{
 		isCursorLocked = isLocked;
+
+		#if !MOBILE_INPUT
 		if (isLocked) {
 			Cursor.lockState = CursorLockMode.Locked;
 		} else {
 			Cursor.lockState = CursorLockMode.None;
 		}
 		Cursor.visible = !isLocked;
+		#endif
 	}
 }

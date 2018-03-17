@@ -243,19 +243,19 @@ public class TerrainManager : MonoBehaviour
             c.SetCellValue(cx, y, cz, newValue);
             if (cx == 0 && c.XminusOne != null)
             {
-                QuqueChunkUpdate(c.XminusOne.index, 1);
+                QuqueChunkUpdate(c.XminusOne.index, 3);
             }
             else if (cx == 15 && c.XplusOne != null)
             {
-                QuqueChunkUpdate(c.XplusOne.index, 1);
+                QuqueChunkUpdate(c.XplusOne.index, 3);
             }
             if (cz == 0 && c.YminusOne != null)
             {
-                QuqueChunkUpdate(c.YminusOne.index, 1);
+                QuqueChunkUpdate(c.YminusOne.index, 3);
             }
             else if (cz == 15 && c.YplusOne != null)
             {
-                QuqueChunkUpdate(c.YplusOne.index, 1);
+                QuqueChunkUpdate(c.YplusOne.index, 3);
             }
             QuqueChunkUpdate(c.index);
         }
@@ -371,19 +371,19 @@ public class TerrainManager : MonoBehaviour
                 InstantiateChunk(chunk);
                 if (chunk.XminusOne != null && chunk.XminusOne.Statics(Terrain).IsNormal)
                 {
-                    QuqueChunkUpdate(chunk.XminusOne.index, 1);
+                    QuqueChunkUpdate(chunk.XminusOne.index, 3);
                 }
                 if (chunk.XplusOne != null && chunk.XplusOne.Statics(Terrain).IsNormal)
                 {
-                    QuqueChunkUpdate(chunk.XplusOne.index, 1);
+                    QuqueChunkUpdate(chunk.XplusOne.index, 3);
                 }
                 if (chunk.YminusOne != null && chunk.YminusOne.Statics(Terrain).IsNormal)
                 {
-                    QuqueChunkUpdate(chunk.YminusOne.index, 1);
+                    QuqueChunkUpdate(chunk.YminusOne.index, 3);
                 }
                 if (chunk.YplusOne != null && chunk.YplusOne.Statics(Terrain).IsNormal)
                 {
-                    QuqueChunkUpdate(chunk.YplusOne.index, 1);
+                    QuqueChunkUpdate(chunk.YplusOne.index, 3);
                 }
                 break;
             case BlockTerrain.ChunkUpdateState.NeedsToBeDestoryed:
