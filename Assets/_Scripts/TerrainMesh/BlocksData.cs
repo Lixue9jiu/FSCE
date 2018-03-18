@@ -37,7 +37,8 @@ public class BlocksData : MonoBehaviour
         { typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
         { typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
         { typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } },
-        { typeof(FurnitureBlock), new int[] { 227 } }
+        { typeof(FurnitureBlock), new int[] { 227 } },
+        { typeof(TorchBlock), new int[] { 31 } }
     };
 
     public static Block GetBlock(int content)
@@ -108,6 +109,7 @@ public class BlocksData : MonoBehaviour
             }
         }
         ParseBlocksData(Application.streamingAssetsPath + Path.DirectorySeparatorChar + "BlocksData.txt");
+        GetComponent<FurnitureManager>().AlaphaTest4();
     }
 
     void ParseBlocksData(string path)
@@ -828,8 +830,7 @@ public class SlabBlock : PaintableBlock
 
     public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
     {
-        int i = SlabBlock.GetIsTop(BlockTerrain.GetData(value)) ? 1 : 0;
-        DrawMeshBlock(x, y, z, value, slabs[i], GetColorC(value), g);
+        DrawMeshBlock(x, y, z, value, slabs[GetIsTop(BlockTerrain.GetData(value)) ? 1 : 0], GetColorC(value), g);
     }
 }
 
@@ -840,17 +841,23 @@ public class NullBlock : Block
     }
 }
 
-//public abstract class MeshBlock : Block
-//{
-//	Mesh mesh;
-//
-//	public override void Initialize (GameObject game)
-//	{
-//		mesh = GetMesh ();
-//		if (mesh.colors.Length == 0) {
-//
-//		}
-//	}
-//
-//	protected abstract Mesh GetMesh ();
-//}
+public class TorchBlock : Block
+{
+    MeshData[] meshes = new MeshData[5];
+
+	public override void Initialize (GameObject game)
+	{
+        IsTransparent = true;
+        MeshData mesh = new MeshData(game.GetComponent<BlockMeshes>().torch);
+        meshes[0] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 0, 0)) * Matrix4x4.Translate(new Vector3(0.5f, 0.15f, -0.05f)));
+        meshes[1] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 90, 0)) * Matrix4x4.Translate(new Vector3(-0.05f, 0.15f, 0.5f)));
+        meshes[2] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 180, 0)) * Matrix4x4.Translate(new Vector3(0.5f, 0.15f, 1.05f)));
+        meshes[3] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 270, 0)) * Matrix4x4.Translate(new Vector3(1.05f, 0.15f, 0.5f)));
+        meshes[4] = mesh.Transform(Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f)));
+	}
+
+	public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+	{
+        g.MeshFromMesh(x, y, z, meshes[BlockTerrain.GetData(value)], true);
+	}
+}

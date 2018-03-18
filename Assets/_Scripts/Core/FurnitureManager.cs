@@ -13,7 +13,7 @@ public class FurnitureManager : MonoBehaviour
 
 	void Start ()
 	{
-//		AlaphaTest4 ();
+		//AlaphaTest4 ();
 	}
 
 		//void AlaphaTest ()
@@ -52,7 +52,12 @@ public class FurnitureManager : MonoBehaviour
 		Load (WorldManager.Project);
 
 //		GetComponent<TerrainManager> ().AlaphaTest6 ();
-		GetComponent<TerrainManager> ().Load ();
+		//GetComponent<TerrainManager> ().Load ();
+
+        //foreach (int key in furnitures.Keys)
+        //{
+        //    InstantiateFurniture(key, new Vector3(key, 0, 0), 0);
+        //}
 	}
 
 	public void InstantiateFurniture (int index, Vector3 position, int rotation)
@@ -99,7 +104,7 @@ public class FurnitureManager : MonoBehaviour
 		MeshData[] all = new MeshData[4];
 		all [0] = new MeshData(mesh);
 		for (int i = 1; i < 4; i++) {
-			all[i] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.TRS (Vector3.zero, Quaternion.Euler (0, -90 * i, 0), Vector3.one)));
+            all[i] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.Rotate (Quaternion.Euler (0, -90 * i, 0))));
 		}
 		furnitures [furniture.index] = all;
 	}

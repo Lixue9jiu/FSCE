@@ -28,8 +28,8 @@ public class TerrainManager : MonoBehaviour
     {
         //AlaphaTest4 ();
         //AlaphaTest6 ();
-        //Load();
-        GetComponent<FurnitureManager>().AlaphaTest4();
+        Load();
+        //GetComponent<FurnitureManager>().AlaphaTest4();
         //		AlaphaTest9 ();
 
         StartChunkUpdateThread();
@@ -40,53 +40,60 @@ public class TerrainManager : MonoBehaviour
     void StartChunkUpdateThread()
     {
         thread = new Thread(new ThreadStart(ChunkUpdateWork));
-        thread.Priority = System.Threading.ThreadPriority.Lowest;
         thread.Start();
     }
 
     void ChunkUpdateWork()
     {
+        Debug.Log("starting terrain updating thread");
         while (threadRunning)
         {
-            Stopwatch.Reset();
-            Stopwatch.Start();
-            if (chunkQueue.TerrainCount != 0)
+            try
             {
-                int count = chunkQueue.TerrainCount;
-                for (int i = 0; i < count; i++)
+                Stopwatch.Reset();
+                Stopwatch.Start();
+                if (chunkQueue.TerrainCount != 0)
                 {
-                    int index = chunkQueue.PopTerrain();
-                    BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
-                    if (chunk == null)
-                        continue;
-                    lock (chunk)
+                    int count = chunkQueue.TerrainCount;
+                    for (int i = 0; i < count; i++)
                     {
-                        switch (Terrain.chunkStats.Get(index).state)
+                        int index = chunkQueue.PopTerrain();
+                        BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
+                        if (chunk == null)
+                            continue;
+                        lock (chunk)
                         {
-                            case 3:
-                                terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
-                                terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
-                                break;
-                            case 1:
-                                terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
-                                break;
-                            case 2:
-                                terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[2]);
-                                break;
+                            switch (Terrain.chunkStats.Get(index).state)
+                            {
+                                case 3:
+                                    terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
+                                    terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[1]);
+                                    break;
+                                case 1:
+                                    terrainGenerator.MeshFromChunk(chunk, out chunk.mesh[0]);
+                                    break;
+                                case 2:
+                                    terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[1]);
+                                    break;
+                            }
                         }
+                        chunkQueue.AddMain(index);
                     }
-                    chunkQueue.AddMain(index);
+                }
+                if (needTerrainUpdate)
+                {
+                    UpdateTerrain(centerChunk.X, centerChunk.Y);
+
+                    needTerrainUpdate = false;
+                }
+                if (Stopwatch.ElapsedMilliseconds < updateMili)
+                {
+                    Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
                 }
             }
-            if (needTerrainUpdate)
+            catch (System.Exception e)
             {
-                UpdateTerrain(centerChunk.X, centerChunk.Y);
-
-                needTerrainUpdate = false;
-            }
-            if (Stopwatch.ElapsedMilliseconds < updateMili)
-            {
-                Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
+                Debug.LogException(e);
             }
         }
         Debug.Log("chunk loading thread closed");

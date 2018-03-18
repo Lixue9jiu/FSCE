@@ -15,7 +15,7 @@ public class FurnitureBlock : Block
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
 	{
 		int data = BlockTerrain.GetData (value);
-		g.MeshFromMeshRaw (x, y, z, furnitureManager.GetFurniture (GetDesignIndex (data), GetRotation (data)));
+        g.MeshFromMesh (x, y, z, furnitureManager.GetFurniture (GetDesignIndex (data), GetRotation (data)), true);
 	}
 
 	public static int GetDesignIndex (int data)

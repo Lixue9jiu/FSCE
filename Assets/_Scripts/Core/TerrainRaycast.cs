@@ -33,19 +33,22 @@ public class TerrainRaycast : MonoBehaviour
             //Cube.transform.position = LookingAt.Value.Position.ToVec3();
         }
 
-        if (!isBreaking && LookingAt.HasValue)
+        if (CamaraController.isCursorLocked)
         {
-            if (Input.GetKey(KeyCode.Mouse0))
+            if (!isBreaking && LookingAt.HasValue)
             {
-                Point3 p = LookingAt.Value.Position;
-                terrainManager.ChangeCell(p.X, p.Y, p.Z, 0);
-                StartCoroutine(Delay(0.5f));
-            }
-            else if (Input.GetKey(KeyCode.Mouse1))
-            {
-                Point3 p = LookingAt.Value.LastPosition;
-                terrainManager.ChangeCell(p.X, p.Y, p.Z, 2);
-                StartCoroutine(Delay(0.5f));
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
+                    Point3 p = LookingAt.Value.Position;
+                    terrainManager.ChangeCell(p.X, p.Y, p.Z, 0);
+                    StartCoroutine(Delay(0.5f));
+                }
+                else if (Input.GetKey(KeyCode.Mouse1))
+                {
+                    Point3 p = LookingAt.Value.LastPosition;
+                    terrainManager.ChangeCell(p.X, p.Y, p.Z, 2);
+                    StartCoroutine(Delay(0.5f));
+                }
             }
         }
     }

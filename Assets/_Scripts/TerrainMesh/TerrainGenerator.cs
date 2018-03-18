@@ -168,10 +168,10 @@ public class TerrainGenerator : MonoBehaviour
                             }
                             else
                             {
-                                MeshFromRect(new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
-                                             new Vector3(x[0], x[1], x[2]),
+                                MeshFromRect(new Vector3(x[0], x[1], x[2]),
                                              new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
-                                             new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]));
+                                             new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
+                                             new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]));
                                 GenerateFurnitureUVs(textureSlot, x[u], x[v], uvBlockSize);
                                 GenerateFurnitureUVs(textureSlot, x[u], x[v] + h, uvBlockSize);
                                 GenerateFurnitureUVs(textureSlot, x[u] + w, x[v] + h, uvBlockSize);
@@ -203,7 +203,7 @@ public class TerrainGenerator : MonoBehaviour
         //Debug.LogFormat("{0}, {1}, {2}", vertices.Count, colors.Count, uvs.Count);
         for (i = 0; i < vertices.Count; i++)
         {
-            vertices[i] = matrix.MultiplyPoint(vertices[i]);
+            vertices[i] = matrix.MultiplyPoint3x4(vertices[i]);
         }
         mesh = new Mesh();
         PushToMesh(mesh);
@@ -245,14 +245,7 @@ public class TerrainGenerator : MonoBehaviour
         colors.Clear();
     }
 
-    public void MeshFromMeshRaw(int x, int y, int z, MeshData mesh)
-    {
-        MeshFromMesh(x, y, z, mesh);
-        uvs.AddRange(mesh.uv);
-        colors.AddRange(mesh.colors);
-    }
-
-    public void MeshFromMesh(int x, int y, int z, MeshData mesh)
+    public void MeshFromMesh(int x, int y, int z, MeshData mesh, bool raw = false)
     {
         Vector3 tran = new Vector3(x, y, z);
         int count = vertices.Count;
@@ -263,6 +256,21 @@ public class TerrainGenerator : MonoBehaviour
         for (int i = 0; i < mesh.triangles.Length; i++)
         {
             triangles.Add(mesh.triangles[i] + count);
+        }
+        if (raw)
+        {
+            uvs.AddRange(mesh.uv);
+            if (mesh.colors.Length != 0)
+            {
+                colors.AddRange(mesh.colors);
+            }
+            else
+            {
+                for (int i = 0; i < mesh.vertices.Length; i++)
+                {
+                    colors.Add(Color.white);
+                }
+            }
         }
     }
 

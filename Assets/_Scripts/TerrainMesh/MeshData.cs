@@ -30,4 +30,31 @@ public struct MeshData {
 		mesh.RecalculateNormals ();
 	}
 
+    public MeshData Clone()
+    {
+        return new MeshData
+        {
+            vertices = CopyArray(vertices),
+            triangles = CopyArray(triangles),
+            uv = CopyArray(uv),
+            colors = CopyArray(colors)
+        };
+    }
+
+    public static T[] CopyArray<T>(T[] src)
+    {
+        T[] dst = new T[src.Length];
+        System.Array.Copy(src, dst, src.Length);
+        return dst;
+    }
+
+    public MeshData Transform(Matrix4x4 matrix)
+    {
+        MeshData m = Clone();
+        for (int i = 0; i < m.vertices.Length; i++)
+        {
+            m.vertices[i] = matrix.MultiplyPoint3x4(m.vertices[i]);
+        }
+        return m;
+    }
 }

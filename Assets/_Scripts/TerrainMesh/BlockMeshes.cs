@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BlockMeshes : MonoBehaviour
 {
@@ -9,6 +7,9 @@ public class BlockMeshes : MonoBehaviour
 	public Mesh stair2;
 
 	public Mesh slab;
+
+    public Mesh torch;
+    public Mesh battery;
 
 	static Vector3 half = new Vector3 (0.5f, 0.5f, 0.5f);
 
