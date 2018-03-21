@@ -65,8 +65,8 @@ public class MainMenu : MonoBehaviour
 
 	public void OnSettingButtonClicked()
 	{
-        SettingWindow.Show();
-	}
+        WindowManager.Get<SettingWindow>().Show();
+    }
 
 	void OnURLLoaded(byte[] bytes)
     {

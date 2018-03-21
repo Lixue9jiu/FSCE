@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
-public class PopupWindow : MonoBehaviour
+public class PopupWindow : BaseWindow
 {
 
     public Text text;

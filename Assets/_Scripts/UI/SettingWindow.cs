@@ -1,15 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
-public class SettingWindow : MonoBehaviour
+public class SettingWindow : BaseWindow
 {
     const string VIEW_DISTANCE = "view_distance";
     const string IMAGE_QUALITY = "image_quality";
-
-    static bool hasApplied;
-
-    static GameObject main;
 
     public Slider viewDistanceSlider;
     public Button imageQualityButton;
@@ -18,29 +13,23 @@ public class SettingWindow : MonoBehaviour
     static int viewDistance;
     static int imageQuality;
 
-	void Awake()
+    public void Initialize()
 	{
-        if (!hasApplied)
-        {
-            LoadSettings();
-            SaveSettings();
-            hasApplied = true;
-        }
-	}
-
-	void Start()
-	{
-        main = gameObject;
-        gameObject.SetActive(false);
+        LoadSettings();
+        ApplySettings();
 	}
 
 	void LoadSettings()
     {
         viewDistance = PlayerPrefs.GetInt(VIEW_DISTANCE, 8);
+        imageQuality = PlayerPrefs.GetInt(IMAGE_QUALITY, 0);
+    }
+
+    void UpdateUI()
+    {
         viewDistanceSlider.value = Mathf.Log(viewDistance, 2) - 2;
         SetBlockStr();
 
-        imageQuality = PlayerPrefs.GetInt(IMAGE_QUALITY, QualitySettings.GetQualityLevel());
         SetImageQualityStr();
     }
 
@@ -48,8 +37,7 @@ public class SettingWindow : MonoBehaviour
 	{
         //Debug.LogFormat("save settings {0}, {1}", viewDistance, imageQuality);
 
-        BlockTerrain.terrainSize = viewDistance;
-        QualitySettings.SetQualityLevel(imageQuality);
+        ApplySettings();
 
         PlayerPrefs.SetInt(VIEW_DISTANCE, viewDistance);
         PlayerPrefs.SetInt(IMAGE_QUALITY, imageQuality);
@@ -57,15 +45,16 @@ public class SettingWindow : MonoBehaviour
         PlayerPrefs.Save();
 	}
 
-	public static void Show()
+    void ApplySettings()
     {
-        main.SetActive(true);
-        main.GetComponent<SettingWindow>().OnShow();
+        BlockTerrain.terrainSize = viewDistance;
+        QualitySettings.SetQualityLevel(imageQuality);
     }
 
-    public void OnShow()
+    public override void Show()
     {
-        LoadSettings();
+        base.Show();
+        UpdateUI();
     }
 
     public void OnViewDistanceChange(float num)
@@ -84,14 +73,14 @@ public class SettingWindow : MonoBehaviour
     public void OnOkButtonClicked()
     {
         SaveSettings();
-        main.SetActive(false);
+		Hide ();
     }
 
     public void OnDefaultButtonClicked()
     {
         PlayerPrefs.DeleteAll();
         LoadSettings();
-        SaveSettings();
+        UpdateUI();
     }
 
     public void OnOpenScreenshotFolderClicked()

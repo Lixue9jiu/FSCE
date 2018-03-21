@@ -16,14 +16,20 @@ public class LanguageManager : MonoBehaviour
 			SwitchLanguage (Application.systemLanguage.ToString ());
 		}
 
-        Text[] all = GetComponentsInChildren<Text> (true);
-		for (int i = 0; i < all.Length; i++) {
-			Text t = all [i];
-            t.text = GetString(t.text);
-		}
+        ReplaceText();
 
 		Debug.Log ("running in: " + Application.systemLanguage);
 	}
+
+    public void ReplaceText()
+    {
+        Text[] all = GetComponentsInChildren<Text>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            Text t = all[i];
+            t.text = GetString(t.text);
+        }
+    }
 
 	public static string GetString (string id)
 	{
@@ -48,5 +54,10 @@ public class LanguageManager : MonoBehaviour
 				currentMap [elem.Attribute ("id").Value] = elem.Value;
 			}
 		}
+	}
+
+	private void OnTransformChildrenChanged()
+	{
+        ReplaceText();
 	}
 }
