@@ -10,10 +10,34 @@ public class ConsoleWindow : BaseWindow
 
     Dictionary<string, System.Action<string[]>> commands = new Dictionary<string, System.Action<string[]>>();
 
+    List<string> history = new List<string>(20);
+    int currentHistory = 0;
+
+    private void Start()
+    {
+        currentHistory = history.Count;
+    }
+
+    private void Awake()
+    {
+        AssignCommand("ls", (args) =>
+        {
+            foreach (string s in commands.Keys)
+            {
+                ConsoleLog.Log(s);
+            }
+        });
+    }
+
     public void AssignCommand(string name, System.Action<string[]> action)
     {
         commands.Add(name, action);
     }
+
+	public void RemoveCommand(string name)
+	{
+		commands.Remove (name);
+	}
 
     private void Update()
     {
@@ -22,6 +46,18 @@ public class ConsoleWindow : BaseWindow
             textDisplay.text = ConsoleLog.text;
             ConsoleLog.needFresh = false;
         }
+        if (Input.GetKeyDown(KeyCode.UpArrow) && currentHistory > 0)
+        {
+            currentHistory--;
+            input.text = history[currentHistory];
+            input.caretPosition = input.text.Length;
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && currentHistory < history.Count - 1)
+        {
+            currentHistory++;
+            input.text = history[currentHistory];
+            input.caretPosition = input.text.Length;
+        }
     }
 
     public void OnInputValueChanged(string str)
@@ -29,7 +65,10 @@ public class ConsoleWindow : BaseWindow
         if (str.Length == 0 || str[str.Length - 1] != '\n')
             return;
 
-        str = str.Remove(str.Length - 1);
+        str = str.TrimEnd('\n');
+        history.Add(str);
+        currentHistory = history.Count;
+
         ConsoleLog.Log("--> " + str);
         int index = str.IndexOf(' ');
         if (index == -1)
@@ -46,13 +85,22 @@ public class ConsoleWindow : BaseWindow
 
     public void RunCommand(string name, string[] args)
     {
-        if (commands.ContainsKey(name))
+        try
         {
-            commands[name](args);
+            Debug.Log("running command: " + name);
+            if (commands.ContainsKey(name))
+            {
+                commands[name](args);
+            }
+            else
+            {
+                ConsoleLog.LogFormat("command named \"{0}\" does not exist", name);
+            }
         }
-        else
+        catch (System.Exception e)
         {
-            ConsoleLog.LogFormat("command named \"{0}\" does not exist", name);
+            ConsoleLog.Log(e.Message);
+            ConsoleLog.Log(e.StackTrace);
         }
     }
 

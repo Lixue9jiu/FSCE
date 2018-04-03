@@ -6,16 +6,14 @@ public class TerrainRaycast : MonoBehaviour
 {
     public GameObject Cube;
 
-    public MLineRenderer line;
+    //public MLineRenderer line;
     BlockTerrain terrain;
-    TerrainManager terrainManager;
 
     public RaycastResult? LookingAt;
 
     void Awake()
     {
         terrain = GetComponent<BlockTerrain>();
-        terrainManager = GetComponent<TerrainManager>();
     }
 
     //	void Update ()
@@ -26,37 +24,17 @@ public class TerrainRaycast : MonoBehaviour
     {
         LookingAt = AlaphaRaycast(Camera.main.transform.position, Camera.main.transform.forward);
         //Cube.SetActive(LookingAt.HasValue);
-        line.activated = LookingAt.HasValue;
-        if (LookingAt.HasValue)
-        {
-            line.SetLocation(LookingAt.Value.Position);
+        //line.activated = LookingAt.HasValue;
+        //if (LookingAt.HasValue)
+        //{
+            //line.SetLocation(LookingAt.Value.Position);
             //Cube.transform.position = LookingAt.Value.Position.ToVec3();
-        }
-
-        if (!isBreaking && LookingAt.HasValue)
-        {
-            if (Input.GetKey(KeyCode.Mouse0))
-            {
-                Point3 p = LookingAt.Value.Position;
-                terrainManager.ChangeCell(p.X, p.Y, p.Z, 0);
-                StartCoroutine(Delay(0.5f));
-            }
-            else if (Input.GetKey(KeyCode.Mouse1))
-            {
-                Point3 p = LookingAt.Value.LastPosition;
-                terrainManager.ChangeCell(p.X, p.Y, p.Z, 2);
-                StartCoroutine(Delay(0.5f));
-            }
-        }
+        //}
     }
 
-    bool isBreaking;
-
-    IEnumerator Delay(float seconds)
+    public RaycastResult? RaycastFromCamera(float distance = 20)
     {
-        isBreaking = true;
-        yield return new WaitForSeconds(seconds);
-        isBreaking = false;
+        return AlaphaRaycast(Camera.main.transform.position, Camera.main.transform.forward, distance);
     }
 
     public RaycastResult? AlaphaRaycast(Vector3 position, Vector3 direction, float distance = 20)
@@ -79,7 +57,8 @@ public class TerrainRaycast : MonoBehaviour
                     {
                         Position = result,
                         LastPosition = last,
-                        BlockValue = value
+                        BlockValue = value,
+                        Distance = i * 0.05f
                     };
                 }
                 last = result;
@@ -88,6 +67,17 @@ public class TerrainRaycast : MonoBehaviour
         }
 
         return null;
+    }
+
+    public Point3 RayToPosFromCamera(float distance)
+    {
+        return RayToPosition(Camera.main.transform.position, Camera.main.transform.forward, distance);
+    }
+
+    public Point3 RayToPosition(Vector3 position, Vector3 direction, float distance)
+    {
+        position += direction.normalized * distance;
+        return new Point3(ToCell(position.x), ToCell(position.y), ToCell(position.z));
     }
 
     //	public RaycastResult? Raycast(Vector3 position, Vector3 direction, int distance = 20)
@@ -160,12 +150,14 @@ public class TerrainRaycast : MonoBehaviour
     {
         return new Point3(ToCell(vec.x), ToCell(vec.y), ToCell(vec.z));
     }
+}
 
-    public struct RaycastResult
-    {
-        public Point3 Position;
-        public int BlockValue;
+public struct RaycastResult
+{
+    public Point3 Position;
+    public int BlockValue;
 
-        public Point3 LastPosition;
-    }
+    public Point3 LastPosition;
+
+    public float Distance;
 }

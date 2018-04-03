@@ -6,10 +6,10 @@ public class FurnitureBlock : Block
 {
 	FurnitureManager furnitureManager;
 
-	public override void Initialize (GameObject game)
+	public override void Initialize ()
 	{
 		IsTransparent = true;
-		furnitureManager = game.GetComponent<FurnitureManager> ();
+        furnitureManager = FurnitureManager.instance;
 	}
 
 	public override void GenerateTerrain (int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)

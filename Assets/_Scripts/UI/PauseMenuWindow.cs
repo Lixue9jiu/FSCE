@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PauseMenuWindow : BaseWindow
+public class PauseMenuWindow : MonoBehaviour
 {
+	public static bool paused;
 
 	public void OnResumeClicked ()
 	{
@@ -22,11 +23,19 @@ public class PauseMenuWindow : BaseWindow
 		WindowManager.Get<SettingWindow> ().Show ();
 	}
 
-	public override void Show ()
+	public void Show ()
 	{
 		gameObject.SetActive (true);
-		PauseManager.SetAllActive (false);
+		PauseManager.SetAllActive (false, true);
 
-		isShowing = true;
+		paused = true;
+	}
+
+	public void Hide()
+	{
+		gameObject.SetActive (false);
+		PauseManager.SetAllActive (true, true);
+
+		paused = false;
 	}
 }

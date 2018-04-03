@@ -5,7 +5,6 @@ using UnityEngine.PostProcessing;
 
 public class PPManager : MonoBehaviour
 {
-
     public PostProcessingBehaviour ppBehaviour;
 
     void Start()

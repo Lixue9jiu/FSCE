@@ -101,10 +101,5 @@ public class WindowManager : MonoBehaviour
     {
         windowInstances.Clear();
         inGame = scene.name == "MainScene";
-		if (inGame) {
-			windowInstances [typeof(PauseMenuWindow)] = FindObjectOfType<PauseMenuWindow> ();
-		} else {
-			windowInstances.Remove(typeof(PauseMenuWindow));
-		}
     }
 }

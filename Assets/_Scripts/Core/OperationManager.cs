@@ -3,44 +3,67 @@ using System.Collections.Generic;
 
 public class OperationManager : MonoBehaviour
 {
-    public GameObject operationMenu;
+    static OperationManager main;
 
-    static Dictionary<string, System.Type> operations = new Dictionary<string, System.Type>()
+    public static OperationManager instance
     {
-        {"op_none", null},
-        {"op_normal", typeof(NormalBlockOperation)},
-        {"op_select", typeof(SelectOperation)}
-    };
+        get
+        {
+            if (main == null)
+                main = FindObjectOfType<OperationManager>();
+            return main;
+        }
+    }
 
-    public System.Type currentOperation;
+    public Operation currentOperation = null;
 
-    public void SwitchOperation(string str)
+    private void Start()
+    {
+        //WindowManager.Get<ConsoleWindow>().AssignCommand("operation", delegate (string[] args) {
+        //    WindowManager.Get<OperationWindow>().OnButtonClicked(args[0]);
+        //});
+    }
+
+    public void SwitchOperation<T>()
+    {
+        SwitchOperation(typeof(T));
+    }
+
+    public void SwitchOperation(System.Type type)
+    {
+        if (type.IsInstanceOfType(currentOperation))
+            return;
+
+        if (currentOperation != null)
+            currentOperation.OnRemoveFromCurrent();
+
+        currentOperation = GetOpBehavior(type);
+        currentOperation.OnSetToCurrent();
+    }
+
+    public Operation GetOpBehavior(System.Type type)
+    {
+        if (type == null)
+            return null;
+        Component component = GetComponent(type);
+        if (component != null)
+        {
+            return component as Operation;
+        }
+        return gameObject.AddComponent(type) as Operation;
+    }
+
+    public void SetCurrentOpEnabled(bool active)
     {
         if (currentOperation != null)
-        {
-            GetOpBehavior(currentOperation).enabled = false;
-        }
-        if (operations.ContainsKey(str))
-        {
-            currentOperation = operations[str];
-            GetOpBehavior(currentOperation).enabled = true;
-        }
-        else
-        {
-            currentOperation = null;
-        }
+            currentOperation.enabled = active;
     }
 
-    public MonoBehaviour GetOpBehavior(System.Type type)
+    private void Update()
     {
-        return GetComponent(type) as MonoBehaviour;
-    }
-
-	private void Update()
-	{
-        if (Input.GetKeyUp(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            WindowManager.Get<OperationWindow>().TuggleE();
+            WindowManager.Get<OperationWindow>().Show();
         }
-	}
+    }
 }

@@ -24,11 +24,11 @@ public class ProjectData
 				.GetValues ("1")
 				.GetValue<Vector3> ("SpawnPosition");
 				v.x = -v.x;
-				return v;
+				return v + new Vector3(0, 1.7f, 0);
 			} else {
 				Vector3 v = GetSubsystem ("Player").GetValue<Vector3> ("SpawnPosition");
 				v.x = -v.x;
-				return v;
+				return v + new Vector3(0, 1.7f, 0);
 			}
 		}
 	}
@@ -84,7 +84,7 @@ public struct GameInfo
 		e.GetValue ("HumidityOffset", out HumidityOffset);
 		e.GetValue ("SeaLevelOffset", out SeaLevelOffset);
 		e.GetValueOrDefault ("BiomeSize", out BiomeSize, 0);
-		e.GetValue ("BlockTextureName", out BlockTextureName);
+		e.GetValueOrDefault ("BlockTextureName", out BlockTextureName, "");
 
 		string str;
 		XElement palette = XMLUtils.FindValuesByName (e, "Palette");

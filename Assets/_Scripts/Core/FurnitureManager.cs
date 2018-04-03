@@ -11,6 +11,17 @@ public class FurnitureManager : MonoBehaviour
 
 	public GameObject furniturePrefab;
 
+    static FurnitureManager main;
+    public static FurnitureManager instance
+    {
+        get
+        {
+            if (main == null)
+                main = FindObjectOfType<FurnitureManager>();
+            return main;
+        }
+    }
+
 	void Start ()
 	{
 		//AlaphaTest4 ();
@@ -103,9 +114,9 @@ public class FurnitureManager : MonoBehaviour
 		terrainGenerator.MeshFromFurniture (furniture, out mesh);
 		MeshData[] all = new MeshData[4];
 		all [0] = new MeshData(mesh);
-		for (int i = 1; i < 4; i++) {
-            all[i] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.Rotate (Quaternion.Euler (0, -90 * i, 0))));
-		}
+		all [1] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.Rotate (Quaternion.Euler (0, 270, 0))));
+		all [2] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.Rotate (Quaternion.Euler (0, 180, 0))));
+		all [3] = new MeshData(BlockMeshes.TranslateMeshRaw (mesh, Matrix4x4.Rotate (Quaternion.Euler (0, 90, 0))));
 		furnitures [furniture.index] = all;
 	}
 
@@ -133,7 +144,7 @@ public class FurnitureManager : MonoBehaviour
 		public int GetCellValue (int x, int y, int z)
 		{
 			if (x >= 0 && x < Resolution && y >= 0 && y < Resolution && z >= 0 && z < Resolution) {
-				return data [x + y * Resolution + z * Resolution * Resolution];
+				return data [Resolution - x - 1 + y * Resolution + z * Resolution * Resolution];
 			}
 			return 0;
 		}

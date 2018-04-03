@@ -10,6 +10,15 @@ public static class WorldManager
     public static ProjectData Project;
     public static string ChunkDat;
 
+	public static string CurrentWorldDir;
+
+	public static string CurrentEmbeddedContent
+	{
+		get {
+			return Path.Combine (CurrentWorldDir, "EmbeddedContent");
+		}
+	}
+
     static WorldManager()
     {
         WorldsFolder = Path.Combine(Application.persistentDataPath, "Worlds");
@@ -97,6 +106,8 @@ public static class WorldManager
 
     static void LoadWorldDir(string dir)
     {
+		CurrentWorldDir = dir;
+
         Project = new ProjectData(dir);
         ChunkDat = Path.Combine(dir, "Chunks32.dat");
     }

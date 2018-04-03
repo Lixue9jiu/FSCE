@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Xml.Linq;
 using UnityEngine;
 
 public class BlocksData : MonoBehaviour
@@ -32,13 +29,14 @@ public class BlocksData : MonoBehaviour
         { typeof(WaterBlock), new int[] { 18 } },
         { typeof(XGrassBlock), new int[] { 19 } },
         { typeof(TreeBlock), new int[] { 9, 10, 11 } },
-        { typeof(AlaphaTestBlock), new int[] { 17, 44 } },
+        { typeof(AlaphaTestBlock), new int[] { 15, 17, 44 } },
         { typeof(TreeLeaveBlock), new int[] { 12, 13, 14, 225 } },
         { typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
         { typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
         { typeof(SlabBlock), new int[] { 52, 53, 54, 55, 70, 75, 95, 136 } },
         { typeof(FurnitureBlock), new int[] { 227 } },
-        { typeof(TorchBlock), new int[] { 31 } }
+        { typeof(TorchBlock), new int[] { 31 } },
+        { typeof(RotatableGateBlock), new int[] { 186 } }
     };
 
     public static Block GetBlock(int content)
@@ -55,22 +53,22 @@ public class BlocksData : MonoBehaviour
     }
 
     public static Color[] DEFAULT_COLORS = new Color[] {
-        new Color (1, 1, 1),
-        new Color (0.7109375f, 1, 1),
-        new Color (1, 0.7109375f, 1),
-        new Color (0.625f, 0.7109375f, 1),
-        new Color (1, 0.9375f, 0.625f),
-        new Color (0.7109375f, 1, 0.7109375f),
-        new Color (1, 0.7109375f, 0.625f),
-        new Color (0.7109375f, 0.7109375f, 0.7109375f),
-        new Color (0.4375f, 0.4375f, 0.4375f),
-        new Color (0.125f, 0.4375f, 0.4375f),
-        new Color (0.4375f, 0.125f, 0.4375f),
-        new Color (0.1015625f, 0.203125f, 0.5f),
-        new Color (0.33984375f, 0.2109375f, 0.125f),
-        new Color (0.09375f, 0.453125f, 0.09375f),
-        new Color (0.53125f, 0.125f, 0.125f),
-        new Color (0.09375f, 0.09375f, 0.09375f)
+        new Color32 (255, 255, 255, 255),
+        new Color32 (181, 255, 255, 255),
+        new Color32 (255, 181, 255, 255),
+        new Color32 (160, 181, 255, 255),
+        new Color32 (255, 240, 160, 255),
+        new Color32 (181, 255, 181, 255),
+        new Color32 (255, 181, 160, 255),
+        new Color32 (181, 181, 181, 255),
+        new Color32 (112, 112, 112, 255),
+        new Color32 (32, 112, 112, 255),
+        new Color32 (112, 32, 112, 255),
+        new Color32 (26, 52, 128, 255),
+        new Color32 (87, 54, 31, 255),
+        new Color32 (24, 116, 24, 255),
+        new Color32 (136, 32, 32, 255),
+        new Color32 (24, 24, 24, 255)
     };
 
     public static Color GetBlockColor(Block b, int value)
@@ -164,10 +162,6 @@ public class BlocksData : MonoBehaviour
         }
 
         blocks = b.ToArray();
-        for (int k = 0; k < blocks.Length; k++)
-        {
-            blocks[k].Initialize(gameObject);
-        }
     }
 
     void LoadBlockClass(Block block, BlockData data)
@@ -175,6 +169,7 @@ public class BlocksData : MonoBehaviour
         block.Index = data.Index;
         block.Name = data.Name;
         block.TextureSlot = data.TextureSlot;
+        block.Initialize();
     }
 
     public static bool IsTransparent(BlockTerrain.Chunk chunk, int x, int y, int z)
@@ -216,7 +211,12 @@ public abstract class Block
 
     public string Name;
 
-    public virtual void Initialize(GameObject game)
+    public string ToString(int value)
+    {
+        return string.Format("{0}: {1}, {2}", Name, Index, BlockTerrain.GetData(value));
+    }
+
+    public virtual void Initialize()
     {
     }
 
@@ -287,38 +287,22 @@ public abstract class PaintableBlock : Block
 {
     int paintTextureSlot;
 
-    public override void Initialize(GameObject game)
+    Dictionary<int, int> paintedTextures = new Dictionary<int, int>()
     {
-        switch (TextureSlot)
-        {
-            case 4:
-                paintTextureSlot = 23;
-                break;
-            case 1:
-                paintTextureSlot = 24;
-                break;
-            case 70:
-                paintTextureSlot = 39;
-                break;
-            case 6:
-                paintTextureSlot = 40;
-                break;
-            case 176:
-                paintTextureSlot = 64;
-                break;
-            case 16:
-                paintTextureSlot = 69;
-                break;
-            case 7:
-                paintTextureSlot = 51;
-                break;
-            case 54:
-                paintTextureSlot = 50;
-                break;
-            case 8:
-                paintTextureSlot = 147;
-                break;
-        }
+        {4, 23},
+        {70, 39},
+        {6, 40},
+        {176, 64},
+        {7, 51},
+        {54, 50},
+        {8, 147},
+        {16, 69},
+        {1, 24}
+    };
+
+    public override void Initialize()
+    {
+        paintTextureSlot = paintedTextures[TextureSlot];
     }
 
     public abstract int? GetColor(int data);
@@ -345,7 +329,7 @@ public abstract class PaintableBlock : Block
 
 public class AirBlock : Block
 {
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
         IsTransparent = true;
     }
@@ -391,9 +375,8 @@ public class WaterBlock : Block
 
 public class AlaphaTestBlock : Block
 {
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
-        base.Initialize(game);
         IsTransparent = true;
     }
 
@@ -425,7 +408,7 @@ public class TreeLeaveBlock : Block
 {
     private ColorMap map;
 
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
         IsTransparent = true;
         switch (Index)
@@ -577,7 +560,7 @@ public class PaintableCubeBlock : PaintableBlock
 
 public class XBlock : Block
 {
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
         IsTransparent = true;
         //IsCubic = false;
@@ -619,7 +602,7 @@ public class XGrassBlock : Block
         return (data & 8) != 0;
     }
 
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
         IsTransparent = true;
         //IsCubic = false;
@@ -658,7 +641,7 @@ public class IvyBlock : Block
 {
     private static ColorMap map = new ColorMap(new Color32(96, 161, 123, 255), new Color32(174, 164, 42, 255), new Color32(96, 161, 123, 255), new Color32(30, 191, 1, 255));
 
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
         IsTransparent = true;
         //IsCubic = false;
@@ -703,24 +686,27 @@ public class IvyBlock : Block
         }
 
         Color color = map.Lookup(chunk.GetShiftValue(x, z));
+        //Color color = Color.white;
 
-		int count = g.vertices.Count;
-		g.vertices.Add (v0);
-		g.vertices.Add (v1);
-		g.vertices.Add (v2);
-		g.vertices.Add (v3);
-		g.triangles.Add (count);
-		g.triangles.Add (count + 1);
-		g.triangles.Add (count + 2);
-		g.triangles.Add (count + 2);
-		g.triangles.Add (count + 3);
-		g.triangles.Add (count);
-		g.triangles.Add (count + 1);
-		g.triangles.Add (count);
-		g.triangles.Add (count + 2);
-		g.triangles.Add (count + 3);
-		g.triangles.Add (count + 2);
-		g.triangles.Add (count);
+        int count = g.vertices.Count;
+        g.vertices.Add(v0);
+        g.vertices.Add(v1);
+        g.vertices.Add(v2);
+        g.vertices.Add(v3);
+
+        g.triangles.Add(count);
+        g.triangles.Add(count + 1);
+        g.triangles.Add(count + 2);
+        g.triangles.Add(count + 2);
+        g.triangles.Add(count + 3);
+        g.triangles.Add(count);
+
+        g.triangles.Add(count + 2);
+        g.triangles.Add(count + 3);
+        g.triangles.Add(count + 1);
+        g.triangles.Add(count + 3);
+        g.triangles.Add(count);
+        g.triangles.Add(count + 1);
 
         g.GenerateBlockUVs(TextureSlot);
         g.GenerateBlockColors(color);
@@ -736,13 +722,11 @@ public class StairBlock : PaintableBlock
 {
     MeshData[] stairs = new MeshData[24];
 
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
-        base.Initialize(game);
+        base.Initialize();
         IsTransparent = true;
         //IsCubic = false;
-
-        BlockMeshes bm = game.GetComponent<BlockMeshes>();
 
         float y;
         Matrix4x4 m;
@@ -757,16 +741,16 @@ public class StairBlock : PaintableBlock
             switch ((i >> 3) & 3)
             {
                 case 1:
-                    mesh = bm.stair0;
+                    mesh = BlockMeshes.FindMesh("Stair0");
                     break;
                 case 0:
-                    mesh = bm.stair1;
+                    mesh = BlockMeshes.FindMesh("Stair1");
                     break;
                 case 2:
-                    mesh = bm.stair2;
+                    mesh = BlockMeshes.FindMesh("Stair2");
                     break;
                 default:
-                    throw new UnityException("unknown stair module: " + ((i >> 3) & 3));
+                    throw new System.Exception("unknown stair module: " + ((i >> 3) & 3));
             }
 
             stairs[i] = new MeshData(BlockMeshes.TranslateMesh(mesh, m, (i & 4) != 0));
@@ -802,16 +786,16 @@ public class SlabBlock : PaintableBlock
 {
     MeshData[] slabs = new MeshData[2];
 
-    public override void Initialize(GameObject game)
+    public override void Initialize()
     {
-        base.Initialize(game);
+        base.Initialize();
         IsTransparent = true;
         //IsCubic = false;
 
-        BlockMeshes bm = game.GetComponent<BlockMeshes>();
+        Mesh slab = BlockMeshes.FindMesh("Slab");
 
-        slabs[0] = new MeshData(bm.slab);
-        slabs[1] = new MeshData(BlockMeshes.UpsideDownMesh(bm.slab));
+        slabs[0] = new MeshData(slab);
+        slabs[1] = new MeshData(BlockMeshes.UpsideDownMesh(slab));
     }
 
     public override int? GetColor(int data)
@@ -845,19 +829,138 @@ public class TorchBlock : Block
 {
     MeshData[] meshes = new MeshData[5];
 
-	public override void Initialize (GameObject game)
-	{
+    public override void Initialize()
+    {
         IsTransparent = true;
-        MeshData mesh = new MeshData(game.GetComponent<BlockMeshes>().torch);
+        MeshData mesh = new MeshData(BlockMeshes.FindMesh("Torch"));
         meshes[0] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 0, 0)) * Matrix4x4.Translate(new Vector3(0.5f, 0.15f, -0.05f)));
         meshes[1] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 90, 0)) * Matrix4x4.Translate(new Vector3(-0.05f, 0.15f, 0.5f)));
         meshes[2] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 180, 0)) * Matrix4x4.Translate(new Vector3(0.5f, 0.15f, 1.05f)));
         meshes[3] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(34, 270, 0)) * Matrix4x4.Translate(new Vector3(1.05f, 0.15f, 0.5f)));
         meshes[4] = mesh.Transform(Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f)));
-	}
+    }
 
-	public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
-	{
+    public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+    {
         g.MeshFromMesh(x, y, z, meshes[BlockTerrain.GetData(value)], true);
-	}
+    }
+}
+
+public class RotatableGateBlock : Block
+{
+    MeshData[] meshes = new MeshData[24];
+
+    public override void Initialize()
+    {
+        IsTransparent = true;
+
+        Mesh blockMesh;
+        switch (Index)
+        {
+            case 134:
+                blockMesh = BlockMeshes.FindMesh("NandGate");
+                break;
+            case 135:
+                blockMesh = BlockMeshes.FindMesh("NorGate");
+                break;
+            case 137:
+                blockMesh = BlockMeshes.FindMesh("AndGate");
+                break;
+            case 140:
+                blockMesh = BlockMeshes.FindMesh("NotGate");
+                break;
+            case 143:
+                blockMesh = BlockMeshes.FindMesh("OrGate");
+                break;
+            case 145:
+                blockMesh = BlockMeshes.FindMesh("DelayGate");
+                break;
+            case 146:
+                blockMesh = BlockMeshes.FindMesh("SRLatch");
+                break;
+            case 156:
+                blockMesh = BlockMeshes.FindMesh("XorGate");
+                break;
+            case 157:
+                blockMesh = BlockMeshes.FindMesh("RandomGenerator");
+                break;
+            case 179:
+                blockMesh = BlockMeshes.FindMesh("MotionDetector");
+                break;
+            case 180:
+                blockMesh = BlockMeshes.FindMesh("DigitalToAnalogConverter");
+                break;
+            case 181:
+                blockMesh = BlockMeshes.FindMesh("AnalogToDigitalConverter");
+                break;
+            case 183:
+                blockMesh = BlockMeshes.FindMesh("SoundGenerator");
+                break;
+            case 184:
+                blockMesh = BlockMeshes.FindMesh("Counter");
+                break;
+            case 186:
+                blockMesh = BlockMeshes.FindMesh("MemoryBank");
+                break;
+            case 187:
+                blockMesh = BlockMeshes.FindMesh("RealTimeClock");
+                break;
+            case 188:
+                blockMesh = BlockMeshes.FindMesh("TruthTableCircuit");
+                break;
+            default:
+                throw new System.Exception("unsupported electric gate: " + Index);
+        }
+
+        Matrix4x4 m;
+        Matrix4x4 m2;
+
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                switch (j)
+                {
+                    case 0:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(0, 0, i * 90));
+                        m2 = Matrix4x4.TRS(new Vector3(0.5f, -0.5f, 0f), Quaternion.Euler(90, 0, 0), Vector3.one);
+                        break;
+                    case 1:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(i * -90, 0, 0));
+                        m2 = Matrix4x4.TRS(new Vector3(0f, -0.5f, 0.5f), Quaternion.Euler(90, 0, -270), Vector3.one);
+                        break;
+                    case 2:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(0, 0, i * -90));
+                        m2 = Matrix4x4.TRS(new Vector3(-0.5f, -0.5f, 0f), Quaternion.Euler(90, 0, -180), Vector3.one);
+                        break;
+                    case 3:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(i * 90, 0, 0));
+                        m2 = Matrix4x4.TRS(new Vector3(0f, -0.5f, -0.5f), Quaternion.Euler(90, 0, -90), Vector3.one);
+                        break;
+                    case 4:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(0, i * 90, 0));
+                        m2 = Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f));
+                        break;
+                    case 5:
+                        m = Matrix4x4.Rotate(Quaternion.Euler(0, i * -90, 0));
+                        m2 = Matrix4x4.TRS(new Vector3(0.5f, 0f, -0.5f), Quaternion.Euler(180, 0, 0), Vector3.one);
+                        break;
+                    default:
+                        throw new System.Exception();
+                }
+
+                meshes[(j << 2) + i] = new MeshData(BlockMeshes.TranslateMeshRaw(blockMesh, m * m2));
+            }
+        }
+    }
+
+    public static int GetFace(int value)
+    {
+        return BlockTerrain.GetData(value) >> 2 & 7;
+    }
+
+    public override void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g)
+    {
+        g.MeshFromMesh(x, y, z, meshes[BlockTerrain.GetData(value) & 31], true);
+    }
 }

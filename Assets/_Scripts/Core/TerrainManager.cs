@@ -35,7 +35,7 @@ public class TerrainManager : MonoBehaviour
         StartChunkUpdateThread();
     }
 
-    System.Diagnostics.Stopwatch Stopwatch = new System.Diagnostics.Stopwatch();
+    //System.Diagnostics.Stopwatch Stopwatch = new System.Diagnostics.Stopwatch();
 
     void StartChunkUpdateThread()
     {
@@ -50,8 +50,8 @@ public class TerrainManager : MonoBehaviour
         {
             try
             {
-                Stopwatch.Reset();
-                Stopwatch.Start();
+                //Stopwatch.Reset();
+                //Stopwatch.Start();
                 if (chunkQueue.TerrainCount != 0)
                 {
                     int count = chunkQueue.TerrainCount;
@@ -86,10 +86,10 @@ public class TerrainManager : MonoBehaviour
 
                     needTerrainUpdate = false;
                 }
-                if (Stopwatch.ElapsedMilliseconds < updateMili)
-                {
-                    Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
-                }
+                //if (Stopwatch.ElapsedMilliseconds < updateMili)
+                //{
+                //    Thread.Sleep(updateMili - (int)Stopwatch.ElapsedMilliseconds);
+                //}
             }
             catch (System.Exception e)
             {
@@ -101,10 +101,15 @@ public class TerrainManager : MonoBehaviour
 
     void OnDisable()
     {
-        threadRunning = false;
-        thread.Join();
-
-        SaveAllChunks();
+        try
+        {
+            threadRunning = false;
+            thread.Join();
+        }
+        finally
+        {
+            SaveAllChunks();
+        }
     }
 
     public void AlaphaTest4()
@@ -203,6 +208,7 @@ public class TerrainManager : MonoBehaviour
             for (int y = 0; y < size; y++)
             {
                 LoadChunk(startx + x, starty + y);
+                Terrain.chunkStats.Get(startx + x, starty + y).state = 0;
             }
         }
 
@@ -438,7 +444,7 @@ public class TerrainManager : MonoBehaviour
         needTerrainUpdate = true;
     }
 
-    void QuqueChunkUpdate(int index, int state)
+    public void QuqueChunkUpdate(int index, int state)
     {
         Terrain.chunkStats.Get(index).state |= state;
         QuqueChunkUpdate(index);
@@ -471,7 +477,7 @@ public class TerrainManager : MonoBehaviour
                     }
                     //					Debug.Log ("is loaded " + Terrain.chunkStats.Get (centerChunkX + x, centerChunkY + y).Loaded);
                     LoadChunk(centerChunkX + x, centerChunkY + y);
-
+                    Debug.LogFormat("loading: {0}, {1}", centerChunkX + x, centerChunkY + y);
                 }
             }
         }
