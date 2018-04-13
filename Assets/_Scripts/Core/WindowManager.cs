@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class WindowManager : MonoBehaviour
@@ -11,6 +12,8 @@ public class WindowManager : MonoBehaviour
     public static BaseWindow activeWindow;
 
     public bool inGame { get; private set; }
+
+    private static GameObject mainCanvas;
 
     private void Awake()
     {
@@ -27,7 +30,6 @@ public class WindowManager : MonoBehaviour
 
     private void Start()
     {
-        DontDestroyOnLoad(gameObject);
         // windowPrefabs = new Dictionary<System.Type, GameObject>()
         // {
         //     {typeof(PopupWindow), popupWindow},
@@ -38,21 +40,24 @@ public class WindowManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            ConsoleWindow console = Get<ConsoleWindow>();
-            if (!console.isShowing)
-            {
-                console.Show();
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!HideActiveWindow() && inGame)
-            {
+		if (EventSystem.current == null || EventSystem.current.currentSelectedGameObject == null) {
+			if (Input.GetKeyDown(KeyCode.T))
+			{
+				ConsoleWindow console = Get<ConsoleWindow>();
+				if (!console.isShowing)
+				{
+					console.Show();
+				}
+			}
+		}
+
+		if (Input.GetKeyDown(KeyCode.Escape))
+		{
+			if (!HideActiveWindow() && inGame)
+			{
 				PauseManager.instance.TuggleEsc();
-            }
-        }
+			}
+		}
     }
 
     public bool HideActiveWindow()
@@ -89,7 +94,7 @@ public class WindowManager : MonoBehaviour
         {
             if (b.GetComponent<T>() != null)
             {
-                behaviour = Instantiate(b, FindObjectOfType<Canvas>().transform).GetComponent<T>();
+                behaviour = Instantiate(b, LanguageManager.mainCanvas.transform).GetComponent<T>();
                 instance.windowInstances.Add(typeof(T), behaviour);
                 //				Debug.LogFormat ("creating window: {0} on {1}", typeof(T), FindObjectOfType<Canvas> ().name);
             }

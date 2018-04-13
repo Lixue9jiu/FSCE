@@ -230,7 +230,7 @@ BlockId;BlockName;TextureSlot
 228;IncendiaryBombBlock;255
 229;StarfishBlock;255
 230;IronHammerBlock;255
-231;SemiconductorBlock;255
+231;SemiconductorBlock;78
 232;KelpBlock;78
 233;SeagrassBlock;172
 234;SmallIncendiaryKegBlock;172

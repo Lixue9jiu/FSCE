@@ -3,7 +3,7 @@
 public class PauseManager : MonoBehaviour
 {
 
-	public PauseMenuWindow pauseWindow;
+	public PauseMenu pauseWindow;
 
     OperationManager operation;
 
@@ -36,7 +36,7 @@ public class PauseManager : MonoBehaviour
 
 	public void TuggleEsc()
 	{
-		if (PauseMenuWindow.paused) {
+		if (pauseWindow.paused) {
 			Resume ();
 		} else {
 			Pause ();
@@ -55,7 +55,7 @@ public class PauseManager : MonoBehaviour
 
 	public void SetActiveForAll(bool active, bool calledFromPauseMenu)
     {
-		if (PauseMenuWindow.paused && !calledFromPauseMenu)
+		if (pauseWindow.paused && !calledFromPauseMenu)
 			return;
         operation.enabled = active;
         CameraController.SetCursorLocked(active);

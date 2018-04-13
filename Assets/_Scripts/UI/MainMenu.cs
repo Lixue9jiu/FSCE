@@ -18,11 +18,18 @@ public class MainMenu : MonoBehaviour
     {
         dropdown.AddOptions(WorldManager.GetWorldNames());
 
-        dropdown.onValueChanged.AddListener(new UnityEngine.Events.UnityAction<int>(OnWorldChanged));
+        dropdown.onValueChanged.AddListener(OnWorldChanged);
 
         enterWorld.enabled = WorldManager.Worlds.Count > 0;
         deleteWorld.enabled = enterWorld.enabled;
     }
+
+	public void OnInputFieldChanged(string str)
+	{
+		if (str.Length != 0 && str[str.Length - 1] == '\n') {
+			OnLoadFileClicked ();
+		}
+	}
 
     public void OnWorldChanged(int i)
     {
@@ -54,7 +61,7 @@ public class MainMenu : MonoBehaviour
 
     public void OnEnterWorldClicked()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("MainScene");
     }
 
     public void OnDeleteWorldClicked()

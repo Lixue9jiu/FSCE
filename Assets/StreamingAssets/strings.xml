@@ -6,6 +6,7 @@
     <Value id="enter_world_link">输入存档链接</Value>
     <Value id="continue">继续</Value>
     <Value id="main_menu">主菜单</Value>
+
     <Value id="view_distance">视距</Value>
     <Value id="image_quality">视频质量</Value>
     <Value id="screenshot_folder">截图文件夹</Value>
@@ -17,7 +18,17 @@
     <Value id="settings">设置</Value>
     <Value id="Simple">简单</Value>
     <Value id="Fantastic">最高</Value>
-    <Value id="test">测试</Value>
+    <Value id="v_sync">垂直同步</Value>
+    <Value id="on">开启</Value>
+    <Value id="off">关闭</Value>
+
+    <Value id="ambient_brightness">环境光亮度</Value>
+
+    <Value id="op_none">无操作</Value>
+    <Value id="op_normal">单个方块操作</Value>
+    <Value id="op_select">选区方块操作</Value>
+
+    <Value id="time_fromat">yyyy年M月d日 H小时m分s秒</Value>
   </Chinese>
 
   <English>
@@ -27,5 +38,28 @@
     <Value id="enter_world_link">enter a link to a scworld file</Value>
     <Value id="continue">continue</Value>
     <Value id="main_menu">main menu</Value>
+
+    <Value id="view_distance">view distance</Value>
+    <Value id="image_quality">vedio quality</Value>
+    <Value id="screenshot_folder">screenshot folder</Value>
+    <Value id="open">open</Value>
+    <Value id="default">set to default</Value>
+    <Value id="ok">confirm</Value>
+    <Value id="open">open</Value>
+    <Value id="chunks">chunks</Value>
+    <Value id="settings">settings</Value>
+    <Value id="Simple">simple</Value>
+    <Value id="Fantastic">highest</Value>
+    <Value id="v_sync">vertical sync</Value>
+    <Value id="on">on</Value>
+    <Value id="off">off</Value>
+
+    <Value id="ambient_brightness">dark area brightness</Value>
+
+    <Value id="op_none">no operation</Value>
+    <Value id="op_normal">single block operation</Value>
+    <Value id="op_select">block selection operation</Value>
+
+    <Value id="time_fromat">yyyy-MM-dd HH.mm.ss</Value>
   </English>
 </languages>

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PauseMenuWindow : MonoBehaviour
+public class PauseMenu : MonoBehaviour
 {
-	public static bool paused;
+	public bool paused;
 
 	public void OnResumeClicked ()
 	{
@@ -15,7 +15,7 @@ public class PauseMenuWindow : MonoBehaviour
 	public void OnMainMenuClicked ()
 	{
 		//		GetComponent<TerrainManager> ().SaveAllChunks ();
-		SceneManager.LoadScene (0);
+		SceneManager.LoadScene ("MainMenu");
 	}
 
 	public void OnSettingsClicked ()

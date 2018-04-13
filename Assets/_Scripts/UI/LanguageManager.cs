@@ -10,11 +10,15 @@ public class LanguageManager : MonoBehaviour
 
 	static Dictionary<string, string> currentMap = new Dictionary<string, string> ();
 
+    public static GameObject mainCanvas;
+
 	void Start ()
 	{
 		if (currentMap.Count == 0) {
 			SwitchLanguage (Application.systemLanguage.ToString ());
 		}
+
+        mainCanvas = gameObject;
 
         ReplaceText();
 
@@ -43,8 +47,8 @@ public class LanguageManager : MonoBehaviour
 
 	public static void SwitchLanguage (string language)
 	{
-		using (Stream s = File.OpenRead (Path.Combine (Application.streamingAssetsPath, "strings.xml"))) {
-			XElement root = XDocument.Load (s).Root;
+		using (TextReader reader = AssetUtils.LoadText (Path.Combine (Application.streamingAssetsPath, "strings.xml"))) {
+			XElement root = XDocument.Load (reader).Root;
 			XElement all = root.Element (language);
 			if (all == null) {
 				all = root.Element ("English");

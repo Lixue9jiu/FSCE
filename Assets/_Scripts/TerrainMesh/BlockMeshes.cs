@@ -11,7 +11,7 @@ public class BlockMeshes : MonoBehaviour
     private void Awake()
     {
         if (meshes == null)
-            meshes = AssetBundle.LoadFromFile(System.IO.Path.Combine(Application.streamingAssetsPath, "meshes"));
+			meshes = AssetBundle.LoadFromFile(System.IO.Path.Combine(Application.streamingAssetsPath, "meshes"));
     }
 
 	private void OnDestroy()

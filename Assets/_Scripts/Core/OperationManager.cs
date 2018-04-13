@@ -31,7 +31,7 @@ public class OperationManager : MonoBehaviour
 
     public void SwitchOperation(System.Type type)
     {
-        if (type.IsInstanceOfType(currentOperation))
+        if (type == null || type.IsInstanceOfType(currentOperation))
             return;
 
         if (currentOperation != null)

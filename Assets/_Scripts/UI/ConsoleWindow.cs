@@ -20,13 +20,15 @@ public class ConsoleWindow : BaseWindow
 
     private void Awake()
     {
-        AssignCommand("ls", (args) =>
+        AssignCommand("help", (args) =>
         {
             foreach (string s in commands.Keys)
             {
                 ConsoleLog.Log(s);
             }
         });
+
+		ConsoleLog.SetLogHandler ();
     }
 
     public void AssignCommand(string name, System.Action<string[]> action)
@@ -87,7 +89,6 @@ public class ConsoleWindow : BaseWindow
     {
         try
         {
-            Debug.Log("running command: " + name);
             if (commands.ContainsKey(name))
             {
                 commands[name](args);
@@ -145,4 +146,31 @@ public static class ConsoleLog
     {
         Log(string.Format(format, param));
     }
+
+	public static void SetLogHandler()
+	{
+		new Handler ();
+	}
+
+	class Handler : ILogHandler
+	{
+		ILogHandler defaultLogHandler;
+
+		public Handler()
+		{
+			defaultLogHandler = Debug.unityLogger.logHandler;
+			Debug.unityLogger.logHandler = this;
+		}
+
+		public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+		{
+			ConsoleLog.LogFormat (format, args);
+			defaultLogHandler.LogFormat(logType, context, format, args);
+		}
+
+		public void LogException(System.Exception exception, UnityEngine.Object context)
+		{
+			defaultLogHandler.LogException(exception, context);
+		}
+	}
 }

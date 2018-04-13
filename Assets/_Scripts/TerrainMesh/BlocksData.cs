@@ -29,7 +29,7 @@ public class BlocksData : MonoBehaviour
         { typeof(WaterBlock), new int[] { 18 } },
         { typeof(XGrassBlock), new int[] { 19 } },
         { typeof(TreeBlock), new int[] { 9, 10, 11 } },
-        { typeof(AlaphaTestBlock), new int[] { 15, 17, 44 } },
+        { typeof(AlaphaTestBlock), new int[] { 15, 17, 44, 60 } },
         { typeof(TreeLeaveBlock), new int[] { 12, 13, 14, 225 } },
         { typeof(PaintableCubeBlock), new int[] { 3, 4, 5, 21, 26, 67, 68, 72, 73 } },
         { typeof(StairBlock), new int[] { 48, 49, 50, 51, 69, 76, 96, 217 } },
@@ -113,7 +113,7 @@ public class BlocksData : MonoBehaviour
     void ParseBlocksData(string path)
     {
         Dictionary<int, BlockData> blockData = new Dictionary<int, BlockData>();
-        using (StreamReader reader = new StreamReader(path))
+		using (TextReader reader = AssetUtils.LoadText(path))
         {
             reader.ReadLine();
             string line;

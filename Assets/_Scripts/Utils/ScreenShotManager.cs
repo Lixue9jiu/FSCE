@@ -23,6 +23,6 @@ public class ScreenshotManager
 
     static string CurrentTime()
     {
-        return System.DateTime.Now.ToString().Replace('/', '-').Replace(':', '.');
+		return System.DateTime.Now.ToString(LanguageManager.GetString("time_format"));
     }
 }
