@@ -477,7 +477,7 @@ public class TerrainManager : MonoBehaviour
                     }
                     //					Debug.Log ("is loaded " + Terrain.chunkStats.Get (centerChunkX + x, centerChunkY + y).Loaded);
                     LoadChunk(centerChunkX + x, centerChunkY + y);
-                    Debug.LogFormat("loading: {0}, {1}", centerChunkX + x, centerChunkY + y);
+                    //Debug.LogFormat("loading: {0}, {1}", centerChunkX + x, centerChunkY + y);
                 }
             }
         }

@@ -27,8 +27,6 @@ public class ConsoleWindow : BaseWindow
                 ConsoleLog.Log(s);
             }
         });
-
-		ConsoleLog.SetLogHandler ();
     }
 
     public void AssignCommand(string name, System.Action<string[]> action)
@@ -136,6 +134,11 @@ public static class ConsoleLog
     static StringBuilder strBuilder = new StringBuilder();
     public static bool needFresh = false;
 
+	static ConsoleLog()
+	{
+		new Handler ();
+	}
+
     public static void Log(string str)
     {
         strBuilder.AppendLine(str);
@@ -146,11 +149,6 @@ public static class ConsoleLog
     {
         Log(string.Format(format, param));
     }
-
-	public static void SetLogHandler()
-	{
-		new Handler ();
-	}
 
 	class Handler : ILogHandler
 	{
@@ -170,6 +168,8 @@ public static class ConsoleLog
 
 		public void LogException(System.Exception exception, UnityEngine.Object context)
 		{
+			ConsoleLog.Log (exception.Message);
+			ConsoleLog.Log (exception.StackTrace);
 			defaultLogHandler.LogException(exception, context);
 		}
 	}
