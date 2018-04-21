@@ -52,8 +52,7 @@ public class SelectOperation : Operation
 
 	public override void OnSetToCurrent()
 	{
-        ConsoleWindow console = WindowManager.Get<ConsoleWindow>();
-        console.AssignCommand("fill", (args) =>
+        Console.AssignCommand("fill", (args) =>
         {
             terrainOperations.FillWith(minCorner.X, minCorner.Y, minCorner.Z, maxCorner.X, maxCorner.Y, maxCorner.Z, int.Parse(args[0]));
         });
@@ -64,8 +63,7 @@ public class SelectOperation : Operation
         lineRenderer.activated = false;
         if (WindowManager.instance != null)
         {
-            ConsoleWindow console = WindowManager.Get<ConsoleWindow>();
-            console.RemoveCommand("fill");
+            Console.RemoveCommand("fill");
         }
 	}
 
@@ -91,7 +89,7 @@ public class SelectOperation : Operation
         else if (Input.GetKeyDown(KeyCode.Tab))
         {
             selectingMode = (selectingMode + 1) % selectMethods.Length;
-            MessageWindow.instance.DisplayStringRes(selectMethods[selectingMode].Name);
+            MessageManager.ShowStrRes(selectMethods[selectingMode].Name);
             selectAction = selectMethods[selectingMode].Action;
         }
     }

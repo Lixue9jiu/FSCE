@@ -16,6 +16,14 @@ public class ChunkRenderer : MonoBehaviour
 
 	List<int> renderingChunks = new List<int> (256);
 
+    public int[] RenderingChunks
+    {
+        get
+        {
+            return renderingChunks.ToArray();
+        }
+    }
+
 	private void Start ()
 	{
 		string blockTextureName = WorldManager.Project.GetGameInfo ().BlockTextureName;

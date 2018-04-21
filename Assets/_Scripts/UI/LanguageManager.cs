@@ -21,9 +21,7 @@ public class LanguageManager : MonoBehaviour
         mainCanvas = gameObject;
 
         ReplaceText();
-
-		Debug.Log ("running in: " + Application.systemLanguage);
-	}
+    }
 
     public void ReplaceText()
     {
@@ -47,6 +45,8 @@ public class LanguageManager : MonoBehaviour
 
 	public static void SwitchLanguage (string language)
 	{
+        currentMap.Clear();
+
 		using (TextReader reader = AssetUtils.LoadText (Path.Combine (Application.streamingAssetsPath, "strings.xml"))) {
 			XElement root = XDocument.Load (reader).Root;
 			XElement all = root.Element (language);
@@ -58,6 +58,7 @@ public class LanguageManager : MonoBehaviour
 				currentMap [elem.Attribute ("id").Value] = elem.Value;
 			}
 		}
+        Debug.Log("running in: " + Application.systemLanguage);
 	}
 
 	private void OnTransformChildrenChanged()

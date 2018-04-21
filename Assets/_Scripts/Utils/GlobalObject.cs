@@ -3,8 +3,18 @@ using UnityEngine.SceneManagement;
 
 public class GlobalObject : MonoBehaviour {
 
-	void Start () {
-        DontDestroyOnLoad(gameObject);
-		SceneManager.LoadScene ("MainMenu");
+	static bool isInitialized;
+
+	void Awake ()
+	{
+		if (isInitialized)
+			Destroy (gameObject);
+
+		isInitialized = true;
+	}
+
+	void Start ()
+	{
+		DontDestroyOnLoad(gameObject);
 	}
 }

@@ -4,18 +4,6 @@ using UnityEngine;
 public class MessageWindow : MonoBehaviour
 {
 
-    static MessageWindow main;
-
-    public static MessageWindow instance
-    {
-        get
-        {
-            if (main == null)
-                main = FindObjectOfType<MessageWindow>();
-            return main;
-        }
-    }
-
     public GameObject template;
 
     //private void Start()

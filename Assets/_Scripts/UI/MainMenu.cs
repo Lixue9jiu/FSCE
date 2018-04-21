@@ -101,7 +101,8 @@ public class MainMenu : MonoBehaviour
             yield return web.SendWebRequest();
             if (web.isHttpError || web.isNetworkError)
             {
-                Debug.Log(web.error);
+                Debug.LogError(web.error);
+                MessageManager.Show(web.error);
             }
             else
             {

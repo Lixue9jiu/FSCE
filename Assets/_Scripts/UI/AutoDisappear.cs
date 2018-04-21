@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasRenderer))]
 public class AutoDisappear : MonoBehaviour {
@@ -8,6 +7,8 @@ public class AutoDisappear : MonoBehaviour {
     public float alphaOffset = 0.5f;
 
     CanvasRenderer canvasRenderer;
+
+    public CanvasRenderer childText;
 
     float alpha;
 
@@ -25,7 +26,7 @@ public class AutoDisappear : MonoBehaviour {
             return;
         }
         canvasRenderer.SetAlpha(alpha);
-        GetComponentInChildren<CanvasRenderer>().SetAlpha(alpha);
+        childText.SetAlpha(alpha);
         alpha -= alphaOffset;
 	}
 }

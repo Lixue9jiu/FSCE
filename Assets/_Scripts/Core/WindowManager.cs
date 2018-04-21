@@ -15,27 +15,10 @@ public class WindowManager : MonoBehaviour
 
     private static GameObject mainCanvas;
 
-    private void Awake()
-    {
-        SettingWindow setting;
-        foreach (GameObject obj in windowPrefabs)
-        {
-            setting = obj.GetComponent<SettingWindow>();
-            if (setting != null)
-            {
-                setting.Initialize();
-            }
-        }
-    }
-
     private void Start()
     {
-        // windowPrefabs = new Dictionary<System.Type, GameObject>()
-        // {
-        //     {typeof(PopupWindow), popupWindow},
-        //     {typeof(SettingWindow), settingWindow}
-        // };
         SceneManager.sceneLoaded += OnSceneLoaded;
+		inGame = SceneManager.GetActiveScene().name == "MainScene";
     }
 
     private void Update()
@@ -51,12 +34,12 @@ public class WindowManager : MonoBehaviour
 			}
 		}
 
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			if (!HideActiveWindow() && inGame)
-			{
-				PauseManager.instance.TuggleEsc();
+		if (Input.GetKeyDown (KeyCode.Escape)) {
+			if (!HideActiveWindow () && inGame) {
+				PauseManager.instance.TuggleEsc ();
 			}
+		} else if (Input.GetKeyDown (KeyCode.F10)) {
+			Screen.fullScreen = !Screen.fullScreen;
 		}
     }
 

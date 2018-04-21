@@ -109,6 +109,7 @@ public class TerrainManager : MonoBehaviour
         finally
         {
             SaveAllChunks();
+            terrainReader.Destory();
         }
     }
 
@@ -427,11 +428,6 @@ public class TerrainManager : MonoBehaviour
         statics.state = 0;
     }
 
-    void OnDestory()
-    {
-        terrainReader.Destory();
-    }
-
     void LoadTerrain(string path)
     {
         Stream stream = File.Open(path, FileMode.Open, FileAccess.ReadWrite);
@@ -477,7 +473,7 @@ public class TerrainManager : MonoBehaviour
                     }
                     //					Debug.Log ("is loaded " + Terrain.chunkStats.Get (centerChunkX + x, centerChunkY + y).Loaded);
                     LoadChunk(centerChunkX + x, centerChunkY + y);
-                    Debug.LogFormat("loading: {0}, {1}", centerChunkX + x, centerChunkY + y);
+                    //Debug.LogFormat("loading: {0}, {1}", centerChunkX + x, centerChunkY + y);
                 }
             }
         }

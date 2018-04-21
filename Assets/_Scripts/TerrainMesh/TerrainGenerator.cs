@@ -10,6 +10,14 @@ public class TerrainGenerator : MonoBehaviour
     List<Vector2> uvs = new List<Vector2>();
     List<Color> colors = new List<Color>();
 
+	interface BlockDataProvider
+	{
+		int SizeX();
+		int SizeY();
+		int SizeZ();
+		int GetCellValue();
+	}
+
     public void MeshFromChunk(BlockTerrain.Chunk chunk, out MeshData mesh)
     {
         for (int x = 0; x < chunk.sizeX; x++)

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,37 +7,11 @@ public class ConsoleWindow : BaseWindow
     public InputField input;
     public Text textDisplay;
 
-    Dictionary<string, System.Action<string[]>> commands = new Dictionary<string, System.Action<string[]>>();
-
-    List<string> history = new List<string>(20);
     int currentHistory = 0;
 
-    private void Start()
-    {
-        currentHistory = history.Count;
-    }
-
-    private void Awake()
-    {
-        AssignCommand("help", (args) =>
-        {
-            foreach (string s in commands.Keys)
-            {
-                ConsoleLog.Log(s);
-            }
-        });
-
-		ConsoleLog.SetLogHandler ();
-    }
-
-    public void AssignCommand(string name, System.Action<string[]> action)
-    {
-        commands.Add(name, action);
-    }
-
-	public void RemoveCommand(string name)
+	private void OnEnable()
 	{
-		commands.Remove (name);
+        currentHistory = Console.history.Count;
 	}
 
     private void Update()
@@ -51,13 +24,13 @@ public class ConsoleWindow : BaseWindow
         if (Input.GetKeyDown(KeyCode.UpArrow) && currentHistory > 0)
         {
             currentHistory--;
-            input.text = history[currentHistory];
+            input.text = Console.history[currentHistory];
             input.caretPosition = input.text.Length;
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) && currentHistory < history.Count - 1)
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && currentHistory < Console.history.Count - 1)
         {
             currentHistory++;
-            input.text = history[currentHistory];
+            input.text = Console.history[currentHistory];
             input.caretPosition = input.text.Length;
         }
     }
@@ -67,60 +40,24 @@ public class ConsoleWindow : BaseWindow
         if (str.Length == 0 || str[str.Length - 1] != '\n')
             return;
 
-        str = str.TrimEnd('\n');
-        history.Add(str);
-        currentHistory = history.Count;
+        currentHistory++;
 
-        ConsoleLog.Log("--> " + str);
-        int index = str.IndexOf(' ');
-        if (index == -1)
-        {
-            RunCommand(str, null);
-        }
-        else
-        {
-            RunCommand(str.Remove(index), str.Substring(index + 1).Split(' '));
-        }
+        Console.Execute(str);
 
         input.text = "";
-    }
-
-    public void RunCommand(string name, string[] args)
-    {
-        try
-        {
-            if (commands.ContainsKey(name))
-            {
-                commands[name](args);
-            }
-            else
-            {
-                ConsoleLog.LogFormat("command named \"{0}\" does not exist", name);
-            }
-        }
-        catch (System.Exception e)
-        {
-            ConsoleLog.Log(e.Message);
-            ConsoleLog.Log(e.StackTrace);
-        }
     }
 
     public override void Show()
     {
         base.Show();
-        FocusTo(input.gameObject);
+		UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(input.gameObject);
     }
 
     public override void Hide()
     {
         base.Hide();
         input.text = "";
-        FocusTo(gameObject);
-    }
-
-    static void FocusTo(GameObject obj)
-    {
-        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(obj);
+		UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
     }
 }
 
@@ -136,6 +73,13 @@ public static class ConsoleLog
     static StringBuilder strBuilder = new StringBuilder();
     public static bool needFresh = false;
 
+    public static ILogHandler logHandler;
+
+	static ConsoleLog()
+	{
+        logHandler = new Handler ();
+	}
+
     public static void Log(string str)
     {
         strBuilder.AppendLine(str);
@@ -146,11 +90,6 @@ public static class ConsoleLog
     {
         Log(string.Format(format, param));
     }
-
-	public static void SetLogHandler()
-	{
-		new Handler ();
-	}
 
 	class Handler : ILogHandler
 	{
@@ -170,6 +109,8 @@ public static class ConsoleLog
 
 		public void LogException(System.Exception exception, UnityEngine.Object context)
 		{
+			ConsoleLog.Log (exception.Message);
+			ConsoleLog.Log (exception.StackTrace);
 			defaultLogHandler.LogException(exception, context);
 		}
 	}

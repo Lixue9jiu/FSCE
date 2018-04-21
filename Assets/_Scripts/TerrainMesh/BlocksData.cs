@@ -187,13 +187,6 @@ public abstract class Block
     public const int YplusOne = 16;
     public const int ZplusOne = 32;
 
-    public const int TOP = 0;
-    public const int FRONT = 1;
-    public const int RIGHT = 2;
-    public const int BOTTOM = 3;
-    public const int BACK = 4;
-    public const int LEFT = 5;
-
     public static Vector3[] offsets = new Vector3[] {
         new Vector3 (0.0f, 0.0f, 1.0f),
         new Vector3 (0.0f, 1.0f, 0.0f),
@@ -239,37 +232,37 @@ public abstract class Block
         if ((neighborData & XminusOne) != 0)
         {
             g.MeshFromRect(v001, v011, v010, v000);
-            g.GenerateBlockUVs(GetTextureSlot(value, BACK));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.BACK));
             g.GenerateBlockColors(color);
         }
         if ((neighborData & YminusOne) != 0)
         {
             g.MeshFromRect(v000, v100, v101, v001);
-            g.GenerateBlockUVs(GetTextureSlot(value, BOTTOM));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.BOTTOM));
             g.GenerateBlockColors(color);
         }
         if ((neighborData & ZminusOne) != 0)
         {
             g.MeshFromRect(v000, v010, v110, v100);
-            g.GenerateBlockUVs(GetTextureSlot(value, LEFT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.LEFT));
             g.GenerateBlockColors(color);
         }
         if ((neighborData & XplusOne) != 0)
         {
             g.MeshFromRect(v100, v110, v111, v101);
-            g.GenerateBlockUVs(GetTextureSlot(value, FRONT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.FRONT));
             g.GenerateBlockColors(color);
         }
         if ((neighborData & YplusOne) != 0)
         {
             g.MeshFromRect(v111, v110, v010, v011);
-            g.GenerateBlockUVs(GetTextureSlot(value, TOP));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.TOP));
             g.GenerateBlockColors(color);
         }
         if ((neighborData & ZplusOne) != 0)
         {
             g.MeshFromRect(v101, v111, v011, v001);
-            g.GenerateBlockUVs(GetTextureSlot(value, RIGHT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.RIGHT));
             g.GenerateBlockColors(color);
         }
     }
@@ -277,7 +270,7 @@ public abstract class Block
     protected void DrawMeshBlock(int x, int y, int z, int value, MeshData mesh, Color color, TerrainGenerator g)
     {
         g.MeshFromMesh(x, y, z, mesh);
-        g.GenerateTextureForMesh(mesh, GetTextureSlot(value, FRONT), color);
+        g.GenerateTextureForMesh(mesh, GetTextureSlot(value, CellFace.FRONT), color);
     }
 
     public abstract void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainGenerator g);
@@ -458,7 +451,7 @@ public class GrassBlock : Block
 
     public override int GetTextureSlot(int value, int face)
     {
-        if (face == TOP)
+        if (face == CellFace.TOP)
             return 0;
         return 3;
     }
@@ -487,37 +480,37 @@ public class GrassBlock : Block
         if ((neighborData & XminusOne) != 0)
         {
             g.MeshFromRect(v001, v011, v010, v000);
-            g.GenerateBlockUVs(GetTextureSlot(value, BACK));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.BACK));
             g.GenerateBlockColors(white);
         }
         if ((neighborData & YminusOne) != 0)
         {
             g.MeshFromRect(v000, v100, v101, v001);
-            g.GenerateBlockUVs(GetTextureSlot(value, BOTTOM));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.BOTTOM));
             g.GenerateBlockColors(white);
         }
         if ((neighborData & ZminusOne) != 0)
         {
             g.MeshFromRect(v000, v010, v110, v100);
-            g.GenerateBlockUVs(GetTextureSlot(value, LEFT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.LEFT));
             g.GenerateBlockColors(white);
         }
         if ((neighborData & XplusOne) != 0)
         {
             g.MeshFromRect(v100, v110, v111, v101);
-            g.GenerateBlockUVs(GetTextureSlot(value, FRONT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.FRONT));
             g.GenerateBlockColors(white);
         }
         if ((neighborData & YplusOne) != 0)
         {
             g.MeshFromRect(v111, v110, v010, v011);
-            g.GenerateBlockUVs(GetTextureSlot(value, TOP));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.TOP));
             g.GenerateBlockColors(map.Lookup(chunk.GetShiftValue(x, z)));
         }
         if ((neighborData & ZplusOne) != 0)
         {
             g.MeshFromRect(v101, v111, v011, v001);
-            g.GenerateBlockUVs(GetTextureSlot(value, RIGHT));
+            g.GenerateBlockUVs(GetTextureSlot(value, CellFace.RIGHT));
             g.GenerateBlockColors(white);
         }
     }
@@ -527,7 +520,7 @@ public class TreeBlock : CubeBlock
 {
     public override int GetTextureSlot(int value, int face)
     {
-        if (face == TOP || face == BOTTOM)
+        if (face == CellFace.TOP || face == CellFace.BOTTOM)
             return 21;
         return TextureSlot;
     }

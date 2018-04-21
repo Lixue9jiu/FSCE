@@ -52,8 +52,7 @@ public class NormalBlockOperation : Operation
 
 	public override void OnSetToCurrent()
 	{
-        ConsoleWindow console = WindowManager.Get<ConsoleWindow>();
-        console.AssignCommand("setData", delegate (string[] args)
+        Console.AssignCommand("setData", delegate (string[] args)
         {
             if (terrainRaycast.LookingAt.HasValue)
             {
@@ -61,7 +60,7 @@ public class NormalBlockOperation : Operation
                 terrainManager.ChangeCell(p.X, p.Y, p.Z, BlockTerrain.ReplaceData(terrainManager.Terrain.GetCellValue(p.X, p.Y, p.Z), int.Parse(args[0])));
             }
         });
-        console.AssignCommand("setContent", delegate (string[] args)
+        Console.AssignCommand("setContent", delegate (string[] args)
         {
             placeBlockValue = int.Parse(args[0]);
         });
@@ -72,9 +71,8 @@ public class NormalBlockOperation : Operation
         lineRenderer.activated = false;
         if (WindowManager.instance != null)
         {
-            ConsoleWindow console = WindowManager.Get<ConsoleWindow>();
-            console.RemoveCommand("setData");
-            console.RemoveCommand("setContent");
+            Console.RemoveCommand("setData");
+            Console.RemoveCommand("setContent");
         }
 	}
 
