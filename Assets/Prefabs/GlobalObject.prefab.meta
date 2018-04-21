@@ -1,6 +1,12 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Prefabs/GlobalObject.prefab.meta
 guid: 194fd61cac67040968ba75e55503791a
 timeCreated: 1523898294
+=======
+guid: 80c9f50291251474fa8c393cbc206ffb
+folderAsset: yes
+timeCreated: 1523675564
+>>>>>>> b63ce56b5cda98e10e93d15b0b6f72ae85fb4c08:Assets/AssetBundles.meta
 licenseType: Free
 NativeFormatImporter:
   externalObjects: {}
