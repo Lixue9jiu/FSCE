@@ -50,7 +50,7 @@ public class CameraController : MonoBehaviour
 #if !MOBILE_INPUT
         if (isLocked)
         {
-			Cursor.lockState = CursorLockMode.Confined;
+			Cursor.lockState = CursorLockMode.Locked;
         }
         else
         {

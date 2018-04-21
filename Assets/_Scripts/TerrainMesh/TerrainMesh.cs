@@ -9,7 +9,10 @@ public class TerrainMesh {
     List<Vector2> uvs = new List<Vector2>();
 	List<Color> colors = new List<Color>();
 
+	public void GenerateCube()
+	{
 
+	}
 
 	public void PushToMesh(out MeshData data)
 	{
@@ -41,6 +44,11 @@ public class TerrainMesh {
 		triangles.Add(count + 3);
 		triangles.Add(count);
 	}
+
+	public void GetCellFace(int x, int y, int z, int face)
+	{
+
+	}
 }
 
 public struct CellFace
@@ -53,9 +61,21 @@ public struct CellFace
     public const int LEFT = 5;
 
     public int Face;
-    public int x;
-    public int y;
-    public int z;
+	public int TextureSlot;
 
+	public CellFace(Block block, int _value, int _face)
+	{
+		Face = _face;
+		TextureSlot = block.GetTextureSlot (_value, _face);
+	}
 
+	public override bool Equals (object obj)
+	{
+        return (obj is CellFace) && Equals ((CellFace)obj);
+	}
+
+	public bool Equals(CellFace face)
+	{
+		return face.Face == Face;
+	}
 }
