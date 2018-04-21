@@ -9,34 +9,9 @@ public class ConsoleWindow : BaseWindow
 
     int currentHistory = 0;
 
-<<<<<<< HEAD
 	private void OnEnable()
-=======
-    private void Start()
-    {
-        currentHistory = history.Count;
-    }
-
-    private void Awake()
-    {
-        AssignCommand("help", (args) =>
-        {
-            foreach (string s in commands.Keys)
-            {
-                ConsoleLog.Log(s);
-            }
-        });
-    }
-
-    public void AssignCommand(string name, System.Action<string[]> action)
-    {
-        commands.Add(name, action);
-    }
-
-	public void RemoveCommand(string name)
->>>>>>> b63ce56b5cda98e10e93d15b0b6f72ae85fb4c08
 	{
-        currentHistory = Console.history.Count;
+		currentHistory = Console.history.Count;
 	}
 
     private void Update()
@@ -98,17 +73,11 @@ public static class ConsoleLog
     static StringBuilder strBuilder = new StringBuilder();
     public static bool needFresh = false;
 
-<<<<<<< HEAD
     public static ILogHandler logHandler;
 
 	static ConsoleLog()
 	{
         logHandler = new Handler ();
-=======
-	static ConsoleLog()
-	{
-		new Handler ();
->>>>>>> b63ce56b5cda98e10e93d15b0b6f72ae85fb4c08
 	}
 
     public static void Log(string str)
