@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class NTorchBlock : Block
+public class TorchBlock : Block
 {
 	MeshData[] meshes = new MeshData[5];
 

@@ -2,7 +2,7 @@
 
 public class FPSDisplay : MonoBehaviour
 {
-    
+
     bool showing = true;
 	float deltaTime = 0.0f;
 
@@ -37,7 +37,7 @@ public class FPSDisplay : MonoBehaviour
             if (r.HasValue)
             {
                 //text += string.Format ("\nlooking at {0}", BlocksData.GetBlock(BlockTerrain.GetContent(r.Value.BlockValue)).Name);
-                text += string.Format("\nlooking at {0}", BlocksData.GetBlock(BlockTerrain.GetContent(r.Value.BlockValue)).ToString(r.Value.BlockValue));
+				text += string.Format("\nlooking at {0}", BlocksData.Blocks[BlockTerrain.GetContent(r.Value.BlockValue)].ToString(r.Value.BlockValue));
             }
             GUI.Label(rect, text, style);
         }

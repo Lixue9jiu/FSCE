@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class NStairBlock : Block
+public class StairBlock : Block
 {
 	MeshData[] stairs = new MeshData[24];
 

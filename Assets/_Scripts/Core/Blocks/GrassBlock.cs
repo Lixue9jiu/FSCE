@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class NewGrassBlock : NewCubeBlock
+public class GrassBlock : CubeBlock
 {
     public static ColorMap map = new ColorMap(new Color32(141, 198, 166, 255), new Color32(210, 201, 93, 255), new Color32(141, 198, 166, 255), new Color32(79, 225, 56, 255));
 

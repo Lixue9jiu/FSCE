@@ -69,11 +69,12 @@ public class OBJExporter : ScriptableWizard
         helpString = "Aaro4130's OBJ Exporter " + versionString;
     }
 
-    Vector3 RotateAroundPoint(Vector3 point, Vector3 pivot, Quaternion angle)
+    public static Vector3 RotateAroundPoint(Vector3 point, Vector3 pivot, Quaternion angle)
     {
         return angle * (point - pivot) + pivot;
     }
-    Vector3 MultiplyVec3s(Vector3 v1, Vector3 v2)
+
+    public static Vector3 MultiplyVec3s(Vector3 v1, Vector3 v2)
     {
         return new Vector3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
     }

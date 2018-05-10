@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class NSlabBlock : Block
+public class SlabBlock : Block
 {
 	MeshData[] slabs = new MeshData[2];
 

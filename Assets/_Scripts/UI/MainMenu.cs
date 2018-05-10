@@ -59,6 +59,11 @@ public class MainMenu : MonoBehaviour
         //		dropdown.AddOptions (GetComponent<WorldManager> ().GetWorldNames ());
     }
 
+	public void OnQuitGameClicked()
+	{
+		Application.Quit();
+	}
+
     public void OnEnterWorldClicked()
     {
         SceneManager.LoadScene("MainScene");

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
-public class NewBlocksData : MonoBehaviour
+public class BlocksData : MonoBehaviour
 {
 	const string blocksDataFile = "BlocksData.csv";
 
@@ -26,7 +26,7 @@ public class NewBlocksData : MonoBehaviour
 	static readonly Dictionary<string, System.Type> definedBlocks = new Dictionary<string, System.Type>
 	{
 		{"CubeBlock", typeof(CubeBlock)},
-		{"AirBlock", typeof(NewAirBlock)},
+		{"AirBlock", typeof(AirBlock)},
 		{"GrassBlock", typeof(GrassBlock)}
 	};
 

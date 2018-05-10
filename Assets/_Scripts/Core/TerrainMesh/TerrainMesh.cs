@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class TempMesh
+public class TerrainMesh
 {
-	List<Vector3> vertices = new List<Vector3>();
-    List<int> triangles = new List<int>();
-    List<Vector2> uvs = new List<Vector2>();
-    List<Color> colors = new List<Color>();
+	readonly List<Vector3> vertices = new List<Vector3>();
+	readonly List<int> triangles = new List<int>();
+	readonly List<Vector2> uvs = new List<Vector2>();
+	readonly List<Color> colors = new List<Color>();
 
 	public void PushToMesh(out MeshData mesh)
     {
