@@ -1,11 +1,11 @@
+﻿using System;
 using UnityEngine;
-using System.Collections;
 
-public class CubeBlock : Block, IStandardCubeBlock
+public class WoodBlock : Block, IStandardCubeBlock
 {
 	public void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data)
 	{
-		data.TextureSlot = TextureSlot;
+		data.TextureSlot = (face == CellFace.TOP || face == CellFace.BOTTOM) ? 21 : TextureSlot;
 		data.Color = Color.white;
 	}
 }

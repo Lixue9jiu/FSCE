@@ -7,9 +7,8 @@ public class FurnitureManager : MonoBehaviour
 {
 
 	Dictionary<int, MeshData[]> furnitures = new Dictionary<int, MeshData[]>();
-	public TerrainGenerator terrainGenerator;
 
-	public GameObject furniturePrefab;
+	TerrainGenerator terrainGenerator;
 
 	static FurnitureManager main;
 	public static FurnitureManager instance
@@ -22,9 +21,10 @@ public class FurnitureManager : MonoBehaviour
 		}
 	}
 
-	void Start()
+	private void Start()
 	{
-		//AlaphaTest4 ();
+		terrainGenerator = GetComponent<TerrainManager>().terrainGenerator;
+        AlaphaTest4();
 	}
 
 	//void AlaphaTest ()
@@ -71,13 +71,13 @@ public class FurnitureManager : MonoBehaviour
 		//}
 	}
 
-	public void InstantiateFurniture(int index, Vector3 position, int rotation)
-	{
-		GameObject obj = Instantiate(furniturePrefab, position, Quaternion.AngleAxis(rotation * -90, Vector3.up));
-		MeshFilter filter = obj.GetComponent<MeshFilter>();
+	//public void InstantiateFurniture(int index, Vector3 position, int rotation)
+	//{
+	//	GameObject obj = Instantiate(furniturePrefab, position, Quaternion.AngleAxis(rotation * -90, Vector3.up));
+	//	MeshFilter filter = obj.GetComponent<MeshFilter>();
 
-		furnitures[index][0].ToMesh(filter.mesh);
-	}
+	//	furnitures[index][0].ToMesh(filter.mesh);
+	//}
 
 	public MeshData GetFurniture(int index, int rotation)
 	{
@@ -115,11 +115,13 @@ public class FurnitureManager : MonoBehaviour
 	{
 		MeshData mesh;
 		terrainGenerator.GenerateFurnitureMesh(furniture, out mesh);
+		Matrix4x4 t = Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f));
+		Matrix4x4 inverseT = t.inverse;
 		MeshData[] all = new MeshData[4];
 		all[0] = mesh;
-		all[1] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(0, 270, 0)));
-		all[2] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(0, 180, 0)));
-		all[3] = mesh.Transform(Matrix4x4.Rotate(Quaternion.Euler(0, 90, 0)));
+		all[1] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 270, 0)) * inverseT);
+		all[2] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 180, 0)) * inverseT);
+		all[3] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 90, 0)) * inverseT);
 		furnitures[furniture.index] = all;
 	}
 
@@ -156,22 +158,22 @@ public class FurnitureManager : MonoBehaviour
 		}
 	}
 
-	public static int SetDesignIndex(int data, int designIndex, int shadowStrengthFactor, bool isLightEmitter)
-	{
-		data = ((data & -4093) | (designIndex & 1023) << 2);
-		data = ((data & -12289) | (shadowStrengthFactor & 3) << 12);
-		data = ((data & -16385) | (isLightEmitter ? 1 : 0) << 14);
-		return data;
-	}
+	//public static int SetDesignIndex(int data, int designIndex, int shadowStrengthFactor, bool isLightEmitter)
+	//{
+	//	data = ((data & -4093) | (designIndex & 1023) << 2);
+	//	data = ((data & -12289) | (shadowStrengthFactor & 3) << 12);
+	//	data = ((data & -16385) | (isLightEmitter ? 1 : 0) << 14);
+	//	return data;
+	//}
 
-	public static int SetRotation(int data, int rotation)
-	{
-		return (data & -4) | (rotation & 3);
-	}
+	//public static int SetRotation(int data, int rotation)
+	//{
+	//	return (data & -4) | (rotation & 3);
+	//}
 
-	public static int GetVariant(int data)
-	{
-		return data & 31;
-	}
+	//public static int GetVariant(int data)
+	//{
+	//	return data & 31;
+	//}
 
 }

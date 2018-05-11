@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FurnitureBlock : Block
+public class FurnitureBlock : Block, INormalBlock
 {
 	FurnitureManager furnitureManager;
 
 	public override void Initialize ()
 	{
-		IsTransparent = true;
         furnitureManager = FurnitureManager.instance;
 	}
 
@@ -22,9 +21,9 @@ public class FurnitureBlock : Block
 		return data & 3;
 	}
 
-	public override void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data, TerrainGenerator terrainMesh)
+	public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh)
 	{
 		int d = BlockTerrain.GetData(value);
-		terrainMesh.AlphaTest.Mesh(x, y, z, furnitureManager.GetFurniture(GetDesignIndex(d), GetRotation(d)));
+		terrainMesh.Mesh(x, y, z, furnitureManager.GetFurniture(GetDesignIndex(d), GetRotation(d)));
 	}
 }

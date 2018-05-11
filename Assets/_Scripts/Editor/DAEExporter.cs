@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class DAEExporter : ScriptableWizard {
 
-    private string lastExportFolder;
+    //private string lastExportFolder;
 
 	private void OnWizardCreate()
 	{
@@ -43,8 +43,8 @@ public class DAEExporter : ScriptableWizard {
 
     void Export(string exportPath, Mesh[] meshes, Matrix4x4[] transforms)
     {
-        var exportFileInfo = new System.IO.FileInfo(exportPath);
-        lastExportFolder = exportFileInfo.Directory.FullName;
+        //var exportFileInfo = new System.IO.FileInfo(exportPath);
+        //lastExportFolder = exportFileInfo.Directory.FullName;
         EditorUtility.DisplayProgressBar("Exporting OBJ", "Please wait.. Starting export.", 0);
 
         ColladaExporter exporter = new ColladaExporter(exportPath);

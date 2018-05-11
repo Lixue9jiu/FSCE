@@ -23,13 +23,6 @@ public class BlocksData : MonoBehaviour
 		}
 	}
 
-	static readonly Dictionary<string, System.Type> definedBlocks = new Dictionary<string, System.Type>
-	{
-		{"CubeBlock", typeof(CubeBlock)},
-		{"AirBlock", typeof(AirBlock)},
-		{"GrassBlock", typeof(GrassBlock)}
-	};
-
 	public static readonly Color[] DEFAULT_COLORS =
 	{
 		new Color32 (255, 255, 255, 255),
@@ -64,6 +57,9 @@ public class BlocksData : MonoBehaviour
 	};
 
     public static Block[] Blocks { get; private set; }
+	public static IStandardCubeBlock[] StandardCubeBlocks { get; private set; }
+	public static INormalBlock[] NormalBlocks { get; private set; }
+
     public static bool[] IsTransparent { get; private set; }
 
 	public static Color ColorFromInt(int? i)
@@ -81,6 +77,15 @@ public class BlocksData : MonoBehaviour
 
 	private void Awake()
 	{
+        string[] strs = WorldManager.Project.GetGameInfo().Colors;
+        for (int i = 0; i < 16; i++)
+        {
+            if (!string.IsNullOrEmpty(strs[i]))
+            {
+				string[] rgb = strs[i].Split(',');
+				DEFAULT_COLORS[i] = new Color((float)int.Parse(rgb[0]) / 256f, (float)int.Parse(rgb[1]) / 256f, (float)int.Parse(rgb[2]) / 256f);
+            }
+        }
 		Load();
 	}
 
@@ -95,6 +100,15 @@ public class BlocksData : MonoBehaviour
 			{
 				BlockData data = new BlockData(line);
 				blockData[data.Index] = data;
+			}
+		}
+
+		Dictionary<string, System.Type> definedBlocks = new Dictionary<string, System.Type>();
+		foreach (System.Type t in System.Reflection.Assembly.GetAssembly(typeof(Block)).GetTypes())
+		{
+			if (t.IsSubclassOf(typeof(Block)))
+			{
+				definedBlocks.Add(t.Name, t);
 			}
 		}
 
@@ -120,10 +134,20 @@ public class BlocksData : MonoBehaviour
 
 		Blocks = b.ToArray();
 
+		StandardCubeBlocks = new IStandardCubeBlock[Blocks.Length];
+		NormalBlocks = new INormalBlock[Blocks.Length];
 		IsTransparent = new bool[Blocks.Length];
 		for (int k = 0; k < Blocks.Length; k++)
 		{
-			IsTransparent[k] = Blocks[k].IsTransparent;
+			var standard = Blocks[k] as IStandardCubeBlock;
+			var normal = Blocks[k] as INormalBlock;
+
+			if (standard == null && normal == null)
+				Debug.LogErrorFormat("block {0} does not defind GenerateTerrain", Blocks[k].GetType().Name);
+
+			StandardCubeBlocks[k] = standard;
+			NormalBlocks[k] = normal;
+			IsTransparent[k] = standard == null;
 		}
 	}
 

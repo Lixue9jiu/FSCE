@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ElectricGateBlock : Block
+public class ElectricGateBlock : Block, INormalBlock
 {
 	MeshData[] meshes = new MeshData[24];
 
     public override void Initialize()
-    {
-        IsTransparent = true;
-
+    {      
         Mesh blockMesh;
         switch (Index)
         {
@@ -114,8 +112,8 @@ public class ElectricGateBlock : Block
         return BlockTerrain.GetData(value) >> 2 & 7;
     }
 
-	public override void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data, TerrainGenerator terrainMesh)
+	public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh)
 	{
-		terrainMesh.AlphaTest.Mesh(x, y, z, meshes[BlockTerrain.GetData(value) & 31], Color.white);
+		terrainMesh.Mesh(x, y, z, meshes[BlockTerrain.GetData(value) & 31], Color.white);
 	}
 }

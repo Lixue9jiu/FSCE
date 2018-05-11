@@ -4,6 +4,8 @@
     <Value id="enter_world">进入存档</Value>
     <Value id="load_world">加载存档</Value>
     <Value id="enter_world_link">输入存档链接</Value>
+    <Value id="quit">退出</Value>
+    
     <Value id="continue">继续</Value>
     <Value id="main_menu">主菜单</Value>
 
@@ -36,6 +38,8 @@
     <Value id="enter_world">enter world</Value>
     <Value id="load_world">download world</Value>
     <Value id="enter_world_link">enter a link to a scworld file</Value>
+    <Value id="quit">quit</Value>
+    
     <Value id="continue">continue</Value>
     <Value id="main_menu">main menu</Value>
 

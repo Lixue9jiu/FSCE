@@ -5,12 +5,11 @@ using UnityEngine;
 public class TerrainGenerator
 {
 	public readonly TerrainMesh MainMesh = new TerrainMesh();
-	public readonly TerrainMesh AlphaTest = new TerrainMesh();
 
 	public void GenerateChunkMesh(BlockTerrain.Chunk chunk, out MeshData mesh)
 	{
 		bool[] isTrans = BlocksData.IsTransparent;
-		Block[] blocks = BlocksData.Blocks;
+		IStandardCubeBlock[] blocks = BlocksData.StandardCubeBlocks;
 
 		CellFace[] mask;
 		int u, v, n, w, h, j, i, l, k;
@@ -54,7 +53,7 @@ public class TerrainGenerator
 							if (!isTrans[cb] && (((x[0] + off[0])) & 16) == 0)
 							{
 								mask[n].IsOpposite = true;
-								blocks[cb].GenerateTerrain(x[0] + off[0], x[1] + off[1], x[2] + off[2], vb, CellFace.opposite[d], chunk, ref mask[n], this);
+								blocks[cb].GenerateTerrain(x[0] + off[0], x[1] + off[1], x[2] + off[2], vb, CellFace.opposite[d], chunk, ref mask[n]);
 							}
 						}
 						else
@@ -62,7 +61,7 @@ public class TerrainGenerator
 							if (isTrans[cb])
 							{
 								mask[n].IsOpposite = false;
-								blocks[ca].GenerateTerrain(x[0], x[1], x[2], va, d, chunk, ref mask[n], this);
+								blocks[ca].GenerateTerrain(x[0], x[1], x[2], va, d, chunk, ref mask[n]);
 							}
 						}
 						n++;
@@ -142,6 +141,30 @@ public class TerrainGenerator
 					}
 				}
 			}
+		}
+
+		MainMesh.PushToMesh(out mesh);
+	}
+
+	public void GenerateNormalBlocks(BlockTerrain.Chunk chunk, out MeshData mesh)
+	{
+		bool[] isTransparent = BlocksData.IsTransparent;
+		INormalBlock[] normalBlocks = BlocksData.NormalBlocks;
+
+		for (int x = 0; x < 16; x++)
+		{
+			for (int z = 0; z < 16; z++)
+            {
+				for (int y = 0; y < 128; y++)
+                {
+					int value = chunk.GetCellValue(x, y, z);
+					int content = BlockTerrain.GetContent(value);
+					if (isTransparent[content])
+					{
+						normalBlocks[content].GenerateTerrain(x, y, z, value, chunk, MainMesh);
+					}
+                }
+            }
 		}
 
 		MainMesh.PushToMesh(out mesh);
@@ -240,22 +263,24 @@ public class TerrainGenerator
 							int textureSlot = mask[n] & 255;
 							if (mask[n] >> 12 == 0)
 							{
-								MainMesh.Quad(
+								MainMesh.FurnitureQuad(
 									new Vector3(x[0], x[1], x[2]),
 									new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
 									new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
 									new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
+									x[u], x[v], w, h, uvBlockSize,
 									textureSlot,
 									BlocksData.DEFAULT_COLORS[(mask[n] >> 8) & 15]
 								);
 							}
 							else
 							{
-								MainMesh.Quad(
+								MainMesh.FurnitureQuad(
 									new Vector3(x[0], x[1], x[2]),
 								    new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
 									new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
 									new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
+									x[v], x[u], h, w, uvBlockSize,
 									textureSlot,
 									BlocksData.DEFAULT_COLORS[(mask[n] >> 8) & 15]
 								);
@@ -302,6 +327,11 @@ public struct CellFace
 	public Color Color;
 
 	public static int[] opposite = { 3, 4, 5, 0, 1, 2 };
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode();
+	}
 
 	public override bool Equals(object obj)
 	{

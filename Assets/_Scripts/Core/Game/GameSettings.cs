@@ -58,6 +58,8 @@ public class GameSettings : MonoBehaviour
 
 	public static void ApplySettings()
 	{
+		Debug.Log("apply settings");
+
 		BlockTerrain.terrainSize = viewDistance;
 
 		PPManager ppManager = FindObjectOfType<PPManager>();

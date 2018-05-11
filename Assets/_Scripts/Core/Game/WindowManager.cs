@@ -48,6 +48,7 @@ public class WindowManager : MonoBehaviour
         if (activeWindow != null && activeWindow.isShowing)
         {
             activeWindow.Hide();
+			activeWindow = null;
             return true;
         }
         return false;

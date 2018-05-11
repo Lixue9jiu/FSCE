@@ -1,11 +1,11 @@
 using UnityEngine;
 using System.Collections;
 
-public class GrassBlock : CubeBlock
+public class GrassBlock : Block, IStandardCubeBlock
 {
     public static ColorMap map = new ColorMap(new Color32(141, 198, 166, 255), new Color32(210, 201, 93, 255), new Color32(141, 198, 166, 255), new Color32(79, 225, 56, 255));
-
-	public override void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data, TerrainGenerator terrainMesh)
+   
+	public void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data)
 	{
 		switch (face)
 		{

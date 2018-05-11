@@ -5,7 +5,6 @@ using UnityEngine;
 public abstract class Block
 {
     public int Index;
-    public bool IsTransparent;
 
     public int TextureSlot;
 
@@ -19,6 +18,4 @@ public abstract class Block
     public virtual void Initialize()
     {
     }
-
-	public abstract void GenerateTerrain(int x, int y, int z, int value, int face, BlockTerrain.Chunk chunk, ref CellFace data, TerrainGenerator terrainMesh);
 }

@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 56d7a30109c79443b99e409a141efb41
-timeCreated: 1518931224
-licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -10,7 +8,7 @@ MonoImporter:
   - stair1: {fileID: 4300000, guid: c18c4eba6e4754972a7ef5090eefe024, type: 3}
   - stair2: {fileID: 4300000, guid: ef03c6731a52849fbaf90faa1579d982, type: 3}
   - slab: {fileID: 4300000, guid: 52d65150b3ee745429abec081b1dd7de, type: 3}
-  executionOrder: 0
+  executionOrder: -80
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

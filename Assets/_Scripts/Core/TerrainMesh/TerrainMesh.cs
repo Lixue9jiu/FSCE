@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 public class TerrainMesh
-{
+{   
 	readonly List<Vector3> vertices = new List<Vector3>();
 	readonly List<int> triangles = new List<int>();
 	readonly List<Vector2> uvs = new List<Vector2>();
@@ -19,6 +19,33 @@ public class TerrainMesh
         triangles.Clear();
         uvs.Clear();
         colors.Clear();
+    }
+
+	public void NormalQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
+    {
+        int count = vertices.Count;
+        vertices.Add(a);
+        vertices.Add(b);
+        vertices.Add(c);
+        vertices.Add(d);
+
+        triangles.Add(count);
+        triangles.Add(count + 1);
+        triangles.Add(count + 2);
+        triangles.Add(count + 2);
+        triangles.Add(count + 3);
+        triangles.Add(count);
+
+        Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
+        uvs.Add(uvPos);
+		uvs.Add(uvPos + new Vector2(0.0625f, 0));
+		uvs.Add(uvPos + new Vector2(0.0625f, 0.0625f));
+		uvs.Add(uvPos + new Vector2(0, 0.0625f));
+
+        colors.Add(color);
+        colors.Add(color);
+        colors.Add(color);
+        colors.Add(color);
     }
 
 	public void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
@@ -43,6 +70,33 @@ public class TerrainMesh
         uvs.Add(uvPos);
 
 		colors.Add(color);
+        colors.Add(color);
+        colors.Add(color);
+        colors.Add(color);
+    }
+
+	public void FurnitureQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int u, int v, int du, int dv, float blockSize, int texSlot, Color color)
+    {
+        int count = vertices.Count;
+        vertices.Add(a);
+        vertices.Add(b);
+        vertices.Add(c);
+        vertices.Add(d);
+
+        triangles.Add(count);
+        triangles.Add(count + 1);
+        triangles.Add(count + 2);
+        triangles.Add(count + 2);
+        triangles.Add(count + 3);
+        triangles.Add(count);
+
+        Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
+		uvs.Add(uvPos + new Vector2(u * blockSize, v * blockSize));
+		uvs.Add(uvPos + new Vector2((u + du) * blockSize, v * blockSize));
+		uvs.Add(uvPos + new Vector2((u + du) * blockSize, (v + dv) * blockSize));
+		uvs.Add(uvPos + new Vector2(u * blockSize, (v + dv) * blockSize));
+
+        colors.Add(color);
         colors.Add(color);
         colors.Add(color);
         colors.Add(color);

@@ -66,7 +66,7 @@ public class PauseManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.P))
+		if (WindowManager.activeWindow == null && Input.GetKeyUp(KeyCode.P))
         {
             ScreenshotManager.Screenshot();
         }

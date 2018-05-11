@@ -20,7 +20,7 @@ public class TerrainManager : MonoBehaviour
 	public ChunkRenderer chunkRenderer;
 
 	//public TerrainGenerator terrainGenerator;
-	public TerrainGenerator terrainMesh = new TerrainGenerator();
+	public TerrainGenerator terrainGenerator = new TerrainGenerator();
 
 	Thread thread;
 	bool threadRunning = true;
@@ -67,16 +67,14 @@ public class TerrainManager : MonoBehaviour
 							switch (Terrain.chunkStats.Get(index).state)
 							{
 								case 3:
-									terrainMesh.GenerateChunkMesh(chunk, out chunk.mesh[0]);
-									chunk.mesh[1] = MeshData.CreateEmpty();
-									//terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[1]);
+									terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
+									terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
 									break;
 								case 1:
-									terrainMesh.GenerateChunkMesh(chunk, out chunk.mesh[0]);
+									terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
 									break;
 								case 2:
-									chunk.mesh[1] = MeshData.CreateEmpty();
-									//terrainGenerator.MeshFromTransparent(chunk, out chunk.mesh[1]);
+									terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
 									break;
 							}
 						}
@@ -201,24 +199,12 @@ public class TerrainManager : MonoBehaviour
 		LoadTerrain(WorldManager.ChunkDat);
 		Camera.main.transform.position = WorldManager.Project.PlayerPosition;
 
-		Point3 p = TerrainRaycast.ToCell(WorldManager.Project.PlayerPosition);
-		int startx = (p.X >> 4) - Terrain.chunkStats.halfSize;
-		int starty = (p.Z >> 4) - Terrain.chunkStats.halfSize;
-		Terrain.chunkStats.SetOffset(startx, starty);
+		Point2 p = CurrentChunk();
+		Terrain.chunkStats.SetOffset(p.X + 200, p.Y + 200);
 
-		int size = Terrain.chunkStats.size;
-		for (int x = 0; x < size; x++)
-		{
-			for (int y = 0; y < size; y++)
-			{
-				LoadChunk(startx + x, starty + y);
-				Terrain.chunkStats.Get(startx + x, starty + y).state = 0;
-			}
-		}
+		//centerChunk = CurrentChunk();
 
-		centerChunk = CurrentChunk();
-
-		needTerrainUpdate = true;
+		//needTerrainUpdate = true;
 	}
 
 	public void ChangeCell(int x, int y, int z, int newValue)
@@ -304,15 +290,16 @@ public class TerrainManager : MonoBehaviour
 			{
 				//			Debug.Log (string.Format ("loading chunk at {0}, {1}", x, y));
 				c = terrainReader.ReadChunk(x, y, Terrain);
-				terrainMesh.GenerateChunkMesh(c, out c.mesh[0]);
-				//terrainGenerator.MeshFromTransparent(c, out c.mesh[1]);
+				terrainGenerator.GenerateChunkMesh(c, out c.mesh[0]);
+				terrainGenerator.GenerateNormalBlocks(c, out c.mesh[1]);
 				Terrain.chunkStats.Get(c.index).updateState = BlockTerrain.ChunkUpdateState.NeedsToBeCreated;
 				chunkQueue.AddMain(c.index);
 			}
 		}
 		catch (System.Exception e)
 		{
-			Debug.LogError("error loading chunk: " + e.Message + e.StackTrace);
+			Debug.LogError("error loading chunk");
+			Debug.LogException(e);
 			chunkQueue.PopMain();
 			Terrain.DiscardChunk(x, y);
 			//			chunkQueue.Clean ();
@@ -377,6 +364,8 @@ public class TerrainManager : MonoBehaviour
 	public void UpdateChunk(int index)
 	{
 		BlockTerrain.ChunkStatics statics = Terrain.chunkStats.Get(index);
+
+		//Debug.Log(statics.updateState + ", " + index);
 
 		switch (statics.updateState)
 		{
@@ -462,6 +451,8 @@ public class TerrainManager : MonoBehaviour
 			{
 				startx = centerChunkX + x;
 				starty = centerChunkY + y;
+
+				//Debug.LogFormat("chunk valid: {0}", chunkStats.IsValid(startx, starty));
 
 				if (!chunkStats.IsValid(startx, starty))
 				{

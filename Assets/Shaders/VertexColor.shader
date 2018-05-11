@@ -6,7 +6,7 @@ Properties {
 }
 SubShader {
     Tags { "RenderType"="Opaque" }
-    LOD 200
+    LOD 250
 
 CGPROGRAM
 #pragma surface surf Lambert
@@ -58,10 +58,10 @@ void surf (Input IN, inout SurfaceOutput o) {
     if (IN.worldNormal.x != 0) {
         tileUV = tileUV.yx;
     }
-    float2 texCoord = IN.uv_MainTex + 0.0625f * frac(tileUV);
-    fixed4 c = tex2D(_MainTex, texCoord);
+    //float2 texCoord = IN.uv_MainTex + 0.0625f * frac(tileUV);
+    //fixed4 c = tex2D(_MainTex, texCoord);
 
-    //fixed4 c = fourTapSample(IN.uv_MainTex, tileUV, 0.03125f, _MainTex);
+    fixed4 c = fourTapSample(IN.uv_MainTex, tileUV, 0.03125f, _MainTex);
     o.Albedo = c.rgb * IN.color;
     //o.Alpha = c.a;
 }
