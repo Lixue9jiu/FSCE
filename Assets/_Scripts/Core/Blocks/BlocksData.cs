@@ -75,21 +75,21 @@ public class BlocksData : MonoBehaviour
 		return paintable.GetColor(BlockTerrain.GetData(value)) ?? 0;
 	}
 
-	private void Awake()
+	public void Initialize()
 	{
-        string[] strs = WorldManager.Project.GetGameInfo().Colors;
+		string[] strs = WorldManager.Project.GetGameInfo().Colors;
         for (int i = 0; i < 16; i++)
         {
             if (!string.IsNullOrEmpty(strs[i]))
             {
-				string[] rgb = strs[i].Split(',');
-				DEFAULT_COLORS[i] = new Color((float)int.Parse(rgb[0]) / 256f, (float)int.Parse(rgb[1]) / 256f, (float)int.Parse(rgb[2]) / 256f);
+                string[] rgb = strs[i].Split(',');
+                DEFAULT_COLORS[i] = new Color((float)int.Parse(rgb[0]) / 256f, (float)int.Parse(rgb[1]) / 256f, (float)int.Parse(rgb[2]) / 256f);
             }
         }
-		Load();
+        Load();
 	}
 
-	public void Load()
+	void Load()
 	{
 		Dictionary<int, BlockData> blockData = new Dictionary<int, BlockData>();
 		using (TextReader reader = AssetUtils.LoadText(Application.streamingAssetsPath + Path.DirectorySeparatorChar + blocksDataFile))

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockTerrain : MonoBehaviour
+public class BlockTerrain : Object
 {
 	const int NULL_BLOCK_VALUE = 0;
 
@@ -26,7 +26,7 @@ public class BlockTerrain : MonoBehaviour
 	public ChunkStatus chunkStats;
 	public ChunkInstance[] chunkInstances;
 
-	private void Start()
+	public BlockTerrain()
 	{
 		chunks = new Chunk[terrainSize * terrainSize];
 

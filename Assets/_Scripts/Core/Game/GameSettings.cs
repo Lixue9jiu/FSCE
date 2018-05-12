@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+#if UNITY_STANDALONE
+using UnityEngine.SceneManagement;
+#endif
 
 public class GameSettings : MonoBehaviour
 {
-
 	const string VIEW_DISTANCE = "view_distance";
 	const string IMAGE_QUALITY = "image_quality";
 	const string V_SYNC = "is_v_sync_on";
@@ -20,8 +20,12 @@ public class GameSettings : MonoBehaviour
 	private void Start()
 	{
 		instance = this;
-		LoadSettingsInternal ();
-		SaveSettingsInternal ();
+		LoadSettingsInternal();
+		SaveSettingsInternal();
+
+#if UNITY_STANDALONE
+		SceneManager.sceneLoaded += SceneManager_SceneLoaded;;
+#endif
 	}
 
 	void LoadSettingsInternal()
@@ -48,12 +52,12 @@ public class GameSettings : MonoBehaviour
 
 	public static void LoadSettings()
 	{
-		instance.LoadSettingsInternal ();
+		instance.LoadSettingsInternal();
 	}
 
 	public static void SaveSettings()
 	{
-		instance.SaveSettingsInternal ();
+		instance.SaveSettingsInternal();
 	}
 
 	public static void ApplySettings()
@@ -62,18 +66,28 @@ public class GameSettings : MonoBehaviour
 
 		BlockTerrain.terrainSize = viewDistance;
 
-		PPManager ppManager = FindObjectOfType<PPManager>();
-		if (ppManager != null)
-		{
-			ppManager.SetQuality(imageQuality);
-		}
-		else
-		{
-			QualitySettings.SetQualityLevel(imageQuality);
-		}
+		QualitySettings.SetQualityLevel(imageQuality);
+#if UNITY_STANDALONE
+		UpdatePostProcessing();
+#endif
 
 		QualitySettings.vSyncCount = IsVSyncOn ? 1 : 0;
 
 		RenderSettings.ambientIntensity = ambientBrightness;
 	}
+
+#if UNITY_STANDALONE
+	void SceneManager_SceneLoaded(Scene arg0, LoadSceneMode arg1)
+	{
+		if (arg0.name == "MainScene")
+		{
+			UpdatePostProcessing();
+		}
+	}
+
+	static void UpdatePostProcessing()
+	{
+		Camera.main.gameObject.GetComponent<UnityEngine.PostProcessing.PostProcessingBehaviour>().enabled = imageQuality > 0;
+	}
+#endif
 }

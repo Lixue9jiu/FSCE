@@ -1,51 +1,55 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
+using InputManager = UnityStandardAssets.CrossPlatformInput.CrossPlatformInputManager;
+
 public class CameraController : MonoBehaviour
 {
 
-    public float verticalRotation = 0;
+	public float verticalRotation = 0;
 
-    public float WalkSpeed = 1;
-    public float RotationSensitivity = 2;
+	public float WalkSpeed = 1;
+	public float RotationSensitivity = 2;
 
-    public static bool isCursorLocked;
+	public static bool isCursorLocked;
 
-    void Update()
-    {
-		float rotationH = Input.GetAxis("Mouse X");
-        float rotationV = Input.GetAxis("Mouse Y");
+	void Update()
+	{
+		float rotationH = InputManager.GetAxis("Mouse X");
+		float rotationV = InputManager.GetAxis("Mouse Y");
 
-        rotationV = Mathf.Clamp(-rotationV * RotationSensitivity, -80 - verticalRotation, 80 - verticalRotation);
-        verticalRotation += rotationV;
+		rotationV = Mathf.Clamp(-rotationV * RotationSensitivity, -80 - verticalRotation, 80 - verticalRotation);
+		verticalRotation += rotationV;
 
-        Camera.main.transform.Rotate(new Vector3(0, rotationH * RotationSensitivity, 0), Space.World);
-        Camera.main.transform.Rotate(new Vector3(rotationV, 0, 0));
+		Camera.main.transform.Rotate(new Vector3(0, rotationH * RotationSensitivity, 0), Space.World);
+		Camera.main.transform.Rotate(new Vector3(rotationV, 0, 0));
 
-        float forwardSpeed = Input.GetAxis("Vertical");
-        float sideWaySpeed = Input.GetAxis("Horizontal");
+		float forwardSpeed = InputManager.GetAxis("Vertical");
+		float sideWaySpeed = InputManager.GetAxis("Horizontal");
 
-        Vector3 speed = new Vector3(sideWaySpeed, 0, forwardSpeed) * WalkSpeed;
+		Vector3 speed = new Vector3(sideWaySpeed, 0, forwardSpeed) * WalkSpeed;
 
-        Camera.main.transform.Translate(speed);
+		Camera.main.transform.Translate(speed);
 
-        float elevation = Input.GetAxis("Elevation");
+		float elevation = InputManager.GetAxis("Elevation");
 
-        Camera.main.transform.Translate(new Vector3(0, elevation, 0) * WalkSpeed, Space.World);
-    }
+		Camera.main.transform.Translate(new Vector3(0, elevation, 0) * WalkSpeed, Space.World);
+	}
 
-    public static void SetCursorLocked(bool isLocked)
-    {
-        isCursorLocked = isLocked;
+	public static void SetCursorLocked(bool isLocked)
+	{
+		isCursorLocked = isLocked;
 
-        if (isLocked)
-        {
+#if !MOBILE_INPUT
+		if (isLocked)
+		{
 			Cursor.lockState = CursorLockMode.Locked;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-        }
-        Cursor.visible = !isLocked;
-    }
+		}
+		else
+		{
+			Cursor.lockState = CursorLockMode.None;
+		}
+		Cursor.visible = !isLocked;
+#endif
+	}
 }

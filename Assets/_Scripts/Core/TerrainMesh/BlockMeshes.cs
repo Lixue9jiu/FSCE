@@ -8,11 +8,11 @@ public class BlockMeshes : MonoBehaviour
 
     static Vector3 half = new Vector3(0.5f, 0.5f, 0.5f);
 
-    private void Awake()
-    {
-        if (meshes == null)
-			meshes = AssetBundle.LoadFromFile(System.IO.Path.Combine(Application.streamingAssetsPath, "meshes"));
-    }
+	public void Initialize()
+	{
+		if (meshes == null)
+            meshes = AssetBundle.LoadFromFile(System.IO.Path.Combine(Application.streamingAssetsPath, "meshes"));
+	}
 
 	private void OnDestroy()
 	{

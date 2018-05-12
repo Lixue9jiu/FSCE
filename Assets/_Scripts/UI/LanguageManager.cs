@@ -8,61 +8,72 @@ using UnityEngine.UI;
 public class LanguageManager : MonoBehaviour
 {
 
-	static Dictionary<string, string> currentMap = new Dictionary<string, string> ();
+	static Dictionary<string, string> currentMap = new Dictionary<string, string>();
 
-    public static GameObject mainCanvas;
+	public static GameObject mainCanvas;
 
-	void Start ()
+	void Start()
 	{
-		if (currentMap.Count == 0) {
-			SwitchLanguage (Application.systemLanguage.ToString ());
+		if (currentMap.Count == 0)
+		{
+			SwitchLanguage(Application.systemLanguage.ToString());
 		}
 
-        mainCanvas = gameObject;
+		mainCanvas = gameObject;
 
-        ReplaceText();
-    }
-
-    public void ReplaceText()
-    {
-        Text[] all = GetComponentsInChildren<Text>(true);
-        for (int i = 0; i < all.Length; i++)
-        {
-            Text t = all[i];
-            t.text = GetString(t.text);
-        }
-    }
-
-	public static string GetString (string id)
-	{
-        string value;
-        if (currentMap.TryGetValue(id, out value))
-        {
-            return value;
-        }
-        return id;
+		ReplaceText();
 	}
 
-	public static void SwitchLanguage (string language)
+	public void ReplaceText()
 	{
-        currentMap.Clear();
+		Text[] all = GetComponentsInChildren<Text>(true);
+		for (int i = 0; i < all.Length; i++)
+		{
+			Text t = all[i];
+			t.text = GetString(t.text);
+		}
+	}
 
-		using (TextReader reader = AssetUtils.LoadText (Path.Combine (Application.streamingAssetsPath, "strings.xml"))) {
-			XElement root = XDocument.Load (reader).Root;
-			XElement all = root.Element (language);
-			if (all == null) {
-				all = root.Element ("English");
+	public static string GetString(string id)
+	{
+		string value;
+		if (currentMap.TryGetValue(id, out value))
+		{
+			return value;
+		}
+		return id;
+	}
+
+	public static void SwitchLanguage(string language)
+	{
+		currentMap.Clear();
+
+		using (TextReader reader = AssetUtils.LoadText(Path.Combine(Application.streamingAssetsPath, "strings.xml")))
+		{
+			XElement root = XDocument.Load(reader).Root;
+			XElement all = root.Element(language);
+
+			if (all == null)
+			{
+				all = root.Element("English");
+			}
+			else
+			{
+				XAttribute aka = all.Attribute("aka");
+				if (aka != null)
+					all = root.Element(aka.Value);
 			}
 
-			foreach (XElement elem in all.Elements ()) {
-				currentMap [elem.Attribute ("id").Value] = elem.Value;
+			foreach (XElement elem in all.Elements())
+			{
+				currentMap[elem.Attribute("id").Value] = elem.Value;
 			}
 		}
-        Debug.Log("running in: " + Application.systemLanguage);
+		Debug.Log("running in: " + Application.systemLanguage);
 	}
 
 	private void OnTransformChildrenChanged()
 	{
-        ReplaceText();
+		ReplaceText();
 	}
 }

@@ -5,7 +5,7 @@ public class ChunkRenderer : MonoBehaviour
 {
 	const int TEXTURE_SIZE = 256;
 
-	public BlockTerrain Terrain;
+	private BlockTerrain Terrain;
 
 	public Texture2D defautTexture;
 
@@ -26,6 +26,8 @@ public class ChunkRenderer : MonoBehaviour
 
 	private void Start ()
 	{
+		Terrain = GetComponent<TerrainManager>().Terrain;
+
 		string blockTextureName = WorldManager.Project.GetGameInfo ().BlockTextureName;
 		if (!string.IsNullOrEmpty (blockTextureName)) {
 			LoadTexture (blockTextureName);

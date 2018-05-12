@@ -11,14 +11,10 @@ public class TerrainRaycast : MonoBehaviour
 
     public RaycastResult? LookingAt;
 
-    void Awake()
+    void Start()
     {
-        terrain = GetComponent<BlockTerrain>();
+		terrain = GetComponent<TerrainManager>().Terrain;
     }
-
-    //	void Update ()
-    //	{
-    //	}
 
     void FixedUpdate()
     {

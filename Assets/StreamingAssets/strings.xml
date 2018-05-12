@@ -1,69 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <languages>
-  <Chinese>
-    <Value id="delete_world">删除存档</Value>
-    <Value id="enter_world">进入存档</Value>
-    <Value id="load_world">加载存档</Value>
-    <Value id="enter_world_link">输入存档链接</Value>
-    <Value id="quit">退出</Value>
-    
-    <Value id="continue">继续</Value>
-    <Value id="main_menu">主菜单</Value>
-
-    <Value id="view_distance">视距</Value>
-    <Value id="image_quality">视频质量</Value>
-    <Value id="screenshot_folder">截图文件夹</Value>
-    <Value id="open">打开</Value>
-    <Value id="default">恢复到默认</Value>
-    <Value id="ok">确定</Value>
-    <Value id="open">打开</Value>
-    <Value id="chunks">区块</Value>
-    <Value id="settings">设置</Value>
-    <Value id="Simple">简单</Value>
-    <Value id="Fantastic">最高</Value>
-    <Value id="v_sync">垂直同步</Value>
-    <Value id="on">开启</Value>
-    <Value id="off">关闭</Value>
-
-    <Value id="ambient_brightness">环境光亮度</Value>
-
-    <Value id="op_none">无操作</Value>
-    <Value id="op_normal">单个方块操作</Value>
-    <Value id="op_select">选区方块操作</Value>
-
-    <Value id="time_fromat">yyyy年M月d日 H小时m分s秒</Value>
-  </Chinese>
-
-  <English>
-    <Value id="delete_world">delete world</Value>
-    <Value id="enter_world">enter world</Value>
-    <Value id="load_world">download world</Value>
-    <Value id="enter_world_link">enter a link to a scworld file</Value>
-    <Value id="quit">quit</Value>
-    
-    <Value id="continue">continue</Value>
-    <Value id="main_menu">main menu</Value>
-
-    <Value id="view_distance">view distance</Value>
-    <Value id="image_quality">vedio quality</Value>
-    <Value id="screenshot_folder">screenshot folder</Value>
-    <Value id="open">open</Value>
-    <Value id="default">set to default</Value>
-    <Value id="ok">confirm</Value>
-    <Value id="open">open</Value>
-    <Value id="chunks">chunks</Value>
-    <Value id="settings">settings</Value>
-    <Value id="Simple">simple</Value>
-    <Value id="Fantastic">highest</Value>
-    <Value id="v_sync">vertical sync</Value>
-    <Value id="on">on</Value>
-    <Value id="off">off</Value>
-
-    <Value id="ambient_brightness">dark area brightness</Value>
-
-    <Value id="op_none">no operation</Value>
-    <Value id="op_normal">single block operation</Value>
-    <Value id="op_select">block selection operation</Value>
-
-    <Value id="time_fromat">yyyy-MM-dd HH.mm.ss</Value>
-  </English>
+    <Chinese aka="ChineseSimplified" />
+    <ChineseSimplified>
+        <Value id="delete_world">删除存档</Value>
+        <Value id="enter_world">进入存档</Value>
+        <Value id="load_world">加载存档</Value>
+        <Value id="enter_world_link">输入存档链接</Value>
+        <Value id="quit">退出</Value>
+        <Value id="continue">继续</Value>
+        <Value id="main_menu">主菜单</Value>
+        <Value id="view_distance">视距</Value>
+        <Value id="image_quality">视频质量</Value>
+        <Value id="screenshot_folder">截图文件夹</Value>
+        <Value id="open">打开</Value>
+        <Value id="default">恢复到默认</Value>
+        <Value id="ok">确定</Value>
+        <Value id="open">打开</Value>
+        <Value id="chunks">区块</Value>
+        <Value id="settings">设置</Value>
+        <Value id="Simple">简单</Value>
+        <Value id="Fantastic">最高</Value>
+        <Value id="v_sync">垂直同步</Value>
+        <Value id="on">开启</Value>
+        <Value id="off">关闭</Value>
+        <Value id="ambient_brightness">环境光亮度</Value>
+        <Value id="op_none">无操作</Value>
+        <Value id="op_normal">单个方块操作</Value>
+        <Value id="op_select">选区方块操作</Value>
+        <Value id="time_fromat">yyyy年M月d日 H小时m分s秒</Value>
+    </ChineseSimplified>
+    <English>
+        <Value id="delete_world">delete world</Value>
+        <Value id="enter_world">enter world</Value>
+        <Value id="load_world">download world</Value>
+        <Value id="enter_world_link">enter a link to a scworld file</Value>
+        <Value id="quit">quit</Value>
+        <Value id="continue">continue</Value>
+        <Value id="main_menu">main menu</Value>
+        <Value id="view_distance">view distance</Value>
+        <Value id="image_quality">vedio quality</Value>
+        <Value id="screenshot_folder">screenshot folder</Value>
+        <Value id="open">open</Value>
+        <Value id="default">set to default</Value>
+        <Value id="ok">confirm</Value>
+        <Value id="open">open</Value>
+        <Value id="chunks">chunks</Value>
+        <Value id="settings">settings</Value>
+        <Value id="Simple">simple</Value>
+        <Value id="Fantastic">highest</Value>
+        <Value id="v_sync">vertical sync</Value>
+        <Value id="on">on</Value>
+        <Value id="off">off</Value>
+        <Value id="ambient_brightness">dark area brightness</Value>
+        <Value id="op_none">no operation</Value>
+        <Value id="op_normal">single block operation</Value>
+        <Value id="op_select">block selection operation</Value>
+        <Value id="time_fromat">yyyy-MM-dd HH.mm.ss</Value>
+    </English>
 </languages>

@@ -14,26 +14,22 @@ public class TerrainManager : MonoBehaviour
 	ITerrainReader terrainReader = new TerrainReader129();
 
 	ChunkQueue chunkQueue = new ChunkQueue();
-
-	//public GameObject TerrainChunk;
+ 
 	public BlockTerrain Terrain;
-	public ChunkRenderer chunkRenderer;
-
-	//public TerrainGenerator terrainGenerator;
 	public TerrainGenerator terrainGenerator = new TerrainGenerator();
+    
+	public ChunkRenderer chunkRenderer;
 
 	Thread thread;
 	bool threadRunning = true;
 
-	void Start()
+	private void Start()
 	{
-		//AlaphaTest4 ();
-		//AlaphaTest6 ();
-		Load();
-		//GetComponent<FurnitureManager>().AlaphaTest4();
-		//		AlaphaTest9 ();
-
-		StartChunkUpdateThread();
+		if (GetComponent<MyGameManager>().loadingSuccessful)
+		{
+			Load();
+			StartChunkUpdateThread();
+		}
 	}
 
 	//System.Diagnostics.Stopwatch Stopwatch = new System.Diagnostics.Stopwatch();
@@ -196,6 +192,8 @@ public class TerrainManager : MonoBehaviour
 
 	public void Load()
 	{
+		Debug.Log("loading terrain: " + BlockTerrain.terrainSize);
+		Terrain = new BlockTerrain();
 		LoadTerrain(WorldManager.ChunkDat);
 		Camera.main.transform.position = WorldManager.Project.PlayerPosition;
 
