@@ -87,7 +87,9 @@ public class GameSettings : MonoBehaviour
 
 	static void UpdatePostProcessing()
 	{
-		Camera.main.gameObject.GetComponent<UnityEngine.PostProcessing.PostProcessingBehaviour>().enabled = imageQuality > 0;
+		var post = Camera.main.gameObject.GetComponent<UnityEngine.PostProcessing.PostProcessingBehaviour>();
+		if (post != null)
+			post.enabled = imageQuality > 0;
 	}
 #endif
 }
