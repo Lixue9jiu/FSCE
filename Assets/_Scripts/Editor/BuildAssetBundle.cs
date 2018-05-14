@@ -10,13 +10,14 @@ public class BuildAssetBundle : ScriptableObject, UnityEditor.Build.IActiveBuild
 	{
 		get
 		{
-			return 1;
+			return 0;
 		}
 	}
 
 	[MenuItem("Assets/Build AssetBundles")]
 	static void BuildAllAssetBundles()
     {
+		Debug.Log("building asset bundle");      
         if (!Directory.Exists(assetBundleDirectory))
         {
             Directory.CreateDirectory(assetBundleDirectory);
