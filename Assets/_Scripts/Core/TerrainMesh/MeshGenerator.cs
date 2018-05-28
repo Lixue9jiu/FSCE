@@ -2,11 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainGenerator
+public class MeshGenerator
 {
-	public readonly TerrainMesh MainMesh = new TerrainMesh();
+    public readonly TerrainMesh Terrain = new TerrainMesh();
+	public readonly TerrainMesh AlphaTest = new TerrainMesh();
 
-	public void GenerateChunkMesh(BlockTerrain.Chunk chunk, out MeshData mesh)
+    public void GenerateAllBlocks(BlockTerrain.Chunk chunk)
+    {
+        GenerateChunkMesh(chunk);
+        GenerateNormalBlocks(chunk);
+    }
+
+	public void GenerateChunkMesh(BlockTerrain.Chunk chunk)
 	{
 		bool[] isTrans = BlocksData.IsTransparent;
 		IStandardCubeBlock[] blocks = BlocksData.StandardCubeBlocks;
@@ -102,7 +109,7 @@ public class TerrainGenerator
 							int textureSlot = mask[n].TextureSlot;
 							if (!mask[n].IsOpposite)
 							{
-								MainMesh.Quad(
+								Terrain.Quad(
                                     new Vector3(x[0], x[1], x[2]),
                                     new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
                                     new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
@@ -113,7 +120,7 @@ public class TerrainGenerator
 							}
 							else
 							{
-								MainMesh.Quad(
+								Terrain.Quad(
 									new Vector3(x[0], x[1], x[2]),
                                     new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
                                     new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
@@ -142,11 +149,9 @@ public class TerrainGenerator
 				}
 			}
 		}
-
-		MainMesh.PushToMesh(out mesh);
 	}
 
-	public void GenerateNormalBlocks(BlockTerrain.Chunk chunk, out MeshData mesh)
+	public void GenerateNormalBlocks(BlockTerrain.Chunk chunk)
 	{
 		bool[] isTransparent = BlocksData.IsTransparent;
 		INormalBlock[] normalBlocks = BlocksData.NormalBlocks;
@@ -161,13 +166,11 @@ public class TerrainGenerator
 					int content = BlockTerrain.GetContent(value);
 					if (isTransparent[content])
 					{
-						normalBlocks[content].GenerateTerrain(x, y, z, value, chunk, MainMesh);
+                        normalBlocks[content].GenerateTerrain(x, y, z, value, chunk, this);
 					}
                 }
             }
 		}
-
-		MainMesh.PushToMesh(out mesh);
 	}
 
 	public void GenerateFurnitureMesh(FurnitureManager.Furniture furniture, out MeshData mesh)
@@ -263,7 +266,7 @@ public class TerrainGenerator
 							int textureSlot = mask[n] & 255;
 							if (mask[n] >> 12 == 0)
 							{
-								MainMesh.FurnitureQuad(
+								Terrain.FurnitureQuad(
 									new Vector3(x[0], x[1], x[2]),
 									new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]),
 									new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
@@ -275,7 +278,7 @@ public class TerrainGenerator
 							}
 							else
 							{
-								MainMesh.FurnitureQuad(
+								Terrain.FurnitureQuad(
 									new Vector3(x[0], x[1], x[2]),
 								    new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]),
 									new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]),
@@ -308,7 +311,7 @@ public class TerrainGenerator
 
 		//Debug.LogFormat("{0}, {1}, {2}", vertices.Count, colors.Count, uvs.Count);
 
-		MainMesh.PushToMesh(out mesh);
+		Terrain.PushToMesh(out mesh);
 		MeshData.Transform(mesh, matrix);
 	}
 }

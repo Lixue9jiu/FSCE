@@ -108,6 +108,7 @@ public class BlockTerrain : Object
 		if (freeChunks.Count != 0)
 		{
 			c = freeChunks.Pop();
+            c.isEdited = false;
 		}
 		else
 		{
@@ -191,6 +192,8 @@ public class BlockTerrain : Object
 			{
 				data[i] = new ChunkStatics();
 			}
+
+            Debug.Log("chunk status initialized");
 		}
 
 		int Log2(int x)
@@ -271,6 +274,8 @@ public class BlockTerrain : Object
 
 		public int chunkx;
 		public int chunky;
+
+        public bool isEdited;
 
 		public MeshData[] mesh = new MeshData[2];
 

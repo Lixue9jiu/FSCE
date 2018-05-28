@@ -7,13 +7,13 @@ public class TerrainRaycast : MonoBehaviour
     public GameObject Cube;
 
     //public MLineRenderer line;
-    BlockTerrain terrain;
+    TerrainManager terrainManager;
 
     public RaycastResult? LookingAt;
 
     void Start()
     {
-		terrain = GetComponent<TerrainManager>().Terrain;
+		terrainManager = GetComponent<TerrainManager>();
     }
 
     void FixedUpdate()
@@ -46,7 +46,7 @@ public class TerrainRaycast : MonoBehaviour
             result = new Point3(ToCell(position.x), ToCell(position.y), ToCell(position.z));
             if (!result.Equals(last))
             {
-                int value = terrain.GetCellValue(result.X, result.Y, result.Z);
+                int value = terrainManager.Terrain.GetCellValue(result.X, result.Y, result.Z);
                 if (BlockTerrain.GetContent(value) != 0)
                 {
                     return new RaycastResult

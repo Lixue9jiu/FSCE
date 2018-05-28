@@ -2,7 +2,7 @@
 
 public class AlphaTestBlock : Block, INormalBlock
 {
-	public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh)
+    public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, MeshGenerator g)
 	{
 		Vector3 v000 = new Vector3(x, y, z);
         Vector3 v001 = new Vector3(x, y, z + 1.0f);
@@ -12,6 +12,8 @@ public class AlphaTestBlock : Block, INormalBlock
         Vector3 v101 = new Vector3(x + 1.0f, y, z + 1.0f);
         Vector3 v110 = new Vector3(x + 1.0f, y + 1.0f, z);
         Vector3 v111 = new Vector3(x + 1.0f, y + 1.0f, z + 1.0f);
+
+        TerrainMesh terrainMesh = g.AlphaTest;
 
 		int content = chunk.GetCellContent(x - 1, y, z);
 		if (content == 0 || content == 18)

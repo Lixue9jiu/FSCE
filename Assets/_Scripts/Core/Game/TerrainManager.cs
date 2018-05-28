@@ -15,15 +15,23 @@ public class TerrainManager : MonoBehaviour
 
 	ChunkQueue chunkQueue = new ChunkQueue();
  
-	public BlockTerrain Terrain;
-	public TerrainGenerator terrainGenerator = new TerrainGenerator();
+    public BlockTerrain Terrain;
+	public MeshGenerator terrainGenerator = new MeshGenerator();
     
-	public ChunkRenderer chunkRenderer;
+    private ChunkRenderer chunkRenderer;
+
+    private ChunkInstanceManager chunkInstanceManager;
 
 	Thread thread;
 	bool threadRunning = true;
 
-	private void Start()
+    private void Awake()
+    {
+        chunkRenderer = GetComponent<ChunkRenderer>();
+        chunkInstanceManager = GetComponent<ChunkInstanceManager>();
+    }
+
+    private void Start()
 	{
 		if (GetComponent<MyGameManager>().loadingSuccessful)
 		{
@@ -60,19 +68,22 @@ public class TerrainManager : MonoBehaviour
 							continue;
 						lock (chunk)
 						{
-							switch (Terrain.chunkStats.Get(index).state)
-							{
-								case 3:
-									terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
-									terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
-									break;
-								case 1:
-									terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
-									break;
-								case 2:
-									terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
-									break;
-							}
+                            terrainGenerator.GenerateAllBlocks(chunk);
+                            terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
+                            terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
+							//switch (Terrain.chunkStats.Get(index).state)
+							//{
+							//	case 3:
+							//		terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
+							//		terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
+							//		break;
+							//	case 1:
+							//		terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
+							//		break;
+							//	case 2:
+							//		terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
+							//		break;
+							//}
 						}
 						chunkQueue.AddMain(index);
 					}
@@ -240,6 +251,7 @@ public class TerrainManager : MonoBehaviour
 				}
 			}
 			c.SetCellValue(cx, y, cz, newValue);
+            c.isEdited = true;
 			if (cx == 0 && c.XminusOne != null)
 			{
 				QuqueChunkUpdate(c.XminusOne.index, 3);
@@ -288,8 +300,11 @@ public class TerrainManager : MonoBehaviour
 			{
 				//			Debug.Log (string.Format ("loading chunk at {0}, {1}", x, y));
 				c = terrainReader.ReadChunk(x, y, Terrain);
-				terrainGenerator.GenerateChunkMesh(c, out c.mesh[0]);
-				terrainGenerator.GenerateNormalBlocks(c, out c.mesh[1]);
+                terrainGenerator.GenerateAllBlocks(c);
+                terrainGenerator.Terrain.PushToMesh(out c.mesh[0]);
+                terrainGenerator.AlphaTest.PushToMesh(out c.mesh[1]);
+				//terrainGenerator.GenerateChunkMesh(c, out c.mesh[0]);
+				//terrainGenerator.GenerateNormalBlocks(c, out c.mesh[1]);
 				Terrain.chunkStats.Get(c.index).updateState = BlockTerrain.ChunkUpdateState.NeedsToBeCreated;
 				chunkQueue.AddMain(c.index);
 			}
@@ -338,7 +353,8 @@ public class TerrainManager : MonoBehaviour
 		instance.UpdateAll(c);
 		instance.UpdateMesh(0);
 		instance.UpdateMesh(1);
-		chunkRenderer.AddChunk(index);
+        //chunkRenderer.AddChunk(index);
+        chunkInstanceManager.LoadChunkInstance(instance);
 
 		//GameObject obj;
 		//GameObject obj2;
@@ -388,7 +404,8 @@ public class TerrainManager : MonoBehaviour
 				}
 				break;
 			case BlockTerrain.ChunkUpdateState.NeedsToBeDestoryed:
-				chunkRenderer.RemoveChunk(index);
+                //chunkRenderer.RemoveChunk(index);
+                chunkInstanceManager.UnloadChunkInstance(Terrain.chunkInstances[index]);
 				//Terrain.chunkInstances[index] = null;
 				break;
 		}
@@ -597,7 +614,10 @@ public class ChunkInstance
 {
 	public Matrix4x4 transform;
 	public Mesh[] meshes = new Mesh[] { new Mesh(), new Mesh() };
+
 	public BlockTerrain.Chunk chunkData;
+
+    public GameObject chunkObj;
 
 	public bool dirty;
 

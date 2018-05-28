@@ -4,15 +4,19 @@ using UnityEngine;
 
 public static class TextureProcessing
 {
-	public static Texture2D ProcessTexture(Texture2D origin)
+    public static void ProcessTexture(Texture2D origin, out Texture2D terrainTex, out Texture2D alphaTestTex)
 	{
 		if (origin.width != origin.height)
 			throw new System.Exception(string.Format("texture {0} is not square", origin.name));
 		int textureSize = origin.width;
 
-		Texture2D result = new Texture2D(textureSize * 2, textureSize * 2, TextureFormat.ARGB32, true);
-		result.filterMode = FilterMode.Point;
-		result.mipMapBias = -0.5f;
+        alphaTestTex = new Texture2D(textureSize, textureSize, TextureFormat.ARGB32, true);
+        alphaTestTex.filterMode = FilterMode.Point;
+        alphaTestTex.mipMapBias = -0.5f;
+
+		terrainTex = new Texture2D(textureSize * 2, textureSize * 2, TextureFormat.ARGB32, true);
+		terrainTex.filterMode = FilterMode.Point;
+		terrainTex.mipMapBias = -0.5f;
 		//result.anisoLevel = 3;
 		int cellSize = textureSize / 16;
 
@@ -29,15 +33,18 @@ public static class TextureProcessing
 				for (int i = 0; i < 6; i++)
 				{
 					int mipSize = cellSize >> i;
-					result.SetPixels(x2 * mipSize, y2 * mipSize, mipSize, mipSize, cell.GetPixels(i), i);
-					result.SetPixels((x2 + 1) * mipSize, y2 * mipSize, mipSize, mipSize, cell.GetPixels(i), i);
-					result.SetPixels(x2 * mipSize, (y2 + 1) * mipSize, mipSize, mipSize, cell.GetPixels(i), i);
-					result.SetPixels((x2 + 1) * mipSize, (y2 + 1) * mipSize, mipSize, mipSize, cell.GetPixels(i), i);
+                    Color[] colors = cell.GetPixels(i);
+                    alphaTestTex.SetPixels(x * mipSize, y * mipSize, mipSize, mipSize, colors, i);
+
+                    terrainTex.SetPixels(x2 * mipSize, y2 * mipSize, mipSize, mipSize, colors, i);
+                    terrainTex.SetPixels((x2 + 1) * mipSize, y2 * mipSize, mipSize, mipSize, colors, i);
+                    terrainTex.SetPixels(x2 * mipSize, (y2 + 1) * mipSize, mipSize, mipSize, colors, i);
+                    terrainTex.SetPixels((x2 + 1) * mipSize, (y2 + 1) * mipSize, mipSize, mipSize, colors, i);
 				}
-				result.SetPixels(x, y, 1, 1, cell.GetPixels(5), 6);
+				terrainTex.SetPixels(x, y, 1, 1, cell.GetPixels(5), 6);
             }
 		}
-		result.Apply(false, true);
-		return result;
+        alphaTestTex.Apply(false, true);
+        terrainTex.Apply(false, true);
 	}
 }

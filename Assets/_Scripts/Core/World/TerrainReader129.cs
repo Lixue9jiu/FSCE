@@ -115,6 +115,8 @@ public class TerrainReader129 : System.IDisposable, ITerrainReader
 
 	public void SaveChunk (BlockTerrain.Chunk chunk)
 	{
+        if (!chunk.isEdited)
+            return;
 		lock (locker) {
 			Point2 p = new Point2 (chunk.chunkx, chunk.chunky);
 			long value;

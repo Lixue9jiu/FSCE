@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using UnityEngine;
@@ -8,7 +8,7 @@ public class FurnitureManager : MonoBehaviour
 
 	Dictionary<int, MeshData[]> furnitures = new Dictionary<int, MeshData[]>();
 
-	TerrainGenerator terrainGenerator;
+	MeshGenerator terrainGenerator;
 
 	static FurnitureManager main;
 	public static FurnitureManager instance
@@ -20,6 +20,8 @@ public class FurnitureManager : MonoBehaviour
 			return main;
 		}
 	}
+
+    public bool[] isTransparent;
 
 	public void Initialize()
 	{
@@ -87,13 +89,35 @@ public class FurnitureManager : MonoBehaviour
 	public void Load(ProjectData project)
 	{
 		XElement designs = project.GetSubsystem("FurnitureBlockBehavior").GetValues("FurnitureDesigns");
-		foreach (XElement elem in designs.Elements("Values"))
+
+        List<Furniture> fs = new List<Furniture>();
+        List<int> isTrans = new List<int>();
+        foreach (XElement elem in designs.Elements("Values"))
 		{
-			LoadFurniture(elem);
+            fs.Add(LoadFurniture(elem));
 		}
+        int count = 0;
+        foreach (Furniture f in fs)
+        {
+            int[] data = f.data;
+            for (int i = 0; i < data.Length; i++)
+            {
+                count = Mathf.Max(count, f.index);
+                if (BlocksData.IsTransparent[BlockTerrain.GetContent(data[i])])
+                {
+                    isTrans.Add(f.index);
+                    break;
+                }
+            }
+        }
+        isTransparent = new bool[isTrans.Max() + 1];
+        foreach (int i in isTrans)
+        {
+            isTransparent[i] = true;
+        }
 	}
 
-	Furniture LoadFurniture(XElement furniture)
+    Furniture LoadFurniture(XElement furniture)
 	{
 		int resolution;
 		furniture.GetValue("Resolution", out resolution);
@@ -103,12 +127,17 @@ public class FurnitureManager : MonoBehaviour
 			{
 				index = int.Parse(furniture.Attribute("Name").Value),
 				Resolution = resolution,
-				data = ParseData(XMLUtils.FindValueByName(furniture, "Values"), resolution),
+                data = ParseData(XMLUtils.FindValueByName(furniture, "Values"), resolution)
 			};
 			LoadMash(f);
 			return f;
 		}
-		return new Furniture();
+        return new Furniture
+        {
+            index = int.Parse(furniture.Attribute("Name").Value),
+            Resolution = resolution,
+            data = new int[0]
+        };
 	}
 
 	void LoadMash(Furniture furniture)
@@ -125,7 +154,7 @@ public class FurnitureManager : MonoBehaviour
 		furnitures[furniture.index] = all;
 	}
 
-	int[] ParseData(string str, int resolution)
+    int[] ParseData(string str, int resolution)
 	{
 		List<int> data = new List<int>(resolution * resolution);
 		string[] strs = str.Split(new char[] { ',' }, System.StringSplitOptions.RemoveEmptyEntries);

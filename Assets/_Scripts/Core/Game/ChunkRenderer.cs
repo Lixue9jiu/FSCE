@@ -9,7 +9,7 @@ public class ChunkRenderer : MonoBehaviour
 
 	public Texture2D defautTexture;
 
-	public Material normal;
+	public Material terrain;
 	public Material alaphaTest;
 
 	public const int chunkLayer = 0;
@@ -32,8 +32,10 @@ public class ChunkRenderer : MonoBehaviour
 		if (!string.IsNullOrEmpty (blockTextureName)) {
 			LoadTexture (blockTextureName);
 		} else {
-			normal.mainTexture = TextureProcessing.ProcessTexture(defautTexture);
-			alaphaTest.mainTexture = defautTexture;
+            Texture2D main, alphaTest;
+            TextureProcessing.ProcessTexture(defautTexture, out main, out alphaTest);
+            terrain.mainTexture = main;
+            alaphaTest.mainTexture = alphaTest;
 		}
 	}
 
@@ -48,8 +50,10 @@ public class ChunkRenderer : MonoBehaviour
 
 			defautTexture.LoadImage(System.IO.File.ReadAllBytes(path));
 
-			normal.mainTexture = TextureProcessing.ProcessTexture(defautTexture);;
-			alaphaTest.mainTexture = defautTexture;
+            Texture2D main, alphaTest;
+            TextureProcessing.ProcessTexture(defautTexture, out main, out alphaTest);
+            terrain.mainTexture = main;
+            alaphaTest.mainTexture = alphaTest;
 		} catch (System.Exception e) {
 			Debug.LogException (e);
 		}
@@ -77,7 +81,7 @@ public class ChunkRenderer : MonoBehaviour
 
 	void RenderChunk (ChunkInstance instance)
 	{
-		Graphics.DrawMesh (instance.meshes [0], instance.transform, normal, chunkLayer, Camera.main);
+		Graphics.DrawMesh (instance.meshes [0], instance.transform, terrain, chunkLayer, Camera.main);
 		Graphics.DrawMesh (instance.meshes [1], instance.transform, alaphaTest, chunkLayer, Camera.main);
 	}
 }

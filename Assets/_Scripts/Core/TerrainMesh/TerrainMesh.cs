@@ -21,6 +21,29 @@ public class TerrainMesh
         colors.Clear();
     }
 
+    public void TwoSidedQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
+    {
+        //int count = vertices.Count;
+        //vertices.Add(a);
+        //vertices.Add(b);
+        //vertices.Add(c);
+        //vertices.Add(d);
+
+        //Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
+        //uvs.Add(uvPos);
+        //uvs.Add(uvPos + new Vector2(0.0625f, 0));
+        //uvs.Add(uvPos + new Vector2(0.0625f, 0.0625f));
+        //uvs.Add(uvPos + new Vector2(0, 0.0625f));
+
+        //colors.Add(color);
+        //colors.Add(color);
+        //colors.Add(color);
+        //colors.Add(color);
+
+        NormalQuad(a, b, c, d, texSlot, color);
+        NormalQuad(b, a, d, c, texSlot, color);
+    }
+
 	public void NormalQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
     {
         int count = vertices.Count;

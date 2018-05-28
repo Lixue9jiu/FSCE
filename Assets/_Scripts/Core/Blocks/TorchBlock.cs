@@ -16,8 +16,8 @@ public class TorchBlock : Block, INormalBlock
 		meshes[4] = mesh.Transform(Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f)));
 	}
     
-	public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh)
+    public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, MeshGenerator g)
 	{
-		terrainMesh.Mesh(x, y, z, meshes[BlockTerrain.GetData(value)], Color.white);
+        g.AlphaTest.Mesh(x, y, z, meshes[BlockTerrain.GetData(value)], Color.white);
 	}
 }

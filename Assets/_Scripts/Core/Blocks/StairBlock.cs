@@ -58,12 +58,12 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
 		return data & 31;
 	}
 
-	public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh)
+    public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, MeshGenerator g)
 	{
 		int? color = GetColor(BlockTerrain.GetData(value));
-		terrainMesh.Mesh(x, y, z,
-						 stairs[GetVariant(BlockTerrain.GetData(value))],
-		                 color.HasValue ? BlocksData.paintedTextures[TextureSlot] : TextureSlot,
-		                 BlocksData.ColorFromInt(color));
+        g.AlphaTest.Mesh(x, y, z,
+						stairs[GetVariant(BlockTerrain.GetData(value))],
+		                color.HasValue ? BlocksData.paintedTextures[TextureSlot] : TextureSlot,
+		                BlocksData.ColorFromInt(color));
 	}
 }
