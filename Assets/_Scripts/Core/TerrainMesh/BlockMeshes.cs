@@ -27,7 +27,7 @@ public class BlockMeshes : MonoBehaviour
         {
             Vector3 v = vec[i];
             v -= half;
-            v = matrix.MultiplyPoint(v);
+            v = matrix.MultiplyPoint3x4(v);
             v += half;
             if (upsidedown)
             {
@@ -64,34 +64,11 @@ public class BlockMeshes : MonoBehaviour
         //    }
         //}
         //throw new System.Exception("mesh not found: " + str);
-        return meshes.LoadAsset<Mesh>(str);
+        Mesh mesh = meshes.LoadAsset<Mesh>(str);
+        if (mesh == null)
+            throw new System.Exception("cannot find mesh " + str);
+        return mesh;
     }
-
-    //   public GameObject gates;
-
-    //private void Start()
-    //{
-    //       TransformAllMesh(gates);
-    //}
-
-    //public static void TransformAllMesh(GameObject obj)
-    //{
-    //    MeshFilter[] ms = obj.GetComponentsInChildren<MeshFilter>();
-    //    foreach (MeshFilter m in ms)
-    //    {
-    //        Mesh meshToSave = TranslateMeshRaw(m.sharedMesh, m.gameObject.transform.localToWorldMatrix);
-
-    //        string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/Meshes/", meshToSave.name, "asset");
-    //        if (string.IsNullOrEmpty(path)) continue;
-
-    //        path = FileUtil.GetProjectRelativePath(path);
-
-    //        MeshUtility.Optimize(meshToSave);
-
-    //        AssetDatabase.CreateAsset(meshToSave, path);
-    //        AssetDatabase.SaveAssets();
-    //    }
-    //}
 
     public static Mesh TranslateMeshRaw(Mesh mesh, Matrix4x4 matrix)
     {
@@ -101,9 +78,7 @@ public class BlockMeshes : MonoBehaviour
         for (int i = 0; i < mesh.vertexCount; i++)
         {
             Vector3 v = vec[i];
-            v -= half;
-            v = matrix.MultiplyPoint(v);
-            v += half;
+            v = matrix.MultiplyPoint3x4(v);
             vec[i] = v;
         }
         m.vertices = vec;

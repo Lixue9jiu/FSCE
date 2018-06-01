@@ -15,7 +15,7 @@ public abstract class Block
         return string.Format("{0}: {1}, {2}", Name, Index, BlockTerrain.GetData(value));
     }
 
-    public virtual void Initialize()
+    public virtual void Initialize(string extraData)
     {
     }
 }

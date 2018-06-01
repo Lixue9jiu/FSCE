@@ -161,27 +161,4 @@ public class TerrainMesh
             colors.Add(color);
         }
     }
-
-	public void Mesh(int x, int y, int z, MeshData mesh, int texSlot, Color color)
-    {
-        Vector3 tran = new Vector3(x, y, z);
-        int count = vertices.Count;
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            vertices.Add(mesh.vertices[i] + tran);
-        }
-        for (int i = 0; i < mesh.triangles.Length; i++)
-        {
-            triangles.Add(mesh.triangles[i] + count);
-        }
-
-		Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
-        Vector2[] uv = mesh.uv;
-
-        for (int i = 0; i < uv.Length; i++)
-        {
-			uvs.Add(uvPos + uv[i]);
-            colors.Add(color);
-        }
-    }
 }

@@ -81,7 +81,7 @@ public class ChunkRenderer : MonoBehaviour
 
 	void RenderChunk (ChunkInstance instance)
 	{
-		Graphics.DrawMesh (instance.meshes [0], instance.transform, terrain, chunkLayer, Camera.main);
-		Graphics.DrawMesh (instance.meshes [1], instance.transform, alaphaTest, chunkLayer, Camera.main);
+		//Graphics.DrawMesh (instance.meshes [0], instance.transform, terrain, chunkLayer, Camera.main);
+		//Graphics.DrawMesh (instance.meshes [1], instance.transform, alaphaTest, chunkLayer, Camera.main);
 	}
 }

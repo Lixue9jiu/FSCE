@@ -99,21 +99,29 @@ public class FurnitureManager : MonoBehaviour
         int count = 0;
         foreach (Furniture f in fs)
         {
-            int[] data = f.data;
+            int[] data = f.Data;
+            count = Mathf.Max(count, f.Index);
+
             for (int i = 0; i < data.Length; i++)
             {
-                count = Mathf.Max(count, f.index);
-                if (BlocksData.IsTransparent[BlockTerrain.GetContent(data[i])])
+                if (BlockTerrain.GetContent(data[i]) == 15)
                 {
-                    isTrans.Add(f.index);
+                    isTrans.Add(f.Index);
                     break;
                 }
             }
         }
-        isTransparent = new bool[isTrans.Max() + 1];
+
+        isTransparent = new bool[count + 1];
         foreach (int i in isTrans)
         {
             isTransparent[i] = true;
+        }
+
+        foreach (Furniture f in fs)
+        {
+            if (f.TerrainUseCount > 0)
+                LoadMash(f);
         }
 	}
 
@@ -121,37 +129,45 @@ public class FurnitureManager : MonoBehaviour
 	{
 		int resolution;
 		furniture.GetValue("Resolution", out resolution);
-		if (furniture.GetValue<int>("TerrainUseCount") > 0)
+        int terrainUseCount = furniture.GetValue<int>("TerrainUseCount");
+		if (terrainUseCount > 0)
 		{
-			Furniture f = new Furniture
-			{
-				index = int.Parse(furniture.Attribute("Name").Value),
-				Resolution = resolution,
-                data = ParseData(XMLUtils.FindValueByName(furniture, "Values"), resolution)
+            Furniture f = new Furniture
+            {
+                Index = int.Parse(furniture.Attribute("Name").Value),
+                Resolution = resolution,
+                Data = ParseData(XMLUtils.FindValueByName(furniture, "Values"), resolution),
+                TerrainUseCount = terrainUseCount
 			};
-			LoadMash(f);
 			return f;
 		}
         return new Furniture
         {
-            index = int.Parse(furniture.Attribute("Name").Value),
+            Index = int.Parse(furniture.Attribute("Name").Value),
             Resolution = resolution,
-            data = new int[0]
+            Data = new int[0],
+            TerrainUseCount = terrainUseCount
         };
 	}
 
 	void LoadMash(Furniture furniture)
 	{
 		MeshData mesh;
-		terrainGenerator.GenerateFurnitureMesh(furniture, out mesh);
+        if (isTransparent[furniture.Index])
+            terrainGenerator.GenerateFurnitureMeshAlphaTest(furniture, out mesh);
+        else
+            terrainGenerator.GenerateFurnitureMesh(furniture, out mesh);
 		Matrix4x4 t = Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f));
 		Matrix4x4 inverseT = t.inverse;
 		MeshData[] all = new MeshData[4];
 		all[0] = mesh;
-		all[1] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 270, 0)) * inverseT);
-		all[2] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 180, 0)) * inverseT);
-		all[3] = mesh.Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 90, 0)) * inverseT);
-		furnitures[furniture.index] = all;
+        all[1] = mesh.Clone();
+        all[1].Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 270, 0)) * inverseT);
+        all[2] = mesh.Clone();
+        all[2].Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 180, 0)) * inverseT);
+        all[3] = mesh.Clone();
+        all[3].Transform(t * Matrix4x4.Rotate(Quaternion.Euler(0, 90, 0)) * inverseT);
+		furnitures[furniture.Index] = all;
 	}
 
     int[] ParseData(string str, int resolution)
@@ -173,15 +189,16 @@ public class FurnitureManager : MonoBehaviour
 
 	public struct Furniture
 	{
-		public int index;
+        public int Index;
 		public int Resolution;
-		public int[] data;
+        public int[] Data;
+        public int TerrainUseCount;
 
 		public int GetCellValue(int x, int y, int z)
 		{
 			if (x >= 0 && x < Resolution && y >= 0 && y < Resolution && z >= 0 && z < Resolution)
 			{
-				return data[Resolution - x - 1 + y * Resolution + z * Resolution * Resolution];
+				return Data[Resolution - x - 1 + y * Resolution + z * Resolution * Resolution];
 			}
 			return 0;
 		}

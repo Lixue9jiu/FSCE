@@ -109,7 +109,7 @@ public class OBJExporter : ScriptableWizard
 
     void Export(string exportPath)
     {
-        BlockTerrain terrain = FindObjectOfType<BlockTerrain>();
+        BlockTerrain terrain = FindObjectOfType<TerrainManager>().Terrain;
         int[] chunks = FindObjectOfType<ChunkRenderer>().RenderingChunks;
 
         List<Mesh> ms = new List<Mesh>();
@@ -118,9 +118,9 @@ public class OBJExporter : ScriptableWizard
         {
             ChunkInstance instance = terrain.chunkInstances[chunks[i]];
 
-            ms.Add(instance.meshes[0]);
+            ms.Add(instance.combineInstances[0].mesh);
             ts.Add(instance.transform);
-            ms.Add(instance.meshes[1]);
+            ms.Add(instance.combineInstances[1].mesh);
             ts.Add(instance.transform);
         }
 

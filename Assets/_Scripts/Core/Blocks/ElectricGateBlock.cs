@@ -5,7 +5,7 @@ public class ElectricGateBlock : Block, INormalBlock
 {
 	MeshData[] meshes = new MeshData[24];
 
-    public override void Initialize()
+    public override void Initialize(string extraData)
     {      
         Mesh blockMesh;
         switch (Index)
@@ -68,6 +68,9 @@ public class ElectricGateBlock : Block, INormalBlock
         Matrix4x4 m;
         Matrix4x4 m2;
 
+        Matrix4x4 half = Matrix4x4.Translate(new Vector3(0.5f, 0.5f, 0.5f));
+        Matrix4x4 inverseHalf = half.inverse;
+
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 6; j++)
@@ -102,7 +105,9 @@ public class ElectricGateBlock : Block, INormalBlock
                         throw new System.Exception();
                 }
 
-                meshes[(j << 2) + i] = new MeshData(BlockMeshes.TranslateMeshRaw(blockMesh, m * m2));
+                MeshData data = new MeshData(blockMesh);
+                data.Transform(half * m * m2 * inverseHalf);
+                meshes[(j << 2) + i] = data;
             }
         }
     }

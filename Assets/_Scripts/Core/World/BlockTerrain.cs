@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockTerrain : Object
+public class BlockTerrain
 {
-	const int NULL_BLOCK_VALUE = 0;
+	public const int NULL_BLOCK_VALUE = -2;
 
 	public static int terrainSize = 8;
 
@@ -23,7 +23,7 @@ public class BlockTerrain : Object
 	Chunk[] chunks;
 	Stack<Chunk> freeChunks = new Stack<Chunk>();
 
-	public ChunkStatus chunkStats;
+    public ChunkStatus chunkStats;
 	public ChunkInstance[] chunkInstances;
 
 	public BlockTerrain()
@@ -32,6 +32,11 @@ public class BlockTerrain : Object
 
         chunkStats = new ChunkStatus(terrainSize);
         chunkInstances = new ChunkInstance[terrainSize * terrainSize];
+
+        for (int i = 0; i < chunkInstances.Length; i++)
+        {
+            chunkInstances[i] = new ChunkInstance();
+        }
 	}
 
 	public int GetChunkIndex(int x, int y)
@@ -253,7 +258,8 @@ public class BlockTerrain : Object
 	{
 		public bool Loaded;
 		public int state;
-		public ChunkUpdateState updateState = ChunkUpdateState.None;
+        public bool needsToBeCreated;
+        public bool needsToBeDestroyed;
 
 		public bool IsNormal
 		{
@@ -301,7 +307,12 @@ public class BlockTerrain : Object
 			shifts = new int[sizeX * sizeZ];
 		}
 
-		public int GetCellValue(int x, int y, int z)
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}", chunkx, chunky);
+        }
+
+        public int GetCellValue(int x, int y, int z)
 		{
 			if (x >= 0 && x < chunkSizeX && y >= 0 && y < chunkSizeY && z >= 0 && z < chunkSizeZ)
 			{
@@ -392,12 +403,5 @@ public class BlockTerrain : Object
 	public static int GetHumidity(int value)
 	{
 		return (value & 61440) >> 12;
-	}
-
-	public enum ChunkUpdateState
-	{
-		NeedsToBeCreated,
-		NeedsToBeDestoryed,
-		None
 	}
 }

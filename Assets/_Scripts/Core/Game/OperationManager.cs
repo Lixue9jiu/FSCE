@@ -15,7 +15,7 @@ public class OperationManager : MonoBehaviour
         }
     }
 
-    public Operation currentOperation = null;
+    public Operation currentOperation;
 
     private void Start()
     {
@@ -31,11 +31,10 @@ public class OperationManager : MonoBehaviour
 
     public void SwitchOperation(System.Type type)
     {
-        if (type == null || type.IsInstanceOfType(currentOperation))
+        if (type.IsInstanceOfType(currentOperation))
             return;
 
-        if (currentOperation != null)
-            currentOperation.OnRemoveFromCurrent();
+        currentOperation.OnRemoveFromCurrent();
 
         currentOperation = GetOpBehavior(type);
         currentOperation.OnSetToCurrent();
@@ -43,8 +42,6 @@ public class OperationManager : MonoBehaviour
 
     public Operation GetOpBehavior(System.Type type)
     {
-        if (type == null)
-            return null;
         Component component = GetComponent(type);
         if (component != null)
         {
@@ -55,8 +52,7 @@ public class OperationManager : MonoBehaviour
 
     public void SetCurrentOpEnabled(bool active)
     {
-        if (currentOperation != null)
-            currentOperation.enabled = active;
+        currentOperation.enabled = active;
     }
 
     private void Update()

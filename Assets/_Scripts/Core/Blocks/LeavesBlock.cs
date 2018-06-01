@@ -6,9 +6,9 @@ public class LeavesBlock : Block, INormalBlock
 {
     ColorMap map;
 
-    public override void Initialize()
+    public override void Initialize(string extraData)
     {
-        base.Initialize();
+        base.Initialize(extraData);
         switch (Index)
         {
             case 12:

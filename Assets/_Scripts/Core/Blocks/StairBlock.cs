@@ -3,12 +3,15 @@ using System.Collections;
 
 public class StairBlock : Block, INormalBlock, IPaintableBlock
 {
-	MeshData[] stairs = new MeshData[24];
+    MeshData[] blockMeshes = new MeshData[24];
+    MeshData[] paintedBlockMeshes = new MeshData[24];
 
-	public override void Initialize()
+	public override void Initialize(string extraData)
 	{
-		base.Initialize();
-		//IsCubic = false;
+		base.Initialize(extraData);
+        //IsCubic = false;
+
+        Matrix4x4 matrix = Matrix4x4.Translate(new Vector3(0.5f, 0f, 0.5f));
 
 		float y;
 		Matrix4x4 m;
@@ -19,7 +22,7 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
 
 			y -= GetRotation(i) * 90;
 
-			m = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, y, 0), Vector3.one);
+            m = Matrix4x4.Rotate(Quaternion.Euler(0, y, 0));
 			switch ((i >> 3) & 3)
 			{
 				case 1:
@@ -35,7 +38,22 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
 					throw new System.Exception("unknown stair module: " + ((i >> 3) & 3));
 			}
 
-			stairs[i] = new MeshData(BlockMeshes.TranslateMesh(mesh, m, (i & 4) != 0));
+            Vector2 uvPos = new Vector2((TextureSlot % 16) / 16f, -((TextureSlot >> 4) + 1) / 16f);
+            Vector2 PuvPos = new Vector2((BlocksData.paintedTextures[TextureSlot] % 16) / 16f, -((BlocksData.paintedTextures[TextureSlot] >> 4) + 1) / 16f);
+
+            blockMeshes[i] = new MeshData(mesh);
+            blockMeshes[i].Transform(matrix * m);
+            if ((i & 4) != 0)
+            {
+                blockMeshes[i].FlipVertical();
+            }
+            paintedBlockMeshes[i] = blockMeshes[i].Clone();
+
+            for (int k = 0; k < blockMeshes[i].uv.Length; k++)
+            {
+                blockMeshes[i].uv[k] = uvPos;
+                paintedBlockMeshes[i].uv[k] = PuvPos;
+            }
 		}
 	}
 
@@ -61,9 +79,9 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
     public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, MeshGenerator g)
 	{
 		int? color = GetColor(BlockTerrain.GetData(value));
-        g.AlphaTest.Mesh(x, y, z,
-						stairs[GetVariant(BlockTerrain.GetData(value))],
-		                color.HasValue ? BlocksData.paintedTextures[TextureSlot] : TextureSlot,
-		                BlocksData.ColorFromInt(color));
+        if (color.HasValue)
+            g.Terrain.Mesh(x, y, z, paintedBlockMeshes[GetVariant(BlockTerrain.GetData(value))], BlocksData.DEFAULT_COLORS[color.Value]);
+        else
+            g.Terrain.Mesh(x, y, z, blockMeshes[GetVariant(BlockTerrain.GetData(value))], Color.white);
 	}
 }

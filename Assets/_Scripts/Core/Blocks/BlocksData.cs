@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
@@ -12,6 +12,7 @@ public class BlocksData : MonoBehaviour
 		public string Name;
 		public int TextureSlot;
 		public string BlockType;
+        public string ExtraData;
 
 		public BlockData(string src)
 		{
@@ -20,6 +21,7 @@ public class BlocksData : MonoBehaviour
 			Name = strs[1];
 			TextureSlot = int.Parse(strs[2]);
 			BlockType = strs[3];
+            ExtraData = strs[4];
 		}
 	}
 
@@ -53,7 +55,8 @@ public class BlocksData : MonoBehaviour
 		{54, 50},
 		{8, 147},
 		{16, 69},
-		{1, 24}
+		{1, 24},
+        {58, 58}
 	};
 
     public static Block[] Blocks { get; private set; }
@@ -156,6 +159,6 @@ public class BlocksData : MonoBehaviour
 		block.Index = data.Index;
 		block.Name = data.Name;
 		block.TextureSlot = data.TextureSlot;
-		block.Initialize();
+        block.Initialize(data.ExtraData);
 	}
 }

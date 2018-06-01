@@ -57,7 +57,7 @@ public class ConsoleWindow : BaseWindow
     {
         base.Hide();
         input.text = "";
-		UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(gameObject);
     }
 }
 

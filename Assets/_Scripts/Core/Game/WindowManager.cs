@@ -11,6 +11,14 @@ public class WindowManager : MonoBehaviour
 
     public static BaseWindow activeWindow;
 
+    public static bool isShowingWindow
+    {
+        get
+        {
+            return activeWindow != null && activeWindow.isShowing;
+        }
+    }
+
     public bool inGame { get; private set; }
 
     private static GameObject mainCanvas;
@@ -18,29 +26,31 @@ public class WindowManager : MonoBehaviour
     private void Start()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-		inGame = SceneManager.GetActiveScene().name == "MainScene";
+        inGame = SceneManager.GetActiveScene().name == "MainScene";
     }
 
     private void Update()
     {
-		if (EventSystem.current == null || EventSystem.current.currentSelectedGameObject == null) {
-			if (Input.GetKeyDown(KeyCode.T))
-			{
-				ConsoleWindow console = Get<ConsoleWindow>();
-				if (!console.isShowing)
-				{
-					console.Show();
-				}
-			}
-		}
+        if (!isShowingWindow && Input.GetKeyDown(KeyCode.T))
+        {
+            ConsoleWindow console = Get<ConsoleWindow>();
+            if (!console.isShowing)
+            {
+                console.Show();
+            }
+        }
 
-		if (Input.GetKeyDown (KeyCode.Escape)) {
-			if (!HideActiveWindow () && inGame) {
-				PauseManager.instance.TuggleEsc ();
-			}
-		} else if (Input.GetKeyDown (KeyCode.F10)) {
-			Screen.fullScreen = !Screen.fullScreen;
-		}
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!HideActiveWindow() && inGame)
+            {
+                PauseManager.instance.TuggleEsc();
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.F10))
+        {
+            Screen.fullScreen = !Screen.fullScreen;
+        }
     }
 
     public bool HideActiveWindow()
@@ -48,7 +58,7 @@ public class WindowManager : MonoBehaviour
         if (activeWindow != null && activeWindow.isShowing)
         {
             activeWindow.Hide();
-			activeWindow = null;
+            activeWindow = null;
             return true;
         }
         return false;
