@@ -19,7 +19,7 @@ public class TerrainManager : MonoBehaviour
 
     private ChunkRenderer chunkRenderer;
 
-    private ChunkInstanceManager chunkInstanceManager;
+    //private ChunkInstanceManager chunkInstanceManager;
 
     bool chunkUpdateWorking;
 
@@ -29,7 +29,7 @@ public class TerrainManager : MonoBehaviour
     private void Awake()
     {
         chunkRenderer = GetComponent<ChunkRenderer>();
-        chunkInstanceManager = GetComponent<ChunkInstanceManager>();
+        //chunkInstanceManager = GetComponent<ChunkInstanceManager>();
     }
 
     private void Start()
@@ -44,8 +44,11 @@ public class TerrainManager : MonoBehaviour
     void StartChunkUpdateThread()
     {
         thread = new Thread(new ThreadStart(ChunkUpdateWork));
+        thread.Priority = System.Threading.ThreadPriority.Normal;
         thread.Start();
     }
+
+    System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 
     void ChunkUpdateWork()
     {
@@ -64,27 +67,41 @@ public class TerrainManager : MonoBehaviour
                         BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
                         if (chunk == null)
                             continue;
-                        lock (chunk)
+                        if (Terrain.chunkStats.Get(index).needsToBeCreated)
                         {
-                            terrainGenerator.GenerateAllBlocks(chunk);
-                            terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
-                            terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
-                            //Terrain.chunkStats.Get(index).state = 0;
-                            //switch (Terrain.chunkStats.Get(index).state)
-                            //{
-                            //	case 3:
-                            //		terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
-                            //		terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
-                            //		break;
-                            //	case 1:
-                            //		terrainGenerator.GenerateChunkMesh(chunk, out chunk.mesh[0]);
-                            //		break;
-                            //	case 2:
-                            //		terrainGenerator.GenerateNormalBlocks(chunk, out chunk.mesh[1]);
-                            //		break;
-                            //}
-                            chunkQueue.AddMain(index);
+                            terrainReader.ReadChunk(chunk.chunkx, chunk.chunky, chunk);
                         }
+                        //stopwatch.Reset();
+                        //stopwatch.Start();
+                        //terrainGenerator.GenerateChunkMesh(chunk);
+                        //stopwatch.Stop();
+                        //Debug.Log("building terrain time: " + stopwatch.ElapsedMilliseconds);
+                        //stopwatch.Reset();
+                        //stopwatch.Start();
+                        //terrainGenerator.GenerateNormalBlocks(chunk);
+                        //stopwatch.Stop();
+                        //Debug.Log("building normal blocks time: " + stopwatch.ElapsedMilliseconds);
+                        terrainGenerator.GenerateChunkMesh(chunk);
+                        terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
+                        terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
+                        //switch (Terrain.chunkStats.Get(index).state)
+                        //{
+                        //	case 3:
+                        //		terrainGenerator.GenerateChunkMesh(chunk);
+                        //		terrainGenerator.GenerateNormalBlocks(chunk);
+                        //        terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
+                        //        terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
+                        //		break;
+                        //	case 1:
+                        //		terrainGenerator.GenerateChunkMesh(chunk);
+                        //        terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
+                        //		break;
+                        //	case 2:
+                        //		terrainGenerator.GenerateNormalBlocks(chunk);
+                        //        terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
+                        //		break;
+                        //}
+                        chunkQueue.AddMain(index);
                     }
                 }
                 else if (needTerrainUpdate)
@@ -201,7 +218,8 @@ public class TerrainManager : MonoBehaviour
         {
             if (terrainReader.ChunkExist(x, y))
             {
-                c = terrainReader.ReadChunk(x, y, Terrain);
+                c = Terrain.CreateChunk(x, y);
+                terrainReader.ReadChunk(x, y, c);
                 QuqueChunkUpdate(c.index, 3);
                 Terrain.chunkStats.Get(c.index).needsToBeCreated = true;
             }
@@ -245,8 +263,8 @@ public class TerrainManager : MonoBehaviour
         instance.UpdateAll(c);
         instance.UpdateMesh(0);
         instance.UpdateMesh(1);
-        //chunkRenderer.AddChunk(index);
-        chunkInstanceManager.LoadChunkInstance(instance);
+        chunkRenderer.AddChunk(index);
+        //chunkInstanceManager.LoadChunkInstance(instance);
     }
 
     public void UpdateChunk(int index)
@@ -257,27 +275,28 @@ public class TerrainManager : MonoBehaviour
         {
             BlockTerrain.Chunk chunk = Terrain.GetChunk(index);
             InstantiateChunk(chunk);
-            if (chunk.XminusOne != null && chunk.XminusOne.Statics(Terrain).IsNormal)
-            {
-                QuqueChunkUpdate(chunk.XminusOne.index, 3);
-            }
-            if (chunk.XplusOne != null && chunk.XplusOne.Statics(Terrain).IsNormal)
-            {
-                QuqueChunkUpdate(chunk.XplusOne.index, 3);
-            }
-            if (chunk.YminusOne != null && chunk.YminusOne.Statics(Terrain).IsNormal)
-            {
-                QuqueChunkUpdate(chunk.YminusOne.index, 3);
-            }
-            if (chunk.YplusOne != null && chunk.YplusOne.Statics(Terrain).IsNormal)
-            {
-                QuqueChunkUpdate(chunk.YplusOne.index, 3);
-            }
+            //if (chunk.XminusOne != null && chunk.XminusOne.Statics(Terrain).IsNormal)
+            //{
+            //    QuqueChunkUpdate(chunk.XminusOne.index, 3);
+            //}
+            //if (chunk.XplusOne != null && chunk.XplusOne.Statics(Terrain).IsNormal)
+            //{
+            //    QuqueChunkUpdate(chunk.XplusOne.index, 3);
+            //}
+            //if (chunk.YminusOne != null && chunk.YminusOne.Statics(Terrain).IsNormal)
+            //{
+            //    QuqueChunkUpdate(chunk.YminusOne.index, 3);
+            //}
+            //if (chunk.YplusOne != null && chunk.YplusOne.Statics(Terrain).IsNormal)
+            //{
+            //    QuqueChunkUpdate(chunk.YplusOne.index, 3);
+            //}
             statics.needsToBeCreated = false;
         }
         else if (statics.needsToBeDestroyed)
         {
-            chunkInstanceManager.UnloadChunkInstance(Terrain.chunkInstances[index]);
+            chunkRenderer.RemoveChunk(index);
+            //chunkInstanceManager.UnloadChunkInstance(Terrain.chunkInstances[index]);
             statics.needsToBeDestroyed = false;
         }
 
@@ -288,17 +307,17 @@ public class TerrainManager : MonoBehaviour
                 instance = Terrain.chunkInstances[index];
                 instance.UpdateMesh(0);
                 instance.UpdateMesh(1);
-                chunkInstanceManager.UpdateChunkInstance(instance);
+                //chunkInstanceManager.UpdateChunkInstance(instance);
                 break;
             case 1:
                 instance = Terrain.chunkInstances[index];
                 instance.UpdateMesh(0);
-                chunkInstanceManager.UpdateChunkInstance(instance);
+                //chunkInstanceManager.UpdateChunkInstance(instance);
                 break;
             case 2:
                 instance = Terrain.chunkInstances[index];
                 instance.UpdateMesh(1);
-                chunkInstanceManager.UpdateChunkInstance(instance);
+                //chunkInstanceManager.UpdateChunkInstance(instance);
                 break;
         }
 
@@ -327,7 +346,7 @@ public class TerrainManager : MonoBehaviour
     {
         BlockTerrain.ChunkStatus chunkStats = Terrain.chunkStats;
 
-        Vector2 center = new Vector2(centerChunkX, centerChunkY);
+        //Vector2 center = new Vector2(centerChunkX, centerChunkY);
 
         centerChunkX -= chunkStats.halfSize;
         centerChunkY -= chunkStats.halfSize;
@@ -355,7 +374,7 @@ public class TerrainManager : MonoBehaviour
         }
 
         chunkStats.SetOffset(centerChunkX, centerChunkY);
-        needTerrainUpdate = false;
+        //needTerrainUpdate = false;
     }
 
     public static Point2 CurrentChunk()
@@ -371,6 +390,9 @@ public class TerrainManager : MonoBehaviour
 
     class ChunkQueue
     {
+        int mainCount;
+        int terrainCount;
+
         object locker = new object();
         Queue<int> main = new Queue<int>();
         Queue<int> terrain = new Queue<int>();
@@ -379,7 +401,7 @@ public class TerrainManager : MonoBehaviour
         {
             get
             {
-                return main.Count;
+                return mainCount;
             }
         }
 
@@ -387,7 +409,7 @@ public class TerrainManager : MonoBehaviour
         {
             get
             {
-                return terrain.Count;
+                return terrainCount;
             }
         }
 
@@ -395,6 +417,7 @@ public class TerrainManager : MonoBehaviour
         {
             lock (locker)
             {
+                mainCount--;
                 return main.Dequeue();
             }
         }
@@ -403,6 +426,7 @@ public class TerrainManager : MonoBehaviour
         {
             lock (locker)
             {
+                terrainCount--;
                 return terrain.Dequeue();
             }
         }
@@ -412,6 +436,7 @@ public class TerrainManager : MonoBehaviour
             lock (locker)
             {
                 main.Enqueue(index);
+                mainCount++;
             }
         }
 
@@ -420,6 +445,7 @@ public class TerrainManager : MonoBehaviour
             lock (locker)
             {
                 terrain.Enqueue(index);
+                terrainCount++;
             }
         }
 
@@ -429,6 +455,8 @@ public class TerrainManager : MonoBehaviour
             {
                 main.Clear();
                 terrain.Clear();
+                mainCount = 0;
+                terrainCount = 0;
             }
         }
     }

@@ -32,9 +32,9 @@ public class DAEExporter : ScriptableWizard {
         {
             ChunkInstance instance = terrain.chunkInstances[chunks[i]];
 
-            ms.Add(instance.combineInstances[0].mesh);
+            ms.Add(instance.Meshes[0]);
             ts.Add(instance.transform);
-            ms.Add(instance.combineInstances[1].mesh);
+            ms.Add(instance.Meshes[1]);
             ts.Add(instance.transform);
         }
 

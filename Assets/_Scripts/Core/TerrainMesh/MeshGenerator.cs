@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class MeshGenerator
 {
-    public readonly TerrainMesh Terrain = new TerrainMesh();
-	public readonly TerrainMesh AlphaTest = new TerrainMesh();
+    public readonly GreedyTerrainMesh Terrain = new GreedyTerrainMesh();
+	public readonly GreedyTerrainMesh AlphaTest = new GreedyTerrainMesh();
 
     public void GenerateAllBlocks(BlockTerrain.Chunk chunk)
     {
@@ -166,7 +166,10 @@ public class MeshGenerator
                 {
 					int value = chunk.GetCellValue(x, y, z);
 					int content = BlockTerrain.GetContent(value);
-					if (isTransparent[content])
+                    if (content != 202 && 
+                        //content != 136 &&
+                        //content != 217 &&
+                        isTransparent[content])
 					{
                         normalBlocks[content].GenerateTerrain(x, y, z, value, chunk, this);
 					}
@@ -181,7 +184,7 @@ public class MeshGenerator
 
 		int res = furniture.Resolution;
 		Matrix4x4 matrix = Matrix4x4.Scale(Vector3.one / res);
-		float uvBlockSize = 0.0625f / res;
+		//float uvBlockSize = 0.0625f / res;
 
 		int[] mask = new int[res * res];
 		int u, v, n, w, h, j, i, l, k;

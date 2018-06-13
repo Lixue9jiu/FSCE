@@ -15,7 +15,7 @@ public abstract class FluidBlock : Block, INormalBlock
         }
     }
 
-    public void GenerateFluidTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, TerrainMesh terrainMesh, Color topColor, Color sideColor)
+    public void GenerateFluidTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, GreedyTerrainMesh terrainMesh, Color topColor, Color sideColor)
     {
         float height1, height2, height3, height4;
 

@@ -1,0 +1,10 @@
+{
+    "name": "Game",
+    "references": [
+        "UnityStandardAssets"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true
+}

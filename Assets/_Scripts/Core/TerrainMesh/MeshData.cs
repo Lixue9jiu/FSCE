@@ -65,7 +65,6 @@ public struct MeshData
 
     public void FlipWindingOrder()
     {
-        Debug.Log("filping winding order");
         int[] tri = new int[triangles.Length];
         for (int i = 0; i < tri.Length; i += 3)
         {

@@ -37,7 +37,7 @@ public class BuildAssetBundle : ScriptableObject, UnityEditor.Build.IActiveBuild
         MeshFilter[] ms = Selection.activeGameObject.GetComponentsInChildren<MeshFilter>();
         foreach (MeshFilter m in ms)
         {
-            Mesh meshToSave = BlockMeshes.TranslateMeshRaw(m.sharedMesh, m.transform.localToWorldMatrix);
+            Mesh meshToSave = BlockMeshes.TranslateMesh(m.sharedMesh, m.transform.localToWorldMatrix);
 
             string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/Meshes/", meshToSave.name, "asset");
             if (string.IsNullOrEmpty(path)) continue;

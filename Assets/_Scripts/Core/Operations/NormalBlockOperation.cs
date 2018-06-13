@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 using System.Collections;
 
 public class NormalBlockOperation : Operation
@@ -29,11 +30,11 @@ public class NormalBlockOperation : Operation
 		}
 
 		if (!isBreaking) {
-			if (Input.GetKey (KeyCode.Mouse0)) {
+            if (CrossPlatformInputManager.GetAxis ("Place") > 0) {
 				Point3 p = result.Value.Position;
 				terrainManager.ChangeCell (p.X, p.Y, p.Z, 0);
 				StartCoroutine (Delay (0.1f));
-			} else if (Input.GetKey (KeyCode.Mouse1)) {
+            } else if (CrossPlatformInputManager.GetAxis("Destroy") > 0) {
 				Point3 p = result.Value.LastPosition;
                 terrainManager.ChangeCell (p.X, p.Y, p.Z, placeBlockValue);
 				StartCoroutine (Delay (0.1f));

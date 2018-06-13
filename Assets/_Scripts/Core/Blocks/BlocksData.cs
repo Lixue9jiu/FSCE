@@ -146,7 +146,7 @@ public class BlocksData : MonoBehaviour
 			var normal = Blocks[k] as INormalBlock;
 
 			if (standard == null && normal == null)
-				Debug.LogErrorFormat("block {0} does not defind GenerateTerrain", Blocks[k].GetType().Name);
+				Debug.LogErrorFormat("block {0} does not define GenerateTerrain", Blocks[k].GetType().Name);
 
 			StandardCubeBlocks[k] = standard;
 			NormalBlocks[k] = normal;

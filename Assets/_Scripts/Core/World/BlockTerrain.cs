@@ -5,6 +5,7 @@ using UnityEngine;
 public class BlockTerrain
 {
 	public const int NULL_BLOCK_VALUE = -2;
+    public const int NULL_BLOCK_CONTENT = 1022;
 
 	public static int terrainSize = 8;
 
@@ -320,11 +321,11 @@ public class BlockTerrain
 			}
 			if (XminusOne != null && x == -1)
 				return XminusOne.GetCellValue(15, y, z);
-			else if (XplusOne != null && x == 16)
+			if (XplusOne != null && x == 16)
 				return XplusOne.GetCellValue(0, y, z);
 			if (YminusOne != null && z == -1)
 				return YminusOne.GetCellValue(x, y, 15);
-			else if (YplusOne != null && z == 16)
+			if (YplusOne != null && z == 16)
 				return YplusOne.GetCellValue(x, y, 0);
 			return NULL_BLOCK_VALUE;
 		}

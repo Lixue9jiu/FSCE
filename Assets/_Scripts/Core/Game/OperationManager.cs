@@ -52,7 +52,8 @@ public class OperationManager : MonoBehaviour
 
     public void SetCurrentOpEnabled(bool active)
     {
-        currentOperation.enabled = active;
+        if (currentOperation != null)
+            currentOperation.enabled = active;
     }
 
     private void Update()

@@ -97,7 +97,7 @@ public class FenceBlock : Block, INormalBlock, IPaintableBlock
     {
         int data = BlockTerrain.GetData(value);
         int? i = GetColor(data);
-        TerrainMesh terrainMesh = useAlphaTest ? g.AlphaTest : g.Terrain;
+        GreedyTerrainMesh terrainMesh = useAlphaTest ? g.AlphaTest : g.Terrain;
         if (i.HasValue)
             terrainMesh.Mesh(x, y, z, paintedBlockMeshes[GetVariant(data)], BlocksData.DEFAULT_COLORS[i.Value]);
         else

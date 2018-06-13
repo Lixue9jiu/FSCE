@@ -14,21 +14,21 @@ public class TerrainReader129 : System.IDisposable, ITerrainReader
 
     object locker = new object();
 
-    public BlockTerrain.Chunk[] AlaphaTest(BlockTerrain terrain)
-    {
-        BlockTerrain.Chunk chunk;
+    //public BlockTerrain.Chunk[] AlaphaTest(BlockTerrain terrain)
+    //{
+    //    BlockTerrain.Chunk chunk;
 
-        Dictionary<Point2, long>.Enumerator enu = chunkOffsets.GetEnumerator();
-        List<BlockTerrain.Chunk> c = new List<BlockTerrain.Chunk>();
+    //    Dictionary<Point2, long>.Enumerator enu = chunkOffsets.GetEnumerator();
+    //    List<BlockTerrain.Chunk> c = new List<BlockTerrain.Chunk>();
 
-        while (enu.MoveNext())
-        {
-            Point2 p = enu.Current.Key;
-            chunk = ReadChunk(p.X, p.Y, terrain);
-            c.Add(chunk);
-        }
-        return c.ToArray();
-    }
+    //    while (enu.MoveNext())
+    //    {
+    //        Point2 p = enu.Current.Key;
+    //        chunk = ReadChunk(p.X, p.Y, terrain);
+    //        c.Add(chunk);
+    //    }
+    //    return c.ToArray();
+    //}
 
     public void Load(Stream stream)
     {
@@ -63,12 +63,7 @@ public class TerrainReader129 : System.IDisposable, ITerrainReader
     //		}
     //	}
 
-    public BlockTerrain.Chunk ReadChunk(int chunkx, int chunky, BlockTerrain terrain)
-    {
-        return ReadChunk(chunkx, chunky, terrain.CreateChunk(chunkx, chunky));
-    }
-
-    private unsafe BlockTerrain.Chunk ReadChunk(int chunkx, int chunky, BlockTerrain.Chunk chunk)
+    public unsafe void ReadChunk(int chunkx, int chunky, BlockTerrain.Chunk chunk)
     {
         lock (locker)
         {
@@ -81,46 +76,18 @@ public class TerrainReader129 : System.IDisposable, ITerrainReader
 
                 stream.Read(buffer, 0, 131072);
 
-                try
+                fixed (byte* bptr = &buffer[0])
                 {
-                    fixed (byte* bptr = &buffer[0])
+                    int* iptr = (int*)bptr;
+                    for (int x = 0; x < 16; x++)
                     {
-                        int* iptr = (int*)bptr;
-                        for (int x = 0; x < 16; x++)
+                        for (int y = 0; y < 16; y++)
                         {
-                            for (int y = 0; y < 16; y++)
-                            {
-                                int index = BlockTerrain.GetCellIndex(15 - x, 0, y);
-                                int h = 0;
-                                while (h < 128)
-                                {
-                                    chunk.SetCellValue(index, *iptr);
-                                    iptr++;
-                                    h++;
-                                    index++;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                }
-
-                stream.Read(buffer, 0, 1024);
-
-                try
-                {
-                    fixed (byte* bptr = &buffer[0])
-                    {
-                        int* iptr = (int*)bptr;
-                        for (int x = 0; x < 16; x++)
-                        {
-                            int index = BlockTerrain.GetShiftIndex(15 - x, 0);
+                            int index = BlockTerrain.GetCellIndex(15 - x, 0, y);
                             int h = 0;
-                            while (h < 16)
+                            while (h < 128)
                             {
-                                chunk.SetShiftValue(index, *iptr);
+                                chunk.SetCellValue(index, *iptr);
                                 iptr++;
                                 h++;
                                 index++;
@@ -128,11 +95,26 @@ public class TerrainReader129 : System.IDisposable, ITerrainReader
                         }
                     }
                 }
-                catch
+
+                stream.Read(buffer, 0, 1024);
+
+                fixed (byte* bptr = &buffer[0])
                 {
+                    int* iptr = (int*)bptr;
+                    for (int x = 0; x < 16; x++)
+                    {
+                        int index = BlockTerrain.GetShiftIndex(15 - x, 0);
+                        int h = 0;
+                        while (h < 16)
+                        {
+                            chunk.SetShiftValue(index, *iptr);
+                            iptr++;
+                            h++;
+                            index++;
+                        }
+                    }
                 }
             }
-            return chunk;
         }
     }
 
