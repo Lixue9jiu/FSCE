@@ -1,141 +1,116 @@
-using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace UnityStandardAssets.CrossPlatformInput
 {
-    [RequireComponent(typeof(Image))]
     public class TouchPad : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
-        // Options for which axes to use
-        public enum AxisOption
-        {
-            Both, // Use both
-            OnlyHorizontal, // Only horizontal
-            OnlyVertical // Only vertical
-        }
+        const float MIN_TOUCH_RANGE_SQR = 4f;
+        const float LONG_CLICK_WAIT_TIME = 0.5f;
+        const float SHORT_CLICK_WAIT_TIME = 0.2f;
 
-
-        public enum ControlStyle
-        {
-            Absolute, // operates from teh center of the image
-            Relative, // operates from the center of the initial touch
-            Swipe, // swipe to touch touch no maintained center
-        }
-
-
-        public AxisOption axesToUse = AxisOption.Both; // The options for the axes that the still will use
-        public ControlStyle controlStyle = ControlStyle.Absolute; // control style to use
         public string horizontalAxisName = "Horizontal"; // The name given to the horizontal axis for the cross platform input
         public string verticalAxisName = "Vertical"; // The name given to the vertical axis for the cross platform input
-        public float Xsensitivity = 1f;
-        public float Ysensitivity = 1f;
-
-        public Vector2 LowestOffsetLimit = new Vector2(0.01f, 0.01f);
+        public float sensitivity = 1f;
 
         Vector3 m_StartPos;
         Vector2 m_PreviousDelta;
         Vector3 m_JoytickOutput;
-        bool m_UseX; // Toggle for using the x axis
-        bool m_UseY; // Toggle for using the Y axis
         CrossPlatformInputManager.VirtualAxis m_HorizontalVirtualAxis; // Reference to the joystick in the cross platform input
         CrossPlatformInputManager.VirtualAxis m_VerticalVirtualAxis; // Reference to the joystick in the cross platform input
         bool m_Dragging;
         int m_Id = -1;
         Vector2 m_PreviousTouchPos; // swipe style control touch
 
+        public string shortClickAxisName = "Destroy";
+        public string longClickAxisName = "Place";
 
-#if !UNITY_EDITOR
-    private Vector3 m_Center;
-    private Image m_Image;
-#else
-        Vector3 m_PreviousMouse;
-#endif
+        bool m_CheckForTouch;
+        bool isShortClick;
+        float m_DragTimeWaited;
+        Vector2 m_AccumulatedPointerDelta;
+        CrossPlatformInputManager.VirtualAxis m_ShortClickAxis;
+        CrossPlatformInputManager.VirtualAxis m_LongClickAxis;
 
         void OnEnable()
         {
             CreateVirtualAxes();
         }
 
-        void Start()
-        {
-#if !UNITY_EDITOR
-            m_Image = GetComponent<Image>();
-            m_Center = m_Image.transform.position;
-#endif
-        }
-
         void CreateVirtualAxes()
         {
-            // set axes to use
-            m_UseX = (axesToUse == AxisOption.Both || axesToUse == AxisOption.OnlyHorizontal);
-            m_UseY = (axesToUse == AxisOption.Both || axesToUse == AxisOption.OnlyVertical);
+            m_HorizontalVirtualAxis = new CrossPlatformInputManager.VirtualAxis(horizontalAxisName);
+            CrossPlatformInputManager.RegisterVirtualAxis(m_HorizontalVirtualAxis);
 
-            // create new axes based on axes to use
-            if (m_UseX)
-            {
-                m_HorizontalVirtualAxis = new CrossPlatformInputManager.VirtualAxis(horizontalAxisName);
-                CrossPlatformInputManager.RegisterVirtualAxis(m_HorizontalVirtualAxis);
-            }
-            if (m_UseY)
-            {
-                m_VerticalVirtualAxis = new CrossPlatformInputManager.VirtualAxis(verticalAxisName);
-                CrossPlatformInputManager.RegisterVirtualAxis(m_VerticalVirtualAxis);
-            }
+            m_VerticalVirtualAxis = new CrossPlatformInputManager.VirtualAxis(verticalAxisName);
+            CrossPlatformInputManager.RegisterVirtualAxis(m_VerticalVirtualAxis);
+
+            m_ShortClickAxis = new CrossPlatformInputManager.VirtualAxis(shortClickAxisName);
+            CrossPlatformInputManager.RegisterVirtualAxis(m_ShortClickAxis);
+
+            m_LongClickAxis = new CrossPlatformInputManager.VirtualAxis(longClickAxisName);
+            CrossPlatformInputManager.RegisterVirtualAxis(m_LongClickAxis);
         }
 
         void UpdateVirtualAxes(Vector3 value)
         {
-            value = value.normalized;
-            if (m_UseX)
-            {
-                m_HorizontalVirtualAxis.Update(value.x);
-            }
-
-            if (m_UseY)
-            {
-                m_VerticalVirtualAxis.Update(value.y);
-            }
+            m_HorizontalVirtualAxis.Update(value.x);
+            m_VerticalVirtualAxis.Update(value.y);
         }
-
 
         public void OnPointerDown(PointerEventData data)
         {
             m_Dragging = true;
             m_Id = data.pointerId;
 #if !UNITY_EDITOR
-        if (controlStyle != ControlStyle.Absolute )
-            m_Center = data.position;
+            m_PreviousTouchPos = Input.touches[m_Id].position;
+#else
+            m_PreviousTouchPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 #endif
+            m_CheckForTouch = true;
+            m_DragTimeWaited = 0;
+            m_AccumulatedPointerDelta = Vector2.zero;
         }
 
         void Update()
         {
             if (!m_Dragging)
             {
+                m_PreviousTouchPos = Vector2.zero;
                 return;
             }
             if (Input.touchCount >= m_Id + 1 && m_Id != -1)
             {
 #if !UNITY_EDITOR
-
-            if (controlStyle == ControlStyle.Swipe)
-            {
-                m_Center = m_PreviousTouchPos;
+                Vector2 pointerDelta = new Vector2(Input.touches[m_Id].position.x - m_PreviousTouchPos.x , Input.touches[m_Id].position.y - m_PreviousTouchPos.y);
+                pointerDelta.x *= sensitivity;
+                pointerDelta.y *= sensitivity;
                 m_PreviousTouchPos = Input.touches[m_Id].position;
-            }
-            Vector2 pointerDelta = new Vector2(Input.touches[m_Id].position.x - m_Center.x , Input.touches[m_Id].position.y - m_Center.y).normalized;
-            pointerDelta.x *= Xsensitivity;
-                pointerDelta.y *= Ysensitivity;
-                if (Mathf.Abs(pointerDelta.x) < LowestOffsetLimit.x && Mathf.Abs(pointerDelta.y) < LowestOffsetLimit.y)
-                pointerDelta = Vector3.zero;
 #else
                 Vector2 pointerDelta;
-                pointerDelta.x = Input.mousePosition.x - m_PreviousMouse.x;
-                pointerDelta.y = Input.mousePosition.y - m_PreviousMouse.y;
-                m_PreviousMouse = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
+                pointerDelta.x = Input.mousePosition.x - m_PreviousTouchPos.x;
+                pointerDelta.y = Input.mousePosition.y - m_PreviousTouchPos.y;
+
+                pointerDelta.x *= sensitivity;
+                pointerDelta.y *= sensitivity;
+                m_PreviousTouchPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 #endif
+                if (m_CheckForTouch)
+                {
+                    m_DragTimeWaited += Time.deltaTime;
+                    m_AccumulatedPointerDelta += pointerDelta;
+                    if (m_DragTimeWaited > LONG_CLICK_WAIT_TIME)
+                    {
+                        m_CheckForTouch = false;
+                        if (m_AccumulatedPointerDelta.sqrMagnitude < MIN_TOUCH_RANGE_SQR)
+                        {
+                            m_LongClickAxis.Update(1);
+                        }
+                    }
+                }
+
                 UpdateVirtualAxes(new Vector3(pointerDelta.x, pointerDelta.y, 0));
             }
         }
@@ -145,6 +120,18 @@ namespace UnityStandardAssets.CrossPlatformInput
             m_Dragging = false;
             m_Id = -1;
             UpdateVirtualAxes(Vector3.zero);
+            m_LongClickAxis.Update(0);
+            if (m_DragTimeWaited < SHORT_CLICK_WAIT_TIME && m_AccumulatedPointerDelta.sqrMagnitude < MIN_TOUCH_RANGE_SQR)
+            {
+                StartCoroutine(TuggleShortClick(0.01f));
+            }
+        }
+
+        IEnumerator TuggleShortClick(float seconds)
+        {
+            m_ShortClickAxis.Update(1);
+            yield return new WaitForSeconds(seconds);
+            m_ShortClickAxis.Update(0);
         }
 
         void OnDisable()
@@ -154,6 +141,12 @@ namespace UnityStandardAssets.CrossPlatformInput
 
             if (CrossPlatformInputManager.AxisExists(verticalAxisName))
                 CrossPlatformInputManager.UnRegisterVirtualAxis(verticalAxisName);
+
+            if (CrossPlatformInputManager.AxisExists(shortClickAxisName))
+                CrossPlatformInputManager.UnRegisterVirtualAxis(shortClickAxisName);
+
+            if (CrossPlatformInputManager.AxisExists(longClickAxisName))
+                CrossPlatformInputManager.UnRegisterVirtualAxis(longClickAxisName);
         }
     }
 }

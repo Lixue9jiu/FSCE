@@ -4,55 +4,62 @@ using System.Collections;
 
 public class NormalBlockOperation : Operation
 {
-	TerrainManager terrainManager;
-	TerrainRaycast terrainRaycast;
+    TerrainManager terrainManager;
+    TerrainRaycast terrainRaycast;
 
-	MLineRenderer lineRenderer;
+    MLineRenderer lineRenderer;
 
     int placeBlockValue = 2;
 
-	private void Awake ()
-	{
-		terrainManager = GetComponent<TerrainManager> ();
-		terrainRaycast = GetComponent<TerrainRaycast> ();
-		lineRenderer = Camera.main.GetComponent<MLineRenderer> ();
-	}
+    private void Awake()
+    {
+        terrainManager = GetComponent<TerrainManager>();
+        terrainRaycast = GetComponent<TerrainRaycast>();
+        lineRenderer = Camera.main.GetComponent<MLineRenderer>();
+    }
 
-	private void FixedUpdate ()
-	{
-		RaycastResult? result = terrainRaycast.LookingAt;
+    private void FixedUpdate()
+    {
+        RaycastResult? result = terrainRaycast.LookingAt;
 
-		lineRenderer.activated = result.HasValue;
-		if (result.HasValue) {
-			SetLocation (result.Value.Position);
-		} else {
-			return;
-		}
+        lineRenderer.activated = result.HasValue;
+        if (result.HasValue)
+        {
+            SetLocation(result.Value.Position);
+        }
+        else
+        {
+            return;
+        }
 
-		if (!isBreaking) {
-            if (CrossPlatformInputManager.GetAxis ("Place") > 0) {
-				Point3 p = result.Value.Position;
-				terrainManager.ChangeCell (p.X, p.Y, p.Z, 0);
-				StartCoroutine (Delay (0.1f));
-            } else if (CrossPlatformInputManager.GetAxis("Destroy") > 0) {
-				Point3 p = result.Value.LastPosition;
-                terrainManager.ChangeCell (p.X, p.Y, p.Z, placeBlockValue);
-				StartCoroutine (Delay (0.1f));
-			}
-		}
-	}
+        if (!isBreaking)
+        {
+            if (CrossPlatformInputManager.GetAxisRaw("Place") > 0)
+            {
+                Point3 p = result.Value.Position;
+                terrainManager.ChangeCell(p.X, p.Y, p.Z, 0);
+                StartCoroutine (Delay (0.1f));
+            }
+            else if (CrossPlatformInputManager.GetAxisRaw("Destroy") > 0)
+            {
+                Point3 p = result.Value.LastPosition;
+                terrainManager.ChangeCell(p.X, p.Y, p.Z, placeBlockValue);
+                //StartCoroutine (Delay (0.1f));
+            }
+        }
+    }
 
-	void SetLocation (Point3 position)
-	{
-		cubicInstance.start = position.ToVec3 ();
-		cubicInstance.end = cubicInstance.start + Vector3.one;
-		lineRenderer.SetCubic (cubicInstance);
-	}
+    void SetLocation(Point3 position)
+    {
+        cubicInstance.start = position.ToVec3();
+        cubicInstance.end = cubicInstance.start + Vector3.one;
+        lineRenderer.SetCubic(cubicInstance);
+    }
 
-	MLineRenderer.Cubic cubicInstance = new MLineRenderer.Cubic () { color = Color.black };
+    MLineRenderer.Cubic cubicInstance = new MLineRenderer.Cubic() { color = Color.black };
 
-	public override void OnSetToCurrent()
-	{
+    public override void OnSetToCurrent()
+    {
         Console.AssignCommand("setData", delegate (string[] args)
         {
             if (terrainRaycast.LookingAt.HasValue)
@@ -65,24 +72,24 @@ public class NormalBlockOperation : Operation
         {
             placeBlockValue = int.Parse(args[0]);
         });
-	}
+    }
 
-	public override void OnRemoveFromCurrent()
-	{
+    public override void OnRemoveFromCurrent()
+    {
         lineRenderer.activated = false;
         if (WindowManager.instance != null)
         {
             Console.RemoveCommand("setData");
             Console.RemoveCommand("setContent");
         }
-	}
+    }
 
-	bool isBreaking;
+    bool isBreaking;
 
-	IEnumerator Delay (float seconds)
-	{
-		isBreaking = true;
-		yield return new WaitForSeconds (seconds);
-		isBreaking = false;
-	}
+    IEnumerator Delay(float seconds)
+    {
+        isBreaking = true;
+        yield return new WaitForSeconds(seconds);
+        isBreaking = false;
+    }
 }

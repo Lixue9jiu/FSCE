@@ -166,10 +166,7 @@ public class MeshGenerator
                 {
 					int value = chunk.GetCellValue(x, y, z);
 					int content = BlockTerrain.GetContent(value);
-                    if (content != 202 && 
-                        //content != 136 &&
-                        //content != 217 &&
-                        isTransparent[content])
+                    if (isTransparent[content])
 					{
                         normalBlocks[content].GenerateTerrain(x, y, z, value, chunk, this);
 					}

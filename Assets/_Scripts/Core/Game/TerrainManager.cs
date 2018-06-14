@@ -81,7 +81,7 @@ public class TerrainManager : MonoBehaviour
                         //terrainGenerator.GenerateNormalBlocks(chunk);
                         //stopwatch.Stop();
                         //Debug.Log("building normal blocks time: " + stopwatch.ElapsedMilliseconds);
-                        terrainGenerator.GenerateChunkMesh(chunk);
+                        terrainGenerator.GenerateAllBlocks(chunk);
                         terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
                         terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
                         //switch (Terrain.chunkStats.Get(index).state)

@@ -10,7 +10,7 @@ public class GameSettings : MonoBehaviour
 	const string V_SYNC = "is_v_sync_on";
 	const string AMBIENT_BRIGHTNESS = "ambient_brightness";
 
-	public static int viewDistance;
+    public static int viewDistance;
 	public static int imageQuality;
 	public static float ambientBrightness;
 	public static bool IsVSyncOn;
@@ -24,7 +24,7 @@ public class GameSettings : MonoBehaviour
 		SaveSettingsInternal();
 
 #if UNITY_STANDALONE
-		SceneManager.sceneLoaded += SceneManager_SceneLoaded;;
+		SceneManager.sceneLoaded += SceneManager_SceneLoaded;
 #endif
 	}
 
