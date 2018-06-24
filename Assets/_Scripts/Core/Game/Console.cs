@@ -12,6 +12,7 @@ public static class Console {
     {
         AssignCommand("help", (args) =>
         {
+            ConsoleLog.Log("可以使用的命令：");
             foreach (string s in commands.Keys)
             {
                 ConsoleLog.Log(s);

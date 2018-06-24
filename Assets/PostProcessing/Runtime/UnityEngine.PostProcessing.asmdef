@@ -1,0 +1,8 @@
+{
+    "name": "UnityEngine.PostProcessing",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

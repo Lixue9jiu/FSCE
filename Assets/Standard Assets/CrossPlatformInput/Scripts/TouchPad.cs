@@ -123,14 +123,14 @@ namespace UnityStandardAssets.CrossPlatformInput
             m_LongClickAxis.Update(0);
             if (m_DragTimeWaited < SHORT_CLICK_WAIT_TIME && m_AccumulatedPointerDelta.sqrMagnitude < MIN_TOUCH_RANGE_SQR)
             {
-                StartCoroutine(TuggleShortClick(0.01f));
+                StartCoroutine(TuggleShortClick());
             }
         }
 
-        IEnumerator TuggleShortClick(float seconds)
+        IEnumerator TuggleShortClick()
         {
             m_ShortClickAxis.Update(1);
-            yield return new WaitForSeconds(seconds);
+            yield return new WaitForFixedUpdate();
             m_ShortClickAxis.Update(0);
         }
 

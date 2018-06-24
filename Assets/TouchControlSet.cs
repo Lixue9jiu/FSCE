@@ -9,8 +9,8 @@ public class TouchControlSet : MonoBehaviour {
 
     private void Start()
     {
-        GetComponentInChildren<TouchPad>().sensitivity = cameraController.RotationSensitivity * 0.4f;
-        GetComponentInChildren<Joystick>().sensitivity = cameraController.WalkSpeed * 0.03333333333f;
+        GetComponentInChildren<TouchPad>().sensitivity = cameraController.RotationSensitivity * 0.03333333333f;
+        GetComponentInChildren<Joystick>().sensitivity = cameraController.WalkSpeed * 0.4f;
     }
 
 }

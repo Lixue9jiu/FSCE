@@ -80,7 +80,7 @@ public class BlocksData : MonoBehaviour
 
 	public void Initialize()
 	{
-		string[] strs = WorldManager.Project.GetGameInfo().Colors;
+        string[] strs = WorldManager.Project.GameInfo.Colors;
         for (int i = 0; i < 16; i++)
         {
             if (!string.IsNullOrEmpty(strs[i]))

@@ -70,15 +70,16 @@ public static class ConsoleLog
             return strBuilder.ToString();
         }
     }
+
     static StringBuilder strBuilder = new StringBuilder();
     public static bool needFresh = false;
 
     public static ILogHandler logHandler;
 
-	static ConsoleLog()
-	{
-        logHandler = new Handler ();
-	}
+    public static void Initialize()
+    {
+        logHandler = new Handler();
+    }
 
     public static void Log(string str)
     {

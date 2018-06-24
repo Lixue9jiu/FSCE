@@ -25,7 +25,7 @@ public class FurnitureManager : MonoBehaviour
 
 	public void Initialize()
 	{
-		terrainGenerator = GetComponent<TerrainManager>().terrainGenerator;
+		terrainGenerator = GetComponent<TerrainManager>().terrainMeshGenerator;
         AlaphaTest4();
 	}
 

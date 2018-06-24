@@ -9,6 +9,7 @@ public class MyGameManager : MonoBehaviour
 	{
 		try
 		{
+            ConsoleLog.Initialize();
 			GetComponent<BlockMeshes>().Initialize();
             GetComponent<BlocksData>().Initialize();
             GetComponent<FurnitureManager>().Initialize();

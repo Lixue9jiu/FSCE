@@ -119,6 +119,6 @@ public class ElectricGateBlock : Block, INormalBlock
 
     public void GenerateTerrain(int x, int y, int z, int value, BlockTerrain.Chunk chunk, MeshGenerator g)
 	{
-        g.Terrain.Mesh(x, y, z, meshes[BlockTerrain.GetData(value) & 31], Color.white);
+        g.AlphaTest.Mesh(x, y, z, meshes[BlockTerrain.GetData(value) & 31], Color.white);
 	}
 }

@@ -10,6 +10,8 @@ public class ProjectData
 
 	public XElement Root;
 
+    public readonly GameInfo GameInfo;
+
 	public static string GetWorldName (string path)
 	{
 		ProjectData p = new ProjectData (path);
@@ -37,17 +39,14 @@ public class ProjectData
 	{
 		Root = doc.Root;
 		version = float.Parse (Root.Attribute ("Version").Value);
+        GameInfo = new GameInfo(this);
 	}
 
 	public ProjectData (string worldPath)
 	{
 		Root = XDocument.Load (Path.Combine (worldPath, "Project.xml")).Root;
 		version = float.Parse (Root.Attribute ("Version").Value);
-	}
-
-	public GameInfo GetGameInfo ()
-	{
-		return new GameInfo (this);
+        GameInfo = new GameInfo(this);
 	}
 
 	public XElement GetSubsystem (string name)

@@ -28,7 +28,7 @@ public class ChunkRenderer : MonoBehaviour
     {
         Terrain = GetComponent<TerrainManager>().Terrain;
 
-        string blockTextureName = WorldManager.Project.GetGameInfo().BlockTextureName;
+        string blockTextureName = WorldManager.Project.GameInfo.BlockTextureName;
         if (!string.IsNullOrEmpty(blockTextureName))
         {
             LoadTexture(blockTextureName);

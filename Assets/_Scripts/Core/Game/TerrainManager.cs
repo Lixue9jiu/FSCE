@@ -15,7 +15,9 @@ public class TerrainManager : MonoBehaviour
     ChunkQueue chunkQueue = new ChunkQueue();
 
     public BlockTerrain Terrain;
-    public MeshGenerator terrainGenerator = new MeshGenerator();
+    public MeshGenerator terrainMeshGenerator = new MeshGenerator();
+
+    TerrainGenerator terrainGenerator = new TerrainGenerator();
 
     private ChunkRenderer chunkRenderer;
 
@@ -81,9 +83,9 @@ public class TerrainManager : MonoBehaviour
                         //terrainGenerator.GenerateNormalBlocks(chunk);
                         //stopwatch.Stop();
                         //Debug.Log("building normal blocks time: " + stopwatch.ElapsedMilliseconds);
-                        terrainGenerator.GenerateAllBlocks(chunk);
-                        terrainGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
-                        terrainGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
+                        terrainMeshGenerator.GenerateAllBlocks(chunk);
+                        terrainMeshGenerator.Terrain.PushToMesh(out chunk.mesh[0]);
+                        terrainMeshGenerator.AlphaTest.PushToMesh(out chunk.mesh[1]);
                         //switch (Terrain.chunkStats.Get(index).state)
                         //{
                         //	case 3:
@@ -223,6 +225,13 @@ public class TerrainManager : MonoBehaviour
                 QuqueChunkUpdate(c.index, 3);
                 Terrain.chunkStats.Get(c.index).needsToBeCreated = true;
             }
+            //else
+            //{
+            //    c = Terrain.CreateChunk(x, y);
+            //    terrainGenerator.GenerateSuperFlatTerrain(c);
+            //    QuqueChunkUpdate(c.index, 3);
+            //    Terrain.chunkStats.Get(c.index).needsToBeCreated = true;
+            //}
         }
         catch (System.Exception e)
         {
