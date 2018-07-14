@@ -453,6 +453,8 @@ public class TerrainManager : MonoBehaviour
         {
             lock (locker)
             {
+                if (terrain.Contains(index))
+                    return;
                 terrain.Enqueue(index);
                 terrainCount++;
             }

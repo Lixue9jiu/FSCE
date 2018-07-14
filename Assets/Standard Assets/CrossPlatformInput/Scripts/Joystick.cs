@@ -11,6 +11,11 @@ namespace UnityStandardAssets.CrossPlatformInput
         public string verticalAxisName = "Vertical"; // The name given to the vertical axis for the cross platform input
         public float sensitivity = 1f;
 
+        public RectTransform Stick;
+
+        bool isHolding;
+
+        int m_movementRange;
         Vector3 m_StartPos;
         CrossPlatformInputManager.VirtualAxis m_HorizontalVirtualAxis; // Reference to the joystick in the cross platform input
         CrossPlatformInputManager.VirtualAxis m_VerticalVirtualAxis; // Reference to the joystick in the cross platform input
@@ -18,18 +23,16 @@ namespace UnityStandardAssets.CrossPlatformInput
         void OnEnable()
         {
             CreateVirtualAxes();
-        }
-
-        void Start()
-        {
             m_StartPos = transform.position;
+            m_movementRange = (int)(transform.parent.GetComponent<RectTransform>().localScale.x * MovementRange);
+            Debug.Log(m_movementRange);
         }
 
         void UpdateVirtualAxes(Vector3 value)
         {
             var delta = m_StartPos - value;
             delta.y = -delta.y;
-            delta /= MovementRange;
+            delta /= m_movementRange;
             m_HorizontalVirtualAxis.Update(-delta.x * sensitivity);
             m_VerticalVirtualAxis.Update(delta.y * sensitivity);
         }
@@ -50,22 +53,34 @@ namespace UnityStandardAssets.CrossPlatformInput
             newPos.y = (data.position.y - m_StartPos.y);
 
             float m = newPos.magnitude;
-            if (m > MovementRange)
+            if (m > m_movementRange)
             {
-                newPos *= MovementRange / m;
+                newPos *= m_movementRange / m;
             }
 
-            transform.position = new Vector3(m_StartPos.x + newPos.x, m_StartPos.y + newPos.y, m_StartPos.z + newPos.z);
-            UpdateVirtualAxes(transform.position);
+            Stick.position = new Vector3(m_StartPos.x + newPos.x, m_StartPos.y + newPos.y, m_StartPos.z + newPos.z);
+            UpdateVirtualAxes(Stick.position);
         }
 
         public void OnPointerUp(PointerEventData data)
         {
-            transform.position = m_StartPos;
-            UpdateVirtualAxes(m_StartPos);
+            isHolding = false;
         }
 
-        public void OnPointerDown(PointerEventData data) { }
+        public void OnPointerDown(PointerEventData data)
+        {
+            isHolding = true;
+            OnDrag(data);
+        }
+
+        void Update()
+        {
+            if (!isHolding && Stick.position != m_StartPos)
+            {
+                Stick.position = Vector3.LerpUnclamped(Stick.position, m_StartPos, 0.1f);
+                UpdateVirtualAxes(Stick.position);
+            }
+        }
 
         void OnDisable()
         {

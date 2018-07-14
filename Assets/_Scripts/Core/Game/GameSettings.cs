@@ -19,6 +19,7 @@ public class GameSettings : MonoBehaviour
 
 	private void Start()
 	{
+        ConsoleLog.Initialize();
 		instance = this;
 		LoadSettingsInternal();
 		SaveSettingsInternal();

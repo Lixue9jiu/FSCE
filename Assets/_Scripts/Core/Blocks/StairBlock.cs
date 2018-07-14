@@ -38,9 +38,6 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
 					throw new System.Exception("unknown stair module: " + ((i >> 3) & 3));
 			}
 
-            Vector2 uvPos = new Vector2((TextureSlot % 16) / 16f, -((TextureSlot >> 4) + 1) / 16f);
-            Vector2 PuvPos = new Vector2((BlocksData.paintedTextures[TextureSlot] % 16) / 16f, -((BlocksData.paintedTextures[TextureSlot] >> 4) + 1) / 16f);
-
             blockMeshes[i] = new MeshData(mesh);
             blockMeshes[i].Transform(matrix * m);
             if ((i & 4) != 0)
@@ -49,11 +46,8 @@ public class StairBlock : Block, INormalBlock, IPaintableBlock
             }
             paintedBlockMeshes[i] = blockMeshes[i].Clone();
 
-            for (int k = 0; k < blockMeshes[i].uv.Length; k++)
-            {
-                blockMeshes[i].uv[k] = uvPos;
-                paintedBlockMeshes[i].uv[k] = PuvPos;
-            }
+            blockMeshes[i].WrapInTextureSlotTerrain(TextureSlot);
+            paintedBlockMeshes[i].WrapInTextureSlotTerrain(BlocksData.paintedTextures[TextureSlot]);
 		}
 	}
 

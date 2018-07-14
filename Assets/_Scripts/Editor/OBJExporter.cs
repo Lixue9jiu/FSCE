@@ -392,6 +392,12 @@ public class OBJExporter : ScriptableWizard
     [MenuItem("File/Export/Wavefront OBJ")]
     static void CreateWizard()
     {
-        ScriptableWizard.DisplayWizard("Export OBJ", typeof(OBJExporter), "Export");
+        DisplayWizard("Export OBJ", typeof(OBJExporter), "Export");
+    }
+
+    [MenuItem("File/Export/Wavefront OBJ", true)]
+    static bool IsAvaliable()
+    {
+        return FindObjectOfType<TerrainManager>() != null;
     }
 }

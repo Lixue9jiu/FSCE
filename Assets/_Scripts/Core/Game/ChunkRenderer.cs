@@ -9,6 +9,9 @@ public class ChunkRenderer : MonoBehaviour
 
     public Texture2D defautTexture;
 
+    public Shader TerrainShader;
+    public Shader VertexColorShader;
+
     public Material terrain;
     public Material alaphaTest;
 
@@ -31,20 +34,9 @@ public class ChunkRenderer : MonoBehaviour
         string blockTextureName = WorldManager.Project.GameInfo.BlockTextureName;
         if (!string.IsNullOrEmpty(blockTextureName))
         {
-            LoadTexture(blockTextureName);
+            string path = System.IO.Path.Combine(WorldManager.CurrentEmbeddedContent, blockTextureName);
+            defautTexture.LoadImage(System.IO.File.ReadAllBytes(path));
         }
-        else
-        {
-            Texture2D main, alphaTest;
-            TextureProcessing.ProcessTexture(defautTexture, out main, out alphaTest);
-            terrain.mainTexture = main;
-            alaphaTest.mainTexture = alphaTest;
-        }
-    }
-
-    public void LoadTexture(string name)
-    {
-        string path = System.IO.Path.Combine(WorldManager.CurrentEmbeddedContent, name);
 
         try
         {
@@ -52,12 +44,19 @@ public class ChunkRenderer : MonoBehaviour
             //tex.filterMode = FilterMode.Point;
             //tex.LoadImage(System.IO.File.ReadAllBytes(path));
 
-            defautTexture.LoadImage(System.IO.File.ReadAllBytes(path));
-
+#if GREEDY_MESHING
             Texture2D main, alphaTest;
-            TextureProcessing.ProcessTexture(defautTexture, out main, out alphaTest);
+            TextureProcessing.ProcessTexture2(defautTexture, out main, out alphaTest);
             terrain.mainTexture = main;
             alaphaTest.mainTexture = alphaTest;
+            terrain.shader = TerrainShader;
+#else
+            Texture2D tex;
+            TextureProcessing.ProcessTexture(defautTexture, out tex);
+            terrain.mainTexture = tex;
+            alaphaTest.mainTexture = tex;
+            terrain.shader = VertexColorShader;
+#endif
         }
         catch (System.Exception e)
         {

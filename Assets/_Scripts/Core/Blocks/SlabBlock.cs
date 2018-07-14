@@ -24,22 +24,10 @@ public class SlabBlock : Block, INormalBlock, IPaintableBlock
         paintedBlockMeshes[0] = blockMeshes[0].Clone();
         paintedBlockMeshes[1] = blockMeshes[1].Clone();
 
-        blockMeshes[0].WrapInTextureSlot(TextureSlot);
-        blockMeshes[1].WrapInTextureSlot(TextureSlot);
-        paintedBlockMeshes[0].WrapInTextureSlot(BlocksData.paintedTextures[TextureSlot]);
-        paintedBlockMeshes[1].WrapInTextureSlot(BlocksData.paintedTextures[TextureSlot]);
-
-        Vector2 uvPos = new Vector2((TextureSlot % 16) / 16f, -((TextureSlot >> 4) + 1) / 16f);
-        Vector2 PuvPos = new Vector2((BlocksData.paintedTextures[TextureSlot] % 16) / 16f, -((BlocksData.paintedTextures[TextureSlot] >> 4) + 1) / 16f);
-
-        for (int i = 0; i < 2; i++)
-        {
-            for (int k = 0; k < blockMeshes[i].uv.Length; k++)
-            {
-                blockMeshes[i].uv[k] = uvPos;
-                paintedBlockMeshes[i].uv[k] = PuvPos;
-            }
-        }
+        blockMeshes[0].WrapInTextureSlotTerrain(TextureSlot);
+        blockMeshes[1].WrapInTextureSlotTerrain(TextureSlot);
+        paintedBlockMeshes[0].WrapInTextureSlotTerrain(BlocksData.paintedTextures[TextureSlot]);
+        paintedBlockMeshes[1].WrapInTextureSlotTerrain(BlocksData.paintedTextures[TextureSlot]);
     }
 
     public int? GetColor(int data)

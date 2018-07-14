@@ -1,8 +1,7 @@
 {
     "name": "Game",
     "references": [
-        "UnityStandardAssets",
-        "UnityEngine.PostProcessing"
+        "UnityStandardAssets"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

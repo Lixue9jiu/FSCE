@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 
 public class GreedyTerrainMesh
-{   
-	readonly List<Vector3> vertices = new List<Vector3>();
-	readonly List<int> triangles = new List<int>();
-	readonly List<Vector2> uvs = new List<Vector2>();
-	readonly List<Color> colors = new List<Color>();
+{
+    readonly List<Vector3> vertices = new List<Vector3>();
+    readonly List<int> triangles = new List<int>();
+    readonly List<Vector2> uvs = new List<Vector2>();
+    readonly List<Color> colors = new List<Color>();
 
-	public void PushToMesh(out MeshData mesh)
+    public void PushToMesh(out MeshData mesh)
     {
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
@@ -44,7 +44,7 @@ public class GreedyTerrainMesh
         NormalQuad(b, a, d, c, texSlot, color);
     }
 
-	public void NormalQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
+    public void NormalQuad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
     {
         int count = vertices.Count;
         vertices.Add(a);
@@ -61,9 +61,9 @@ public class GreedyTerrainMesh
 
         Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
         uvs.Add(uvPos);
-		uvs.Add(uvPos + new Vector2(0.0625f, 0));
-		uvs.Add(uvPos + new Vector2(0.0625f, 0.0625f));
-		uvs.Add(uvPos + new Vector2(0, 0.0625f));
+        uvs.Add(uvPos + new Vector2(0.0625f, 0));
+        uvs.Add(uvPos + new Vector2(0.0625f, 0.0625f));
+        uvs.Add(uvPos + new Vector2(0, 0.0625f));
 
         colors.Add(color);
         colors.Add(color);
@@ -71,9 +71,9 @@ public class GreedyTerrainMesh
         colors.Add(color);
     }
 
-	public void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
+    public void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d, int texSlot, Color color)
     {
-		int count = vertices.Count;
+        int count = vertices.Count;
         vertices.Add(a);
         vertices.Add(b);
         vertices.Add(c);
@@ -86,13 +86,21 @@ public class GreedyTerrainMesh
         triangles.Add(count + 3);
         triangles.Add(count);
 
-		Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
+#if GREEDY_MESHING
+        Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
         uvs.Add(uvPos);
         uvs.Add(uvPos);
         uvs.Add(uvPos);
         uvs.Add(uvPos);
+#else
+        Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
+        uvs.Add(uvPos);
+        uvs.Add(uvPos + new Vector2(0.0625f, 0));
+        uvs.Add(uvPos + new Vector2(0.0625f, 0.0625f));
+        uvs.Add(uvPos + new Vector2(0, 0.0625f));
+#endif
 
-		colors.Add(color);
+        colors.Add(color);
         colors.Add(color);
         colors.Add(color);
         colors.Add(color);

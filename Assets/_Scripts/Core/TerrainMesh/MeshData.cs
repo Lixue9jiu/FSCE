@@ -121,12 +121,16 @@ public struct MeshData
 
     public void WrapInTextureSlotTerrain(int texSlot)
     {
+#if GREEDY_MESHING
         Vector2 uvPos = new Vector2((texSlot % 16) / 16f, -((texSlot >> 4) + 1) / 16f);
 
         for (int i = 0; i < uv.Length; i++)
         {
             uv[i] = uvPos;
         }
+#else
+        WrapInTextureSlot(texSlot);
+#endif
     }
 
     public static void Transform(MeshData m, Matrix4x4 matrix)
