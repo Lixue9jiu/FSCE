@@ -8,10 +8,9 @@ public class BaseWindow : MonoBehaviour {
 
     public virtual void Show()
     {
-		if (isShowing || WindowManager.activeWindow != null && WindowManager.activeWindow.isShowing)
-			return;
-        WindowManager.activeWindow = this;
-
+        if (!WindowManager.SetAsActiveWindow(this))
+            return;
+        
         gameObject.SetActive(true);
         PauseManager.SetAllActive(false);
 
@@ -22,9 +21,11 @@ public class BaseWindow : MonoBehaviour {
     {
 		if (!isShowing)
 			return;
+        
         gameObject.SetActive(false);
         PauseManager.SetAllActive(true);
 
 		isShowing = false;
+        Destroy(gameObject);
     }
 }

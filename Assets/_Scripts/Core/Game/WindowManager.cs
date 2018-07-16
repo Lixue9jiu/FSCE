@@ -7,21 +7,20 @@ public class WindowManager : MonoBehaviour
 {
     public GameObject[] windowPrefabs;
 
-    Dictionary<System.Type, BaseWindow> windowInstances = new Dictionary<System.Type, BaseWindow>();
+    public GameObject baseCanvasPrefab;
+    public GameObject baseCanvas;
 
-    public static BaseWindow activeWindow;
+    public static BaseWindow ActiveWindow { get; private set; }
 
     public static bool isShowingWindow
     {
         get
         {
-            return activeWindow != null && activeWindow.isShowing;
+            return ActiveWindow != null && ActiveWindow.isShowing;
         }
     }
 
     public bool inGame { get; private set; }
-
-    private static GameObject mainCanvas;
 
     private void Start()
     {
@@ -53,12 +52,24 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    public bool HideActiveWindow()
+    public static bool SetAsActiveWindow(BaseWindow window)
     {
-        if (activeWindow != null && activeWindow.isShowing)
+        if (window.isShowing || isShowingWindow)
+            return false;
+
+        ActiveWindow = window;
+
+        if (instance.baseCanvas == null)
+            instance.baseCanvas = Instantiate(instance.baseCanvasPrefab);
+        window.transform.SetParent(instance.baseCanvas.transform, false);
+        return true;
+    }
+
+    public static bool HideActiveWindow()
+    {
+        if (isShowingWindow)
         {
-            activeWindow.Hide();
-            activeWindow = null;
+            ActiveWindow.Hide();
             return true;
         }
         return false;
@@ -80,25 +91,21 @@ public class WindowManager : MonoBehaviour
     public static T Get<T>() where T : BaseWindow
     {
         BaseWindow behaviour;
-        if (instance.windowInstances.TryGetValue(typeof(T), out behaviour))
-        {
-            return (T)behaviour;
-        }
         foreach (GameObject b in instance.windowPrefabs)
         {
             if (b.GetComponent<T>() != null)
             {
-                behaviour = Instantiate(b, LanguageManager.mainCanvas.transform).GetComponent<T>();
-                instance.windowInstances.Add(typeof(T), behaviour);
+                behaviour = Instantiate(b).GetComponent<T>();
+                return (T)behaviour;
                 //				Debug.LogFormat ("creating window: {0} on {1}", typeof(T), FindObjectOfType<Canvas> ().name);
             }
         }
-        return (T)behaviour;
+        throw new System.Exception("unknown window: " + typeof(T));
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        windowInstances.Clear();
+        baseCanvas = null;
         inGame = scene.name == "MainScene";
     }
 }

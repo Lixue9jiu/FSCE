@@ -1,109 +1,78 @@
 ﻿using System.Collections;
 using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 
 public class MainMenu : MonoBehaviour
 {
-    public InputField input;
-    public Dropdown dropdown;
 
-    public Button enterWorld;
-    public Button deleteWorld;
-    public Button downloadWorld;
-
-    void Start()
+    public void OnImportWorldClicked()
     {
-        dropdown.AddOptions(WorldManager.GetWorldNames());
-
-        dropdown.onValueChanged.AddListener(OnWorldChanged);
-
-        enterWorld.enabled = WorldManager.Worlds.Count > 0;
-        deleteWorld.enabled = enterWorld.enabled;
+#if UNITY_ANDROID
+        ListWindow.ShowListWindow(new string[] { "sdcard", "external_link" }, HandleImportWorldList);
+#else
+        ListWindow.ShowListWindow(new string[] { "external_link" }, HandleImportWorldList);
+#endif
     }
 
-	public void OnInputFieldChanged(string str)
-	{
-		if (str.Length != 0 && str[str.Length - 1] == '\n') {
-			OnLoadFileClicked ();
-		}
-	}
-
-    public void OnWorldChanged(int i)
+    void HandleImportWorldList(string button)
     {
-        enterWorld.enabled = WorldManager.SetCurrent(i);
-        deleteWorld.enabled = enterWorld.enabled;
-    }
-
-    public void OnLoadFileClicked()
-    {
-        downloadWorld.enabled = false;
-        input.enabled = false;
-        string url = input.text;
-        if (!url.Contains("://"))
+        switch (button)
         {
-            url = "file://" + url.Replace('\\', '/');
+            case "sdcard":
+                WorldPacker.ImportFromSdcard();
+                break;
+            case "external_link":
+                TextBoxWindow.ShowTextBox("enter_world_link", (url) =>
+                {
+                    if (!url.Contains("://"))
+                    {
+                        url = "file://" + url.Replace('\\', '/');
+                    }
+                    StartCoroutine(GetFromURL(url));
+                });
+                break;
         }
-        StartCoroutine(GetFromURL(url));
-
-        //		string path = UnityEditor.EditorUtility.OpenFilePanel ("choose a world file", "", "scworld");
-        //		if (path != string.Empty) {
-        //			using (Stream s = File.OpenRead (path)) {
-        //				GetComponent<WorldManager> ().LoadWorld (s);
-        //			}
-        //		}
-        //
-        //		dropdown.ClearOptions ();
-        //		dropdown.AddOptions (GetComponent<WorldManager> ().GetWorldNames ());
     }
 
-	public void OnQuitGameClicked()
-	{
-		Application.Quit();
-	}
-
-    public void OnEnterWorldClicked()
+    public void OnQuitGameClicked()
     {
-        SceneManager.LoadScene("MainScene");
+        Application.Quit();
     }
 
-    public void OnDeleteWorldClicked()
+    public void OnStartGameClicked()
     {
-        WorldManager.RemoveWorld(dropdown.value);
-        RefreshDropdown();
+        SceneManager.LoadScene("SelectWorld");
     }
 
-	public void OnSettingButtonClicked()
-	{
+    public void OnSettingButtonClicked()
+    {
         WindowManager.Get<SettingWindow>().Show();
     }
 
-	void OnURLLoaded(byte[] bytes)
+    void OnURLLoaded(byte[] bytes)
     {
         using (Stream s = new MemoryStream(bytes))
         {
             WorldManager.LoadWorld(s);
         }
-        RefreshDropdown();
+
     }
 
-    void RefreshDropdown()
-    {
-        dropdown.ClearOptions();
-        dropdown.AddOptions(WorldManager.GetWorldNames());
-        enterWorld.enabled = WorldManager.SetCurrent(dropdown.value);
-        deleteWorld.enabled = enterWorld.enabled;
-    }
+    ProgressWindow progressWindow;
 
     IEnumerator GetFromURL(string url)
     {
         Debug.Log(string.Format("loading from url : {0}", url));
+        progressWindow = WindowManager.Get<ProgressWindow>();
         try
         {
             UnityWebRequest web = UnityWebRequest.Get(url);
-            yield return web.SendWebRequest();
+            var operation = web.SendWebRequest();
+            progressWindow.SetOperation(operation);
+            progressWindow.Show();
+            yield return operation;
             if (web.isHttpError || web.isNetworkError)
             {
                 Debug.LogError(web.error);
@@ -117,9 +86,8 @@ public class MainMenu : MonoBehaviour
         }
         finally
         {
-            downloadWorld.enabled = true;
-            input.enabled = true;
-            input.text = string.Empty;
+            progressWindow.Hide();
+            progressWindow = null;
         }
     }
 }

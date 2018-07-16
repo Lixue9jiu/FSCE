@@ -2,9 +2,13 @@
 <languages>
     <Chinese aka="ChineseSimplified" />
     <ChineseSimplified>
+        <Value id="start_edit">开始编辑</Value>
         <Value id="delete_world">删除存档</Value>
         <Value id="enter_world">进入存档</Value>
-        <Value id="load_world">加载存档</Value>
+        <Value id="import_world">载入存档</Value>
+        <Value id="export_world">导出存档</Value>
+        <Value id="sdcard">SD卡</Value>
+        <Value id="external_link">外部链接</Value>
         <Value id="enter_world_link">输入存档链接</Value>
         <Value id="quit">退出</Value>
         <Value id="continue">继续</Value>
@@ -14,7 +18,8 @@
         <Value id="screenshot_folder">截图文件夹</Value>
         <Value id="open">打开</Value>
         <Value id="default">恢复到默认</Value>
-        <Value id="ok">确定</Value>
+        <Value id="confirm">确定</Value>
+        <Value id="cancel">取消</Value>
         <Value id="open">打开</Value>
         <Value id="chunks">区块</Value>
         <Value id="settings">设置</Value>
@@ -32,7 +37,7 @@
     <English>
         <Value id="delete_world">delete world</Value>
         <Value id="enter_world">enter world</Value>
-        <Value id="load_world">download world</Value>
+        <Value id="import_world">import world</Value>
         <Value id="enter_world_link">enter a link to a scworld file</Value>
         <Value id="quit">quit</Value>
         <Value id="continue">continue</Value>
@@ -42,7 +47,8 @@
         <Value id="screenshot_folder">screenshot folder</Value>
         <Value id="open">open</Value>
         <Value id="default">set to default</Value>
-        <Value id="ok">confirm</Value>
+        <Value id="confirm">confirm</Value>
+        <Value id="cancel">cancel</Value>
         <Value id="open">open</Value>
         <Value id="chunks">chunks</Value>
         <Value id="settings">settings</Value>

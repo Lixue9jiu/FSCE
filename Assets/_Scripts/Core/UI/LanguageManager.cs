@@ -10,16 +10,12 @@ public class LanguageManager : MonoBehaviour
 
 	static Dictionary<string, string> currentMap = new Dictionary<string, string>();
 
-	public static GameObject mainCanvas;
-
 	void Start()
 	{
 		if (currentMap.Count == 0)
 		{
 			SwitchLanguage(Application.systemLanguage.ToString());
 		}
-
-		mainCanvas = gameObject;
 
 		ReplaceText();
 	}

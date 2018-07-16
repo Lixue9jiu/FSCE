@@ -46,10 +46,12 @@ public static class WorldManager
             Directory.CreateDirectory(WorldsFolder);
         }
         Debug.Log(string.Format("{0}, count: {1}", WorldsFolder, Worlds.Count));
+#if UNITY_EDITOR
         if (Worlds.Count > 0)
         {
             SetCurrent(0);
         }
+#endif
     }
 
     public static bool SetCurrent(int index)
@@ -87,11 +89,12 @@ public static class WorldManager
         if (IsWorldVaild(dir))
         {
             Worlds.Add(dir);
-            //			BroadcastMessage ("OnWorldLoaded", SendMessageOptions.DontRequireReceiver);
+            //MessageManager.ShowStrRes("load_succeed");
         }
         else
         {
             Directory.Delete(dir, true);
+            //MessageManager.ShowStrRes("load_failed");
         }
     }
 
@@ -102,6 +105,24 @@ public static class WorldManager
             Directory.Delete(Worlds[index], true);
             Worlds.RemoveAt(index);
         }
+    }
+
+    public static void ExportWorld(int index, Stream stream)
+    {
+        if (!stream.CanWrite)
+            throw new System.Exception("stream cannot write");
+        string tmpPath = Path.GetTempFileName();
+        ZipUtils.Zip(Worlds[index], tmpPath);
+        using (Stream s = File.OpenRead(tmpPath))
+        {
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = s.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                stream.Write(buffer, 0, read);
+            }
+        }
+        File.Delete(tmpPath);
     }
 
     static void LoadWorldDir(string dir)

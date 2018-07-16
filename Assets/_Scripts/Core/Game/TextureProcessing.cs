@@ -68,8 +68,6 @@ public static class TextureProcessing
                 cell.SetPixels(origin.GetPixels(x * cellSize, y * cellSize, cellSize, cellSize));
                 cell.Apply(true, false);
 
-                int x2 = x * 2;
-                int y2 = y * 2;
                 for (int i = 0; i < 6; i++)
                 {
                     int mipSize = cellSize >> i;

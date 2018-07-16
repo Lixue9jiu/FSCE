@@ -102,13 +102,13 @@ public static class ConsoleLog
 			Debug.unityLogger.logHandler = this;
 		}
 
-		public void LogFormat(LogType logType, UnityEngine.Object context, string format, params object[] args)
+		public void LogFormat(LogType logType, Object context, string format, params object[] args)
 		{
 			ConsoleLog.LogFormat (format, args);
 			defaultLogHandler.LogFormat(logType, context, format, args);
 		}
 
-		public void LogException(System.Exception exception, UnityEngine.Object context)
+		public void LogException(System.Exception exception, Object context)
 		{
 			ConsoleLog.Log (exception.Message);
 			ConsoleLog.Log (exception.StackTrace);

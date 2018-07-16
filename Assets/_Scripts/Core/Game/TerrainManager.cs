@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using UnityEngine;
@@ -197,12 +198,13 @@ public class TerrainManager : MonoBehaviour
     Point2 centerChunk;
     bool needTerrainUpdate;
 
+    bool isWaitingForMainQueue;
+
     void FixedUpdate()
     {
-        int count = chunkQueue.MainCount;
-        for (int i = 0; i < count; i++)
+        if (!isWaitingForMainQueue)
         {
-            UpdateChunk(chunkQueue.PopMain());
+            StartCoroutine(WaitForMainQueue());
         }
 
         Point2 p = CurrentChunk();
@@ -211,6 +213,14 @@ public class TerrainManager : MonoBehaviour
             centerChunk = p;
             needTerrainUpdate = true;
         }
+    }
+
+    IEnumerator WaitForMainQueue()
+    {
+        isWaitingForMainQueue = true;
+        yield return new WaitUntil(() => chunkQueue.MainCount > 0);
+        UpdateChunk(chunkQueue.PopMain());
+        isWaitingForMainQueue = false;
     }
 
     void LoadChunk(int x, int y)
@@ -402,7 +412,8 @@ public class TerrainManager : MonoBehaviour
         int mainCount;
         int terrainCount;
 
-        object locker = new object();
+        object mainLocker = new object();
+        object terrainLocker = new object();
         Queue<int> main = new Queue<int>();
         Queue<int> terrain = new Queue<int>();
 
@@ -424,7 +435,7 @@ public class TerrainManager : MonoBehaviour
 
         public int PopMain()
         {
-            lock (locker)
+            lock (mainLocker)
             {
                 mainCount--;
                 return main.Dequeue();
@@ -433,7 +444,7 @@ public class TerrainManager : MonoBehaviour
 
         public int PopTerrain()
         {
-            lock (locker)
+            lock (terrainLocker)
             {
                 terrainCount--;
                 return terrain.Dequeue();
@@ -442,7 +453,7 @@ public class TerrainManager : MonoBehaviour
 
         public void AddMain(int index)
         {
-            lock (locker)
+            lock (mainLocker)
             {
                 main.Enqueue(index);
                 mainCount++;
@@ -451,7 +462,7 @@ public class TerrainManager : MonoBehaviour
 
         public void AddTerrain(int index)
         {
-            lock (locker)
+            lock (terrainLocker)
             {
                 if (terrain.Contains(index))
                     return;
@@ -462,7 +473,7 @@ public class TerrainManager : MonoBehaviour
 
         public void Clear()
         {
-            lock (locker)
+            lock (mainLocker)
             {
                 main.Clear();
                 terrain.Clear();

@@ -35,9 +35,6 @@ public class OperationWindow : BaseWindow
     {
         switch (name)
         {
-            case "op_none":
-                OperationManager.instance.SwitchOperation(null);
-                break;
             case "op_normal":
                 OperationManager.instance.SwitchOperation<NormalBlockOperation>();
                 break;
